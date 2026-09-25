@@ -1,0 +1,35 @@
+# секреты
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.secret
+*_token.txt
+*_key.txt
+*_credentials.txt
+# базы и рантайм
+*.db
+*.db-shm
+*.db-wal
+*.sqlite3
+logs/
+runtime/
+cache/
+backups/
+*.log
+# python / node / исполнитель кода
+__pycache__/
+*.py[cod]
+venv/
+env/
+node_modules/
+.aider*
+.tags*
+*.egg-info/
+# прочее
+.DS_Store
+Thumbs.db
+tmp/
+temp/
+*.tmp
