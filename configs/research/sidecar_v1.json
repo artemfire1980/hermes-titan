@@ -1,0 +1,144 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Research Sidecar v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "research_id",
+    "topic",
+    "generated_at",
+    "stats"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "research_id": {
+      "type": "string",
+      "pattern": "^[0-9]{8}_[0-9]{6}_[a-z0-9_]+$"
+    },
+    "topic": {
+      "type": "string",
+      "minLength": 3
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "stats": {
+      "type": "object",
+      "required": [
+        "subtopics_analyzed",
+        "unique_sources",
+        "evidences_extracted",
+        "evidences_verified",
+        "evidences_dropped",
+        "conflicts_detected"
+      ],
+      "properties": {
+        "subtopics_analyzed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unique_sources": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "independent_sources": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "evidences_extracted": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "evidences_verified": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "evidences_dropped": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "conflicts_detected": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "calls": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "tokens": {
+          "type": "object",
+          "properties": {
+            "input": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "output": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "pacer_interval": {
+          "type": "number",
+          "minimum": 0
+        },
+        "breaker": {
+          "type": "string",
+          "enum": [
+            "closed",
+            "open",
+            "half_open"
+          ]
+        }
+      }
+    },
+    "evidences": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "claim",
+          "source_url",
+          "citation_number"
+        ],
+        "properties": {
+          "claim": {
+            "type": "string"
+          },
+          "source_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "citation_number": {
+            "type": "integer"
+          },
+          "evidence_quality": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "verification_status": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "citation_map": {
+      "type": "object"
+    },
+    "conflicts": {
+      "type": "array"
+    },
+    "report": {
+      "type": "string",
+      "format": "uri"
+    },
+    "sidecar": {
+      "type": "string",
+      "format": "uri"
+    }
+  }
+}

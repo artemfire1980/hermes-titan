@@ -149,3 +149,29 @@
 - Даёт атрибутный доступ (`.type`, `.conflict_type`, `.divergence`)
 
 Альтернатива (отклонена): переписать тесты на `["conflict_type"]` — теряется совместимость.
+
+
+### DEC-016 дополнение: что НЕ перенесено
+
+Осознанно НЕ перенесено из архива:
+- `backup-projects/` — старые бэкапы проектов (используем `hermes backup`)
+- `runtime/`, `logs/` — runtime state старой системы
+- `wiki/` — была пуста
+- `data/runtime.sqlite3` — runtime state
+- `.aider.chat.history.md`, `.aider.input.history` — мусор Aider
+- `freellmapi/`, `searxng/` — старые конфиги (у нас свои в `/mnt/ai-ssd/`)
+
+Перенесено в архивном виде:
+- `docs/README-v1-archive.md` — старая документация v3.1
+- `configs/hermes/config.yaml.v1-archive` — устаревший конфиг
+- `data/tasks.legacy.db` — SQLite старая база задач
+
+## DEC-019: Memory limits для gateway
+
+Обоснование: в архиве найден `configs/systemd/hermes-gateway-memory.conf`
+с лимитами `MemoryHigh=768M`, `MemoryMax=1600M`.
+
+Проблема: текущий gateway использует до 1.6G. Лимит 1600M — на грани OOM kill.
+
+Решение: **не применять** этот drop-in сейчас. Файл сохранён как референс.
+При необходимости ограничивать память — использовать `MemoryMax=2048M`.
