@@ -15,33 +15,35 @@ import argparse, fcntl, json, os, re, signal, subprocess, sys, time, uuid
 from datetime import datetime, timezone
 from pathlib import Path
 import sys as _sys
-_sys.path.insert(0, str(Path.home() / 'bin'))
+_sys.path.insert(0, str(Path('/home/khadas/ai-system/scripts')))
 import task_ledger
 
 HOME = Path.home()
-AIDER_BIN = HOME / ".aider" / "venv" / "bin" / "aider"
-ENV_FILE = HOME / "ai-system" / ".env"
+# Aider установлен через pipx
+AIDER_BIN = Path("/home/khadas/.local/bin/aider")
+if not AIDER_BIN.exists():
+    import shutil as _sh
+    found = _sh.which("aider")
+    if found:
+        AIDER_BIN = Path(found)
+ENV_FILE = Path("/mnt/ai-ssd/hermes/.env")
 LOG_DIR = HOME / "ai-system" / "logs" / "aider"
 LOCK_FILE = HOME / "ai-system" / "runtime" / "locks" / "aider.lock"
-MODEL = "nvidia_nim/nvidia/nemotron-3-ultra-550b-a55b"
+MODEL = os.environ.get("AIDER_MODEL", "nvidia_nim/nvidia/nemotron-3-ultra-550b-a55b")
+# Изоляция Aider: только /mnt/ai-ssd/ai-system/projects/ (DEC-008)
 ALLOWED_ROOTS = [
-    HOME / "projects",      # Пользовательские проекты (основная рабочая область)
-    HOME / "research",      # Результаты исследований
-    HOME / "work",          # Рабочая папка
-    HOME / "code",          # Код
-    HOME / "dev",           # Разработка
-    # Исключены по security policy:
-    # HOME / "Desktop"    — системная папка, не для автономного кодинга
-    # HOME / "Documents"  — системная папка с личными данными
-    # HOME / "Downloads"  — небезопасно (может содержать малварь)
-    # HOME / "tmp"        — временная, не нужна для Aider
+    Path("/mnt/ai-ssd/ai-system/projects"),
 ]
 
 # Критические компоненты системы — Aider НЕ должен их трогать
 FORBIDDEN_ROOTS = [
-    HOME / "ai-system",              # Сам репозиторий системы
-    HOME / ".hermes",                 # Ядро Hermes Agent
-    Path("/mnt/ai-ssd/hermes"),       # Физический путь Hermes
+    Path("/mnt/ai-ssd/hermes"),                    # Ядро Hermes
+    Path("/mnt/ai-ssd/ai-system/scripts"),         # Скрипты самого проекта
+    Path("/mnt/ai-ssd/ai-system/configs"),         # Конфиги проекта
+    Path("/mnt/ai-ssd/ai-system/docs"),            # Документация
+    Path("/mnt/ai-ssd/ai-system/tests"),           # Тесты
+    Path("/home/khadas/.ssh"),                     # SSH ключи
+    Path("/home/khadas/.config"),                  # Системные конфиги
 ]
 DEFAULT_TIMEOUT = 1800
 MAX_OUTPUT = 12000
@@ -241,7 +243,8 @@ def main():
 
         cmd = [str(AIDER_BIN), "--model", MODEL,
                "--yes-always", "--message", args.task,
-               "--no-pretty", "--auto-commits"]
+               "--no-pretty", "--auto-commits",
+               "--no-show-model-warnings"]
         if args.allow_dirty: cmd.append("--dirty-commits")
 
         env = os.environ.copy()

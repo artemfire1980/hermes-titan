@@ -175,3 +175,42 @@
 
 Решение: **не применять** этот drop-in сейчас. Файл сохранён как референс.
 При необходимости ограничивать память — использовать `MemoryMax=2048M`.
+
+
+### DEC-006 (уточнение после CP-006): ctx7 CLI+Skills
+
+Установлен: `ctx7@0.5.12` (npm global, Node.js v24.21.0 LTS).
+
+Авторизация: OAuth через `ctx7 login` → device-code flow → сохранён API-ключ.
+Конфиг: `~/.config/context7/`, `~/.local/state/context7/`.
+
+Синтаксис:
+- `ctx7 library <name> [query] [--json]` — найти libraryId
+- `ctx7 docs <libraryId> <query> [--json]` — получить документацию
+
+Hermes вызывает ctx7 через terminal tool:
+- Пример: `ctx7 library react "hooks"` → получить libraryId
+- Затем: `ctx7 docs /reactjs/react.dev "useEffect"` → документация
+
+MCP-интеграция **не используется** (DEC-006). `ctx7 setup --cli` **не настроен для
+Claude Code / Cursor / Codex** — Hermes не в списке ctx7, но это не мешает
+CLI-режиму.
+
+
+## DEC-020: Aider модель — nemotron-3-ultra-550b-a55b
+
+Обоснование: Ultra — та же архитектура, что проверенный Super, но крупнее
+(550B total / 55B active). 1M контекст, 65K вывод, agentic coding + tool calling.
+Работает в старой системе без YAML.
+
+Проверено:
+- curl: `enable_thinking: false` → `Hi`
+- Aider без YAML: файл создаётся, коммит создаётся
+- Aider с YAML: НЕ работает (extra_params.chat_template_kwargs ломает запрос)
+
+Решение: Aider вызывается с `--model nvidia_nim/nvidia/nemotron-3-ultra-550b-a55b`
+без `.aider.model.settings.yml`. Warning `Unknown context window` подавляется
+флагом `--no-show-model-warnings`.
+
+Альтернативы (на будущее): Kimi K3 (не работает из-за always-on thinking),
+nemotron-3-super (работает, но меньше), deepseek-v4.1-flash (зависает).
