@@ -45,3 +45,29 @@
 
 Обнаружено при аудите: `vim4_golden_snapshot.7z` требует пароль.
 Следствие для CP-005: пароль вводится интерактивно, не хранится в проекте.
+
+## DEC-010: `hermes pm repair` — обязательный шаг после установки из исходников
+
+Обоснование: `pip install -e .` не ставит все зависимости в PM-окружение Hermes.
+Симптом: `venv_is_current=False` → бесконечный цикл `source-update completion failed`.
+Решение: `hermes pm repair` — восстанавливает committed-окружение.
+Источник: issue #122425 (upstream).
+
+## DEC-011: systemd-юнит обновляется через `hermes setup` / `hermes gateway setup`
+
+Обоснование: после ручного создания юнита он может быть устаревшим.
+Симптом: `⚠ Installed gateway service definition is outdated`.
+Решение: `hermes setup` или `hermes gateway restart` — автоматически обновляют unit.
+
+## DEC-012: PM сам управляет зависимостями платформ
+
+Обоснование: python-telegram-bot был поставлен в venv вручную, но PM использует свой Python.
+Симптом: `Platform 'Telegram' dependencies missing — attempting install...`.
+Решение: PM auto-install зависимостей; не ставить пакеты в hermes-agent/venv вручную.
+
+## DEC-013: CDN Nous 403 — ffmpeg/ripgrep/PM artifacts недоступны
+
+Обоснование: `hermes-assets.nousresearch.com` отдаёт 403 Forbidden.
+Симптом: `⚠ install out of sync (ffmpeg, ripgrep)`.
+Влияние: на работу не влияет — gateway, Telegram, модель работают.
+Решение: игнорировать до фикса upstream. При необходимости — ручная установка.
