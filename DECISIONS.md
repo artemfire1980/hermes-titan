@@ -265,3 +265,28 @@ byterover) требуют API-ключей, которых у нас нет.
 
 Локальный `holographic` — протестируем отдельно, если понадобится.
 Результат бенчмарка — в `docs/MEMORY-BENCHMARK.md`.
+
+
+## DEC-024: Hindsight отклонён — возврат к built-in
+
+Обоснование: Hindsight Cloud протестирован на VIM4, **не работает** как ожидалось.
+
+Проблемы:
+1. `hindsight_client` не подтягивается через Hermes PM — установлен вручную.
+2. `fact_count: 0` — Hindsight не записывал память.
+3. Local Embedded/External не работают на ARM64.
+4. Конфликт с built-in — LLM предпочитает built-in.
+5. `hindsight_client` удалится при следующем `hermes update` (issue #123784).
+
+Решение: **откат к built-in only**. Hindsight полностью удалён:
+- `config.yaml` — очищен от `memory.hindsight`, `plugins.disabled`.
+- `.env` — удалены все `HINDSIGHT_*`.
+- `$HERMES_HOME/hindsight/` — удалена.
+- `plugins/hindsight/` — удалён через `hermes plugins remove`.
+- `hindsight-client` — uninstall из venv.
+- Bank `hermes-titan` в Hindsight Cloud — остался (можно удалить через UI).
+
+Текущее состояние: built-in (`MEMORY.md` + `USER.md`), 7 bundled провайдеров доступны.
+
+Следующий шаг: smoke-test **Holographic** (bundled, локальный, без ключей)
+или **OpenViking** (semantic, ARM64 Docker) — по результатам теста.
