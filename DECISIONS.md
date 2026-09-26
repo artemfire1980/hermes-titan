@@ -237,3 +237,31 @@ Worker сам создал файл, проверил через `python3 hello`
 
 Не нужна своя `tasks.db` — kanban покрывает всё. Своя БД — только для
 git-тегов/решений/артефактов, если понадобится (отложено).
+
+
+## DEC-022: Kanban workspace types
+
+`hermes kanban create --workspace` поддерживает 4 режима:
+
+| Режим | Описание |
+|-------|----------|
+| `scratch` | Эфемерная директория, удаляется после задачи (default) |
+| `worktree` | Git worktree в проекте задачи (через `--project`) |
+| `worktree:<path>` | Git worktree в указанном репозитории |
+| `dir:<path>` | Существующая директория |
+
+Для production-задач использовать `--workspace worktree` (сохраняет
+результат в git-ветке проекта) или `--workspace dir:/abs/path`.
+
+Для одноразовых экспериментов — `scratch` (default).
+
+## DEC-023: Memory provider — built-in only
+
+Обоснование: на CP-008 проверено состояние памяти.
+
+Решение: **оставляем built-in** (`MEMORY.md` + `USER.md`) как основной
+провайдер. Внешние провайдеры (honcho, mem0, openviking, retaindb,
+byterover) требуют API-ключей, которых у нас нет.
+
+Локальный `holographic` — протестируем отдельно, если понадобится.
+Результат бенчмарка — в `docs/MEMORY-BENCHMARK.md`.
