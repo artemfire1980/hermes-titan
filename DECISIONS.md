@@ -290,3 +290,41 @@ byterover) требуют API-ключей, которых у нас нет.
 
 Следующий шаг: smoke-test **Holographic** (bundled, локальный, без ключей)
 или **OpenViking** (semantic, ARM64 Docker) — по результатам теста.
+
+
+## DEC-025: Memory provider — Holographic
+
+Обоснование: Holographic прошёл smoke-test на VIM4.
+
+Критерии выбора:
+1. Bundled — переживёт `hermes update`.
+2. Локальный — без ключей, без сервера.
+3. ARM64 — работает.
+4. Semantic recall — **5/5** через перефразированные запросы.
+5. Built-in (MEMORY.md + USER.md) работает параллельно.
+6. RAM/CPU — минимальные (SQLite + HRR).
+7. Лицензия — MIT.
+
+Тест (2026-09-26):
+- Записано 5 фактов через Telegram.
+- Gateway перезапущен.
+- Задано 5 перефраз-запросов.
+- **5/5 фактов найдено.**
+
+Примеры:
+- "материал для 3D-печати" → "полиамид 6 со стекловолокном" ✅
+- "инструмент для кода" → "Aider" ✅
+- "железо платформы" → "Khadas VIM4" ✅
+
+Holographic использует HRR (Holographic Reduced Representations) — не vector
+embedding, но ассоциативный метод. Для наших задач (парсинг, аналитика,
+проекты) достаточно.
+
+Архитектура: built-in + Holographic как один внешний provider.
+
+Не выбраны:
+- Hindsight — отклонён (DEC-024).
+- OpenViking — отложен: +1 сервер, AGPL-3.0, RAM TBD. Не оправдан,
+  пока Holographic справляется.
+- OMEGA — не Hermes provider.
+- Mastra OM — TypeScript framework.
