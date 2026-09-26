@@ -33,3 +33,7 @@ Thumbs.db
 tmp/
 temp/
 *.tmp
+
+# Проекты Aider (изолированные рабочие директории, не часть репо)
+projects/*
+!projects/.gitkeep

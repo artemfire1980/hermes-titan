@@ -214,3 +214,26 @@ CLI-режиму.
 
 Альтернативы (на будущее): Kimi K3 (не работает из-за always-on thinking),
 nemotron-3-super (работает, но меньше), deepseek-v4.1-flash (зависает).
+
+
+## DEC-021: Kanban + Project + Aider — интеграция
+
+Обоснование: полная цепочка "задача → код" работает через штатный kanban Hermes.
+
+Архитектура:
+- Board: `hermes-titan` (default workdir `/mnt/ai-ssd/ai-system/projects`)
+- Project: `hermes-titan` (`p_7464919e`), привязан к board
+- Dispatcher: встроен в gateway, ticks every 60s
+
+Цепочка: Kanban task → Dispatcher → Worker (profile default) → Hermes agent
+→ Terminal tool → aider-runner.py → Aider + Ultra → результат.
+
+Проверено: задача `t_a11011c9` (создать hello.py) завершена за 26 секунд.
+Worker сам создал файл, проверил через `python3 hello`, отметил задачу `done`.
+
+ВАЖНО: `--workspace scratch` (default) — эфемерный. Для сохранения
+результатов использовать `--workspace worktree:` (git worktree) или
+`--workspace dir:/abs/path`.
+
+Не нужна своя `tasks.db` — kanban покрывает всё. Своя БД — только для
+git-тегов/решений/артефактов, если понадобится (отложено).
