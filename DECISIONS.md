@@ -71,3 +71,18 @@
 Симптом: `⚠ install out of sync (ffmpeg, ripgrep)`.
 Влияние: на работу не влияет — gateway, Telegram, модель работают.
 Решение: игнорировать до фикса upstream. При необходимости — ручная установка.
+
+## DEC-014: SearXNG через Docker, подключён к Hermes
+
+Обоснование: приватный метапоиск, штатная интеграция Hermes.
+Развёртывание: `/mnt/ai-ssd/searxng/` (Docker Compose), порт `127.0.0.1:8888`.
+Конфиг: `web.search_backend=searxng`, `web.searxng_url=http://127.0.0.1:8888`.
+Секрет: `SEARXNG_SECRET` в `.env` (права 600).
+Тест: поиск "bitcoin price today" — успешно через SearXNG.
+
+## DEC-015: FreeLLMAPI база восстановлена из старого `freeapi.db`
+
+Обоснование: 77 ключей провайдеров, 314 моделей — восстановлены без пересоздания.
+Путь: `/mnt/ai-ssd/freellmapi/` (Docker Compose), порт `127.0.0.1:3001`.
+Доступ: `https://khadas.taila31870.ts.net` (Tailscale Serve).
+Ключ шифрования: `ENCRYPTION_KEY` в `.env` (права 400).
