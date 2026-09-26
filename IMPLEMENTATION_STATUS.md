@@ -1,6 +1,6 @@
 # Статус внедрения v7.2
 
-Версия: 0.4.0 · Контрольная точка: CP-004
+Версия: 0.5.0 · Контрольная точка: CP-005
 
 ## Состояние компонентов
 
@@ -14,6 +14,8 @@
 | FreeLLMAPI (Docker, 253 модели) | ✅ | CP-004 |
 | SearXNG (Docker, JSON API) | ✅ | CP-004 |
 | Tailscale Serve для Dashboard | ✅ | CP-004 |
+| Аудит старой системы (CP-005) | ✅ | CP-005 |
+| Скрипты перенесены из бэкапа | ✅ | CP-005 |
 
 ## Не сделано
 
@@ -23,10 +25,26 @@
 
 ## Следующие шаги
 
-- CP-005 — аудит старой системы (бэкап `vim4_golden_snapshot.7z`, зашифрован)
+
 - CP-006 — ctx7 + Aider
 - CP-007 — двигатель разработки (kanban)
 - CP-008 — бенчмарк памяти
 - CP-009 — управление ресурсами
 - CP-010 — восстановление (backup + import + checkpoints)
 - CP-011 — базовый уровень разработки
+
+## Тесты
+
+Все unit-тесты перенесённых скриптов **проходят**:
+
+21 passed in 0.44s
+
+Покрытие:
+- `EvidenceVerifier` — 4 теста (exact, fuzzy, no_match, numbers)
+- `ConflictDetector` — 3 теста (same_metric, no_conflict, time_diff)
+- `ExecutiveSummaryGenerator` — 12 тестов (JSON extraction, Pydantic, citations, fallback)
+- `wrapper_sidecar` — 1 тест
+
+Исправленные баги:
+- DEC-017 — нормализация единиц в `EvidenceVerifier`
+- DEC-018 — `ConflictDict` для совместимости API

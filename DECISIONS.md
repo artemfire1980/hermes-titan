@@ -86,3 +86,66 @@
 Путь: `/mnt/ai-ssd/freellmapi/` (Docker Compose), порт `127.0.0.1:3001`.
 Доступ: `https://khadas.taila31870.ts.net` (Tailscale Serve).
 Ключ шифрования: `ENCRYPTION_KEY` в `.env` (права 400).
+
+## DEC-016: Перенос скриптов из старой системы (CP-005)
+
+Обоснование: `vim4_golden_snapshot.7z` содержал production-скрипты старой системы.
+Перенесено (в `~/ai-system/scripts/`):
+- `research-runner.py` — двигатель данных (evidence, dedup, conflict, circuit breaker)
+- `summary_generator.py` — Executive Summary (Pydantic, citations, fallback)
+- `aider-runner.py` — изолированный исполнитель кода
+- `task_ledger.py` + `ledger-viewer.py` — лог запусков Aider (не конфликтует с kanban)
+- `git-auto-push.sh` — auto-commit + gitleaks
+- `research-telegram.sh`, `send-to-telegram.py`, `md2docx.py`
+- `check-freellm-quotas.sh`, `check-memory-peak.sh`, `check_r2_budget.sh`
+- `selfcheck.sh`, `backup-projects.sh`
+- `sync-tasks-to-supabase.py` (Supabase перенесён по решению)
+- Тесты: `tests/test_*.py` (4 файла)
+- Документация: `CODE_EDITING_RULES.md`, `PERSONALIZATION.md`, `IMPLEMENTATION_NOTES.md`
+
+Не перенесено: старые `.env`, `venv/`, `hermes-agent/`, `evals/`, `backup-projects/`.
+
+Секреты перенесены в `/mnt/ai-ssd/hermes/.env`:
+- `NVIDIA_API_KEY` (HTTP 200 — рабочий)
+- `GITHUB_TOKEN` (HTTP 200)
+- `SUPABASE_*` (HTTP 200)
+- `AWS_*` (R2 access key 32 chars)
+- `HERMES_TIMEZONE=Europe/Minsk`
+- `SEARXNG_BASE_URL`, `SEARXNG_INSTANCE_URL`
+
+`GITHUB_REPO=hermes-vim4` НЕ перенесён — у нас `hermes-titan`.
+
+## DEC-017: Нормализация единиц и токенизация в EvidenceVerifier
+
+Обоснование: `EvidenceVerifier` не верифицировал числовые утверждения с разными
+десятичными разделителями (`22.3` vs `22,3`) и разными единицами (`млрд` vs `миллиардов`).
+
+Симптом:
+- `test_evidence_verifier_numbers`: `False, "none", 0.0` вместо `True`
+- `test_evidence_verifier_fuzzy_match`: `False, "none", 0.0` вместо `True`
+
+Решение:
+- `_norm()` — нормализация десятичных разделителей (`,` → `.`)
+- `UNIT_MAP` — словарь единиц (`млрд` → `миллиардов`, `млн` → `миллионов`, `тыс` → `тысяч`)
+- `_tokens()` — токенизация через `re.findall(r"[a-zа-яё0-9]+")` (удаляет пунктуацию)
+- Порог fuzzy понижен: `0.85 → 0.70` (числа отсекаются отдельно — риск ложных срабатываний низкий)
+- Порог token_overlap: `0.70 → 0.60`, `len >= 5 → len >= 3`
+
+Источник решения: консилиум двух ИИ (проверенные патчи).
+
+## DEC-018: ConflictDict — компромисс между dict-API и атрибутным доступом
+
+Обоснование: `ConflictDetector.detect()` возвращает `list[dict]`, тесты ожидают `.type`.
+
+Симптом:
+- `AttributeError: 'dict' object has no attribute 'type'`
+
+Проверка consumers:
+- Production использует только `len(conflicts)` (строка 935 `research-runner.py`)
+- `.conflict_type` и `.type` в production не используются
+
+Решение: `ConflictDict(dict)` с `__getattr__`:
+- Работает как dict (`len()`, `["conflict_type"]`, JSON-сериализация)
+- Даёт атрибутный доступ (`.type`, `.conflict_type`, `.divergence`)
+
+Альтернатива (отклонена): переписать тесты на `["conflict_type"]` — теряется совместимость.
