@@ -328,3 +328,13 @@ embedding, но ассоциативный метод. Для наших зад�
   пока Holographic справляется.
 - OMEGA — не Hermes provider.
 - Mastra OM — TypeScript framework.
+
+### DEC-025 дополнение: memory toolset включён
+
+После CP-008 обнаружено: `memory` toolset был disabled (в `agent.disabled_toolsets`).
+Holographic работал как внешний provider, но агент не имел tool для явного memory_save/recall.
+
+Решение: `hermes tools enable memory` — memory toolset включён.
+Проверено: `hermes memory status` → `Memory tool: enabled ✓`.
+
+Итог CP-008: built-in (MEMORY.md + USER.md) + Holographic (external) + memory tool (agent).
