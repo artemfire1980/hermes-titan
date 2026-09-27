@@ -352,3 +352,26 @@ Holographic работал как внешний provider, но агент не 
 
 Интеграция: вызывать `acquire` перед тяжёлыми задачами (Aider, research),
 `release` после. Не автоматизировано (решение человека или скрипта-обёртки).
+
+## DEC-027: Три уровня восстановления
+
+Уровень 1 — Чекпоинты сессии (shadow git):
+- Инструмент: `hermes checkpoints` (status/prune/clear).
+- Путь: `/mnt/ai-ssd/hermes/checkpoints/`.
+- Назначение: откат правок агента (`/rollback`).
+
+Уровень 2 — История проекта (git-теги CP):
+- Инструмент: `git checkout CP-XXX` в `~/ai-system`.
+- Назначение: откат всего проекта к контрольной точке.
+- Проверено: тег `CP-009` на remote, clone работает (CP-000.5).
+
+Уровень 3 — Полный бэкап:
+- Full: `hermes backup -o <path>.zip` → zip всего HERMES_HOME (кроме кода).
+- Quick: `hermes backup --quick -l <label>` → snapshot в
+  `HERMES_HOME/state-snapshots/<timestamp>-<label>/`.
+  ВАЖНО: `--quick` игнорирует `-o`, всегда пишет в state-snapshots.
+- Восстановление full: `hermes import <path>.zip`.
+- Восстановление quick: `/snapshot restore <timestamp>-<label>`.
+- Наши данные: `~/ai-system/scripts/backup.sh` → tar в `backups/<timestamp>/`.
+
+Комбинация: 1 (сессия) + 2 (проект) + 3 (ядро + наши данные).
