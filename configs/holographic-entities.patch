@@ -1,0 +1,54 @@
+diff --git a/plugins/memory/holographic/store.py b/plugins/memory/holographic/store.py
+index a913cf2d..dc5498f2 100644
+--- a/plugins/memory/holographic/store.py
++++ b/plugins/memory/holographic/store.py
+@@ -74,7 +74,20 @@ _HELPFUL_DELTA, _UNHELPFUL_DELTA = 0.05, -0.10
+ 
+ # Entity extraction patterns, applied in order: capitalized multi-word phrases ("John Doe"), double-quoted terms,
+ # single-quoted terms, then "X aka Y" (both sides).
+-_RE_SINGLE_ENTITY = (re.compile(r'\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)\b'), re.compile(r'"([^"]+)"'), re.compile(r"'([^']+)'"))
++_RE_SINGLE_ENTITY = (
++    # Multi-word capitalized phrases: "John Doe", "Toyota Sienna"
++    re.compile(r'\b([A-ZА-ЯЁ][a-zа-яё]+(?:\s+[A-ZА-ЯЁ][a-zа-яё]+)+)\b'),
++    # All-caps abbreviations: "NVIDIA", "VIM4", "API", "GPU"
++    re.compile(r'\b([A-Z]{2,}\d*)\b'),
++    # CamelCase / mixed-case: "SearXNG", "FreeLLMAPI", "Tailscale"
++    re.compile(r'\b([A-Z][a-z]+[A-Z][a-zA-Z0-9]*)\b'),
++    # Single capitalized word (latin or cyrillic), min 3 chars: "Aider", "Артём"
++    re.compile(r'\b([A-ZА-ЯЁ][a-zа-яё]{2,})\b'),
++    # Double-quoted terms
++    re.compile(r'"([^"]+)"'),
++    # Single-quoted terms
++    re.compile(r"'([^']+)'"),
++)
+ _RE_AKA = re.compile(r'(\w+(?:\s+\w+)*)\s+(?:aka|also known as)\s+(\w+(?:\s+\w+)*)', re.IGNORECASE)
+ _ENTITY_NAMES_SQL = "SELECT e.name FROM entities e JOIN fact_entities fe ON fe.entity_id = e.entity_id WHERE fe.fact_id = ?"
+ # Entity lookup order: exact name, then aliases (comma-separated; wrapped in commas for whole-alias matching).
+@@ -218,9 +231,26 @@ class MemoryStore:
+         raw = [m.group(1) for pattern in _RE_SINGLE_ENTITY for m in pattern.finditer(text)]
+         for m in _RE_AKA.finditer(text):
+             raw += [m.group(1), m.group(2)]
++
++        # Stop-words: общие слова, которые не являются сущностями
++        _STOP_WORDS = {
++            "имя", "язык", "автомобиль", "цель", "поиск", "материал", "хост",
++            "проект", "инструмент", "the", "a", "an", "this", "that",
++            "google", "search", "and", "or", "is", "are", "was", "were",
++        }
++
+         uniq: dict[str, str] = {}  # lower-cased key -> first-seen spelling, insertion-ordered
+         for name in filter(None, (n.strip() for n in raw)):
+-            uniq.setdefault(name.lower(), name)
++            key = name.lower()
++            if key in _STOP_WORDS or len(name) < 3:
++                continue
++            # Не добавлять, если name — подстрока уже добавленного большего name
++            if any(key in existing_key for existing_key in uniq.keys()):
++                continue
++            # Удалить меньшие подстроки, если name содержит их
++            uniq = {k: v for k, v in uniq.items() if k not in key}
++
++            uniq[key] = name
+         return list(uniq.values())
+ 
+     def _link_entities(self, fact_id: int, content: str) -> None:
