@@ -403,3 +403,24 @@ Issue #83042 + PR #109274.
 - Полная цепочка: Telegram → Hermes → kanban_list → ответ.
 
 DEC-028 финализирован.
+
+## DEC-029: Kanban workspace types — проверено
+
+Три режима workspace (из `kanban create --help`):
+
+| Режим | Синтаксис | Поведение |
+|-------|-----------|-----------|
+| `scratch` (default) | `--workspace scratch` | эфемерный, удаляется после done |
+| `dir` | `--workspace dir:/abs/path` | сохраняется в указанной директории |
+| `worktree` | `--workspace worktree:<repo>` | git worktree в указанном репо |
+
+Проверено:
+- `scratch`: t_22b1c019, t_bd35c61e — файлы удалены после done.
+- `dir:/mnt/ai-ssd/ai-system/projects/tg-persist`: t_c2463162 — файлы
+  сохранены (tg_persist.py 3.2 KB, test_tg_persist.py 1.2 KB).
+
+Worker написал production-grade модуль (JSON-lines persistence,
+thread-safe, автосоздание директории) — не буквальный print.
+
+Решение: для реальных проектов использовать `--workspace dir:` или
+`--workspace worktree:`. `scratch` — только для одноразовых тестов.
