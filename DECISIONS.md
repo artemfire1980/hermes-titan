@@ -375,3 +375,31 @@ Holographic работал как внешний provider, но агент не 
 - Наши данные: `~/ai-system/scripts/backup.sh` → tar в `backups/<timestamp>/`.
 
 Комбинация: 1 (сессия) + 2 (проект) + 3 (ядро + наши данные).
+
+## DEC-028: Kanban toolset включён (native tools)
+
+Проблема: `hermes tools enable kanban` пишет в `platform_toolsets`, но gate
+`_profile_has_kanban_toolset()` в старых версиях читал top-level `toolsets`.
+Issue #83042 + PR #109274.
+
+Решение (комбинация):
+1. `hermes -p default tools enable kanban --platform cli`
+2. `hermes -p default tools enable kanban --platform telegram`
+3. `hermes -p default config set toolsets '["hermes-cli","kanban"]'` (legacy fallback)
+
+Проверено:
+- `hermes -p default chat -q "call kanban_list"` → agent вызвал kanban_list,
+  получил задачу t_a11011c9 (status: done).
+- `platform_toolsets.cli` и `.telegram` содержат kanban.
+- top-level `toolsets` содержит kanban.
+
+Источник: консилиум (Claude + Gemini + DeepSeek + GPT).
+
+Осталось: проверить в Telegram (новая сессия).
+
+Проверено в Telegram (2026-09-27):
+- Бот вызвал kanban_list из Telegram-чата.
+- Показал задачу t_a11011c9 (status: done).
+- Полная цепочка: Telegram → Hermes → kanban_list → ответ.
+
+DEC-028 финализирован.

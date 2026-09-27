@@ -1,6 +1,6 @@
 # Статус внедрения v7.2
 
-Версия: 0.10.0 · Контрольная точка: CP-010
+Версия: 0.12.0 · Контрольная точка: CP-012
 
 ## Состояние компонентов
 
@@ -22,6 +22,7 @@
 | Memory provider: Holographic | ✅ (recall 5/5) | CP-008 |
 | Resource governor (CP-009) | ✅ | CP-009 |
 | Recovery (backup.sh + checkpoints) | ✅ | CP-010 |
+| Kanban toolset (native tools) | ✅ | CP-012 |
 | Скрипты перенесены из бэкапа | ✅ | CP-005 |
 
 ## Не сделано
