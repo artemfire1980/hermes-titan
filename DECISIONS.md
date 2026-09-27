@@ -424,3 +424,27 @@ thread-safe, автосоздание директории) — не буква�
 
 Решение: для реальных проектов использовать `--workspace dir:` или
 `--workspace worktree:`. `scratch` — только для одноразовых тестов.
+
+## DEC-030: Holographic — патч + автоматика переприменения
+
+Проблема: два бага в Holographic memory (bundled provider):
+1. `on_memory_write` игнорировал `replace`/`remove` (issue #55095).
+2. `retrieval_count` никогда не инкрементировался (issue #101521).
+(Баг 3 — FTS5 sanitize — уже был исправлен в коде.)
+
+Решение:
+- Патч `~/ai-system/scripts/holographic-patch.sh` (идемпотентный).
+- Маркер `HOLOGRAPHIC_PATCH_v1` в патченных файлах.
+- Бэкапы `*.orig` рядом.
+
+Автоматика:
+- Git post-merge hook в `/mnt/ai-ssd/hermes/hermes-agent/.git/hooks/post-merge`
+  → после `git pull` (внутри `hermes update`) переприменяет патч.
+- systemd timer `holographic-patch.timer` (hourly) → страховка, если update
+  не через git.
+
+Проверено (2026-09-27):
+- `git pull` → hook сработал → `✓ Патч уже применён (v1)`.
+- После pull: `hermes --version` = `v0.21.5+3779.g8f897d2.dirty`.
+- Патч на месте (grep HOLOGRAPHIC_PATCH_v1 = 1 в обоих файлах).
+- `retrieval_count` инкрементируется (fact_id 22: 0→1→2).
