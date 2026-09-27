@@ -448,3 +448,30 @@ thread-safe, автосоздание директории) — не буква�
 - После pull: `hermes --version` = `v0.21.5+3779.g8f897d2.dirty`.
 - Патч на месте (grep HOLOGRAPHIC_PATCH_v1 = 1 в обоих файлах).
 - `retrieval_count` инкрементируется (fact_id 22: 0→1→2).
+
+## DEC-031: Holographic — восстановление FTS5 + DEC-030 дополнение
+
+Проблема: fact_id=22 вызывал `database disk image is malformed` при
+UPDATE/DELETE. Причина — рассинхрон FTS5-индекса для rowid=22 после
+двойного инкремента retrieval_count (v1-патч).
+
+Восстановление:
+1. `VACUUM` — пересборка b-tree (сработало, но DELETE всё ещё падал).
+2. `DROP TRIGGER facts_ad` — временно.
+3. `DELETE FROM facts WHERE fact_id=22` — без триггера.
+4. `INSERT INTO facts_fts(facts_fts) VALUES('rebuild')` — пересборка FTS5.
+5. `CREATE TRIGGER facts_ad` — восстановить.
+6. `INSERT` — новый fact_id=29.
+
+Результат:
+- fact_id=22 удалён, fact_id=29 — его замена.
+- Все 13 фактов: UPDATE OK (13/13).
+- FTS5 integrity-check OK.
+- Telegram-поиск работает, retrieval_count инкрементируется.
+
+Патч v2 (DEC-030) не виноват — он работал корректно. Причина была в
+остаточном рассинхроне от v1.
+
+Дополнительно: system sqlite3 CLI (3.45.1, WAL-reset bug) НЕ использовать.
+Только runtime Python (3.53.1):
+`/mnt/ai-ssd/hermes/tools/python-3.14.7+.../bin/python3`
