@@ -338,3 +338,17 @@ Holographic работал как внешний provider, но агент не 
 Проверено: `hermes memory status` → `Memory tool: enabled ✓`.
 
 Итог CP-008: built-in (MEMORY.md + USER.md) + Holographic (external) + memory tool (agent).
+
+## DEC-026: Resource governor — блокировка тяжёлых задач
+
+Обоснование: VIM4 8GB RAM. Одновременный Aider + research + gateway может
+привести к OOM. Нужна защита.
+
+Решение: `scripts/resource-governor.sh` (bash + flock).
+- MAX_HEAVY=1 (по умолчанию, переопределяется env).
+- Команды: `acquire <task>`, `release <task>`, `status`.
+- Lock-файл: `runtime/locks/heavy.lock` (flock для атомарности).
+- Проверено: acquire/release/status работают, второй acquire блокируется.
+
+Интеграция: вызывать `acquire` перед тяжёлыми задачами (Aider, research),
+`release` после. Не автоматизировано (решение человека или скрипта-обёртки).
