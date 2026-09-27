@@ -475,3 +475,23 @@ UPDATE/DELETE. Причина — рассинхрон FTS5-индекса дл�
 Дополнительно: system sqlite3 CLI (3.45.1, WAL-reset bug) НЕ использовать.
 Только runtime Python (3.53.1):
 `/mnt/ai-ssd/hermes/tools/python-3.14.7+.../bin/python3`
+
+## DEC-032: journal_mode = WAL для всех баз Hermes
+
+Проблема: `config.yaml` содержал `journal_mode: delete`, но on-disk базы
+уже были WAL (после обновления Hermes до v0.21.5+3779). Ошибка в логах:
+"journal_mode=delete is configured but the on-disk database is already WAL".
+
+Решение:
+- `hermes config set database.journal_mode wal` — глобальный конфиг.
+- `hermes sessions set-journal-mode wal` — для state.db (уже был wal).
+- `--db kanban.db`, `--db cron/executions.db` — уже были wal.
+- `memory_store.db` — переключён вручную через runtime Python (был delete).
+
+Проверено:
+- config.yaml: journal_mode: wal.
+- state.db, kanban.db, cron/executions.db, memory_store.db: wal.
+- Логи gateway чистые (нет journal_mode ERROR).
+
+Правило: WAL — единый режим для всех баз. `delete` — не использовать
+(устаревший, менее безопасный, конфликтует с дефолтом SQLite 3.53.1).
