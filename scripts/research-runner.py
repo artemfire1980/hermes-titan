@@ -38,21 +38,12 @@ METRICS_FILE = RESEARCH_DIR / "metrics.jsonl"
 # === URL PREFILTER ===
 JUNK_DOMAINS = {
     # Нерелевантные научные/образовательные сайты (часто попадают в поиск по ошибке)
-    "askabiologist.asu.edu","abiology.org","biology-online.org","britannica.com/animals",
-    "nationalgeographic.com/animals","sciencedaily.com/releases","phys.org/biology",
-    "livescience.com/animals","biologicaldiversity.org","nature.com/articles/biology",
     # Microsoft/Google/Apple support
     "support.microsoft.com","answers.microsoft.com","learn.microsoft.com",
     "support.google.com","support.apple.com","community.adobe.com",
     "maps.google.com","google.com/maps","waze.com","translate.google.com",
-    "sso.qiwa.sa","qiwa.sa","moodle.","forum.termometropolitico.it",
-    "cardiffcityforum.com","theukbettingforum.co.uk","forums.commentcamarche.net",
-    "estudij.um.si","electrodepot.fr","dilo.eu","laserfair.com",
     "informeddelivery.usps.com","tools.usps.com","myaccount.microsoft.com",
     "account.microsoft.com","webcache.googleusercontent.com",
-    "spabreaks.com","booking.com","telegraph.co.uk/travel",
-    "speedtest.mybroadband.co.za","mybroadband.co.za","blancheporte.fr",
-    "pdfs.cir.cn","zhihu.com","gelonghui.com",
     "usps.com","fedex.com","ups.com","dhl.com","17track.net","gdeposylka.ru",
     "reddit.com","quora.com","stackoverflow.com","stackexchange.com",
     "facebook.com","instagram.com","twitter.com","x.com","tiktok.com","pinterest.com","vk.com",
@@ -65,7 +56,7 @@ JUNK_PATHS = ["/forum/","/forums/","/thread/","/threads/","/viewtopic","/showthr
               "/support/","/help/","/tracking","/track/","/login","/signin",
               "/cart","/privacy","/terms","/cookie","/tag/","/tags/","/search?",
               "/community/","/member/","/profile/","/user/"]
-JUNK_EXTENSIONS = (".pdf",".jpg",".jpeg",".png",".gif",".zip",".rar",".exe",".mp4",".mp3",".docx",".xlsx")
+JUNK_EXTENSIONS = (".jpg",".jpeg",".png",".gif",".zip",".rar",".exe",".mp4",".mp3",".docx",".xlsx")
 
 JUNK_DOMAIN_SUBSTRINGS = ("support.", "forum", "forums.", "board.", "community.",
                           "translate.", "webcache.", "moodle.", "sso.", "account.microsoft")
@@ -494,7 +485,7 @@ class LLMGateway:
                     client = await self._get_client()
                     resp = await client.post("/v1/chat/completions", json=payload,
                                              headers={"x-freellm-task-type": task_type})
-                except (httpx.ConnectError, httpx.ReadTimeout, httpx.RemoteProtocolError) as e:
+                except httpx.TransportError as e:
                     last_err = str(e); self.breaker.record_failure()
                     await asyncio.sleep(min(4 * (2 ** (attempt-1)), 60) * random.uniform(0.7, 1.3)); continue
             if resp.status_code == 429:
@@ -608,9 +599,16 @@ class TokenBucket:
         self.rate,self.cap,self.tokens,self.last=rate,cap,cap,time.monotonic(); self._lock=asyncio.Lock()
     async def acquire(self):
         async with self._lock:
-            now=time.monotonic(); self.tokens=min(self.cap,self.tokens+(now-self.last)*self.rate); self.last=now
-            if self.tokens<1: await asyncio.sleep((1-self.tokens)/self.rate); self.tokens=0
-            else: self.tokens-=1
+            now=time.monotonic()
+            self.tokens=min(self.cap, self.tokens+(now-self.last)*self.rate)
+            self.last=now
+            if self.tokens<1:
+                wait=(1-self.tokens)/self.rate
+                await asyncio.sleep(wait)
+                self.tokens=0
+                self.last=time.monotonic()  # CP-019: avoid double-credit after sleep
+            else:
+                self.tokens-=1
 
 class AsyncSearcher:
     def __init__(self, url, mc=3):
@@ -917,22 +915,6 @@ class DeepResearch:
         # Присваиваем evidence_id для метрики independent_sources
         e.evidence_id = hashlib.sha256(f"{e.claim}|{url}|{e.value}|{e.year}".encode()).hexdigest()[:16]
         
-        # Защита от ЯВНО нерелевантных фактов (биология, животные, спорт и т.д.)
-        # Работает в дополнение к JUNK_DOMAINS — отсеиваем по blacklist слов в claim
-        OFF_TOPIC_KEYWORDS = [
-            "penguin", "chimpanzee", "dolphin", "whale", "shark",
-            "dr. biology", "park ranger", "genetic variation",
-            "mitochondria", "photosynthesis", "dna sequence",
-            "ecosystem", "biodiversity", "endangered species",
-            "protein structure", "neuron firing", "brain signal"
-        ]
-        try:
-            claim_lower = e.claim.lower()
-            if any(kw in claim_lower for kw in OFF_TOPIC_KEYWORDS):
-                logger.info("Dropping off-topic evidence (blacklist): %s", e.claim[:80])
-                return None
-        except Exception:
-            pass
         
         return e
     def save_ckpt(self):
@@ -990,117 +972,8 @@ class DeepResearch:
                 logger.info(f"Summary generated via NEW pipeline (source={result.source}, attempts={result.attempts})")
                 
             except Exception as new_pipeline_error:
-                # FALLBACK: Old regex-based code (temporarily)
-                logger.warning(f"NEW pipeline failed: {new_pipeline_error}, falling back to OLD code")
-                try:
-                    es_prompt = (
-                        "Строгая инструкция:\n"
-                        "- Язык ответа: РУССКИЙ\n"
-                        "- НЕ включай свои рассуждения, размышления или planning\n"
-                        "- НЕ пиши фразы вроде \"The user wants\", \"We need to\", \"I'll write\", \"Let me\"\n"
-                        "- НЕ повторяй задание, НЕ пересказывай факты\n"
-                        "- Верни ТОЛЬКО финальный результат — 5-7 bullet points\n\n"
-                        f"Тема: {self.topic}\n"
-                        f"Факты с источниками:\n{bullets}\n\n"
-                        "ВАЖНО:\n"
-                        "- Используй ТОЛЬКО факты релевантные теме\n"
-                        "- Игнорируй факты про биологию, животных, географию, спорт\n"
-                        "- НЕ пиши цитаты с пометками вроде '-> Used in bullet'\n"
-                        "- НЕ используй формат '- \"цитата\" -> пометка'\n"
-                        "- Пиши своими словами, перефразируй факты\n"
-                        "- Каждая строка должна быть законченным утверждением\n\n"
-                        "Напиши Executive Summary на русском. 5-7 bullet points. "
-                        "Каждая цифра с [N] ссылкой. Формат: '- <текст> [N]'. "
-                        "Начинай сразу с первого bullet (символ '-')."
-                    )
-                    es_text = await self.llm.chat(es_prompt, task_type="summary", max_tokens=1200, temp=0.2, use_fusion=True)
-
-                    # Пост-обработка: отсечь reasoning блоки
-                    lines = es_text.strip().splitlines()
-                    clean_lines = []
-                    found_bullet = False
-                    # Расширенный список фраз reasoning
-                    bad_phrases = [
-                        "user wants", "we need", "i'll", "let me", "potential bullet",
-                        "we should", "the facts list", "we must", "i need to",
-                        "the user", "the topic", "probably", "each bullet",
-                        "thinking process", "analyze the request", "evaluate the responses",
-                        "synthesize the facts", "let's look at", "can we link",
-                        "response 1", "response 2", "response 3",
-                        "note the lack", "seems completely unrelated",
-                        "i'll aim", "we must not", "we need to ensure",
-                        "let me think", "let me write", "we should include",
-                        # Новые паттерны для цитат с пометками
-                        "-> used in bullet", "used in bullet", "-> will be used",
-                        "-> this fact", "-> can be used", "-> relevant to",
-                        "quote:", "source:", "fact:", "evidence:",
-                        "**fact", "**quote", "**evidence"
-                    ]
-                    # Паттерны строк которые всегда отбрасываем
-                    bad_patterns = [
-                        r"^\d+\.\s+",  # "1. ", "2. " — нумерованные списки reasoning
-                        r"^\*\*Response",  # "**Response 1"
-                        r"^#+\s+(Analysis|Evaluation|Thinking|Process)",  # ## Analysis
-                        r'^- "[^"]+"\s*->',  # "- "цитата" -> Used in bullet"
-                        r'^- \*\*[^*]+\*\*\s*->',  # "- **текст** -> Used"
-                        r'->\s*(Used|Will|Can|Should|Relevant)',  # "-> Used/Will/Can"
-                    ]
-
-                    for ln in lines:
-                        s = ln.strip()
-                        s_lower = s.lower()
-
-                        # Пропускаем строки с reasoning
-                        if any(b in s_lower for b in bad_phrases):
-                            continue
-                        if any(re.match(p, s) for p in bad_patterns):
-                            continue
-
-                        if not found_bullet:
-                            # Ищем первый реальный bullet: "- " или "• "
-                            if s.startswith("- ") or s.startswith("• "):
-                                found_bullet = True
-                                clean_lines.append(s)
-                            else:
-                                # Собираем bullet points и их продолжения
-                                if s.startswith("- ") or s.startswith("• "):
-                                    clean_lines.append(s)
-                                elif s.startswith("  ") or s.startswith("\t"):
-                                    # продолжение bullet (indent)
-                                    clean_lines.append(ln)
-                                elif not s:
-                                    # пустая строка — пропускаем
-                                    continue
-                                else:
-                                    # Не-bullet строка после bullets — вероятно конец summary
-                                    break
-                        else:
-                            # После первого bullet: собираем только bullet'ы и их продолжения
-                            if s.startswith("- ") or s.startswith("• "):
-                                clean_lines.append(s)
-                            elif s.startswith("  ") or s.startswith("\t"):
-                                # продолжение bullet (indent)
-                                clean_lines.append(ln)
-                            elif not s:
-                                # пустая строка — пропускаем
-                                continue
-                            else:
-                                # Не-bullet строка — вероятно конец summary
-                                break
-
-                    if clean_lines:
-                        exec_lines = clean_lines
-                    else:
-                        # Fallback: убираем только явно reasoning строки
-                        exec_lines = [ln for ln in lines
-                        if ln.strip()
-                            and not any(b in ln.lower() for b in bad_phrases)
-                            and not any(re.match(p, ln.strip()) for p in bad_patterns)]
-
-
-                except Exception as old_pipeline_error:
-                    logger.error(f"OLD pipeline also failed: {old_pipeline_error}")
-                    exec_lines = bullets.splitlines()
+                logger.error(f"Summary pipeline failed: {new_pipeline_error}")
+                exec_lines = bullets.splitlines()
         by_metric = defaultdict(list)
         for e in self.evidences:
             if e.metric and e.value_raw: by_metric[e.metric].append(e)
