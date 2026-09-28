@@ -3,8 +3,6 @@ Unit tests for summary_generator module.
 Tests JSON extraction, Pydantic validation, citation validation, and fallback.
 """
 import asyncio
-from typing import Set
-from unittest.mock import AsyncMock, MagicMock
 
 # Add parent directory to path
 import sys
@@ -15,11 +13,9 @@ from scripts.summary_generator import (
     ExecutiveSummary,
     ExecutiveSummaryGenerator,
     SummaryConfig,
-    SummaryResult,
     extract_last_valid_json,
     generate_fallback_summary,
     render_markdown,
-    top_claims_by_authority,
     validate_citations,
 )
 

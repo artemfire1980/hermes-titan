@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
+# ruff: noqa: F821 (exec loads research-runner into globals)
 """Unit-тесты для ConflictDetector"""
 import sys
 sys.path.insert(0, '/home/khadas/bin')
 
-from pathlib import Path
-import json
 
 # Импортируем классы из runner
 exec(open('scripts/research-runner.py').read(), globals())

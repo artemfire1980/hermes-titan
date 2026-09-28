@@ -8,8 +8,7 @@ def md_to_docx(md_path: Path, docx_path: Path):
     """Конвертирует Markdown в DOCX используя python-docx"""
     try:
         from docx import Document
-        from docx.shared import Pt, RGBColor
-        from docx.enum.text import WD_ALIGN_PARAGRAPH
+        from docx.shared import Pt
     except ImportError:
         print("❌ python-docx не установлен. Запусти: pip3 install python-docx", file=sys.stderr)
         sys.exit(1)
@@ -67,7 +66,7 @@ def md_to_docx(md_path: Path, docx_path: Path):
             text = re.sub(r'\*\*(.+?)\*\*', r'\1', text)
             text = re.sub(r'\*(.+?)\*', r'\1', text)
             text = re.sub(r'`(.+?)`', r'\1', text)
-            p = doc.add_paragraph(text, style='List Bullet')
+            doc.add_paragraph(text, style='List Bullet')
             i += 1
             continue
 

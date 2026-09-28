@@ -7,7 +7,7 @@ from dataclasses import dataclass, asdict, field
 from datetime import datetime, timezone
 from difflib import SequenceMatcher
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional
 
 # Production-grade summary generator
 from summary_generator import ExecutiveSummaryGenerator, SummaryConfig
@@ -977,14 +977,15 @@ class DeepResearch:
                     llm_chat_func=self.llm.chat,
                     config=config
                 )
-                logger.info(f"NEW pipeline: calling generate_summary...")
+                logger.info("NEW pipeline: calling generate_summary...")
                 result = await generator.generate_summary(
                     topic=self.topic,
                     facts=bullets,
                     valid_citation_ids=valid_ids,
-                    evidences=self.evidences
+                    evidences=self.evidences,
+                    url_to_cid=cmap,
                 )
-                logger.info(f"NEW pipeline: generate_summary returned successfully")
+                logger.info("NEW pipeline: generate_summary returned successfully")
                 exec_lines = result.bullets
                 logger.info(f"Summary generated via NEW pipeline (source={result.source}, attempts={result.attempts})")
                 
@@ -1100,6 +1101,7 @@ class DeepResearch:
                 except Exception as old_pipeline_error:
                     logger.error(f"OLD pipeline also failed: {old_pipeline_error}")
                     exec_lines = bullets.splitlines()
+        by_metric = defaultdict(list)
         for e in self.evidences:
             if e.metric and e.value_raw: by_metric[e.metric].append(e)
         tbl=[]

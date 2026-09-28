@@ -207,7 +207,8 @@ def validate_citations(bullets: List[str], valid_citation_ids: Set[int]) -> List
 def top_claims_by_authority(
     evidences: List[Any],
     valid_citation_ids: Set[int],
-    top_n: int = 7
+    top_n: int = 7,
+    url_to_cid: Optional[Dict[str, int]] = None,
 ) -> List[str]:
     """
     Selects top-N most authoritative claims from evidence.
@@ -227,9 +228,12 @@ def top_claims_by_authority(
     citation_pattern = re.compile(r"\[(\d+)\]")
 
     for e in evidences:
-        # Skip evidences with invalid citations
-        if hasattr(e, 'citation_number') and e.citation_number not in valid_citation_ids:
-            continue
+        # CP-017: compute citation id from source_url via url_to_cid map
+        cid = None
+        if url_to_cid:
+            cid = url_to_cid.get(getattr(e, 'source_url', ''))
+            if cid is None or cid not in valid_citation_ids:
+                continue
 
         # Calculate score
         authority = getattr(e, 'source_authority', 0.5)
@@ -240,10 +244,9 @@ def top_claims_by_authority(
         score = authority * 0.5 + quality * 0.3 + has_metric * 0.2 + has_year * 0.1
 
         claim = getattr(e, 'claim', '').strip()
-        citation_num = getattr(e, 'citation_number', None)
 
-        if claim and citation_num and citation_num in valid_citation_ids:
-            scored_claims.append((score, claim, citation_num))
+        if claim and cid is not None:
+            scored_claims.append((score, claim, cid))
 
     # Sort by score descending, take top N
     scored_claims.sort(key=lambda x: x[0], reverse=True)
@@ -263,7 +266,8 @@ def top_claims_by_authority(
 def generate_fallback_summary(
     facts_text: str,
     valid_citation_ids: Set[int],
-    evidences: Optional[List[Any]] = None
+    evidences: Optional[List[Any]] = None,
+    url_to_cid: Optional[Dict[str, int]] = None,
 ) -> List[str]:
     """
     Deterministic fallback when LLM generation fails.
@@ -274,7 +278,9 @@ def generate_fallback_summary(
     """
     # Priority 1: use structured evidences if available
     if evidences:
-        bullets = top_claims_by_authority(evidences, valid_citation_ids, top_n=7)
+        bullets = top_claims_by_authority(
+            evidences, valid_citation_ids, top_n=7, url_to_cid=url_to_cid
+        )
         if len(bullets) >= 5:
             return bullets
 
@@ -419,6 +425,7 @@ class ExecutiveSummaryGenerator:
         facts: str,
         valid_citation_ids: Set[int],
         evidences: Optional[List[Any]] = None,
+        url_to_cid: Optional[Dict[str, int]] = None,
     ) -> SummaryResult:
         """
         Generate Executive Summary with validation, repair, and fallback.
@@ -445,14 +452,6 @@ class ExecutiveSummaryGenerator:
             attempts += 1
             try:
                 # Build request params
-                params = {
-                    "model": self.config.model,
-                    "messages": messages,
-                    "temperature": self.config.temperature,
-                    "top_p": self.config.top_p,
-                    "max_tokens": self.config.max_tokens,
-                }
-
                 # Build prompt from messages (take last user message)
                 user_prompt = ""
                 for msg in messages:

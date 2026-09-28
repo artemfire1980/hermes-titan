@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# ruff: noqa: F821 (exec loads research-runner into globals)
 """Unit-тесты для EvidenceVerifier"""
 import sys
 sys.path.insert(0, '/home/khadas/bin')

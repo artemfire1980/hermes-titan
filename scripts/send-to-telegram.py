@@ -106,7 +106,6 @@ def send_message(text: str):
         return False
 
 if __name__ == "__main__":
-    import urllib.parse
     ap = argparse.ArgumentParser()
     ap.add_argument('file', help='Путь к файлу для отправки')
     ap.add_argument('--caption', '-c', default='', help='Подпись к файлу')
