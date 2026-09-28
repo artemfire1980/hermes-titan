@@ -48,16 +48,21 @@ FORBIDDEN_ROOTS = [
 DEFAULT_TIMEOUT = 1800
 MAX_OUTPUT = 12000
 
+# Set in main() after parse_args(); used by fail() for correct logging
+_CURRENT_PROJECT = None
+_CURRENT_TASK = None
+
 def utc_now(): return datetime.now(timezone.utc).isoformat()
 def emit(d): print(json.dumps(d, ensure_ascii=False, indent=2))
 
 def fail(tid, status, msg, **kw):
-    # Log failure to task ledger (best-effort)
+    """Log failure and exit. Uses _CURRENT_PROJECT/_CURRENT_TASK if set."""
     try:
         ledger_kw = {k: v for k, v in kw.items() 
                     if k in ['elapsed_seconds', 'exit_code', 'dirty_before', 'error_message']}
-        project = kw.get('project', 'unknown')
-        task_ledger.log_task(tid, str(project), msg, status, 
+        project = kw.pop('project', None) or _CURRENT_PROJECT or 'unknown'
+        task = kw.pop('task', None) or _CURRENT_TASK or msg
+        task_ledger.log_task(tid, str(project), str(task), status, 
                             error_message=msg, **ledger_kw)
     except Exception:
         pass
@@ -201,6 +206,11 @@ def main():
     p.add_argument("--allow-dirty", action="store_true")
     p.add_argument("--task-id", default=None)
     args = p.parse_args()
+
+    # Make project/task available to fail() for correct ledger logging
+    global _CURRENT_PROJECT, _CURRENT_TASK
+    _CURRENT_PROJECT = args.project
+    _CURRENT_TASK = args.task
 
     tid = args.task_id or str(uuid.uuid4())
     task_ledger.log_task(tid, args.project, args.task, "STARTED")
