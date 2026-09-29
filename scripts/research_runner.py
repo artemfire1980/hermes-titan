@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Deep Research Agent v3.0 — Production-Grade for VIM4"""
 import argparse, asyncio, hashlib, json, logging, os, random, re, sys, time, urllib.parse
+import httpx
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, asdict, field
@@ -607,11 +608,34 @@ class LLMGateway:
         raise RuntimeError(f"LLM task={task_type} failed: {last_err}")
     def stats(self): return {"calls": self.call_count, "tokens": self.token_usage, "pacer_interval": round(self.pacer.interval,1), "breaker": self.breaker.state}
 
+# Версия алгоритма extraction — при изменении инвалидирует кэш
+CACHE_VERSION = "extract-v1"
+
+
 class AsyncFetcher:
     TTL=30; MC=100000; MH=3000000; UA="Mozilla/5.0 (compatible; DeepResearchAgent/3.0)"
     def __init__(self, cd, mc=2):
-        self.cd=cd; cd.mkdir(parents=True,exist_ok=True); self.sem=asyncio.Semaphore(mc)
-        self._exec=ThreadPoolExecutor(max_workers=2,thread_name_prefix="trafilatura")
+        self.cd = cd
+        cd.mkdir(parents=True, exist_ok=True)
+        self.sem = asyncio.Semaphore(mc)
+        self._exec = ThreadPoolExecutor(max_workers=2, thread_name_prefix="trafilatura")
+        self._client = None
+
+    async def _get_client(self):
+        if self._client is None or self._client.is_closed:
+            self._client = httpx.AsyncClient(
+                timeout=30.0,
+                headers={"User-Agent": self.UA},
+                follow_redirects=True,
+            )
+        return self._client
+
+    async def aclose(self):
+        if self._client and not self._client.is_closed:
+            await self._client.aclose()
+            self._client = None
+        if self._exec:
+            self._exec.shutdown(wait=True)
     def _cp(self, url): return self.cd/f"{hashlib.sha256(url.encode()).hexdigest()[:16]}.txt"
     def _cg(self, p):
         if not p.exists(): return None
@@ -620,7 +644,7 @@ class AsyncFetcher:
     def _save_evidence_cache(self, url, query, evidences):
         """Сохраняет извлечённые evidences в self.cd/evidences/{hash}.json (ключ — пара url + запрос)."""
         try:
-            key = hashlib.sha256(f"{url}::{query}".encode()).hexdigest()[:16]
+            key = hashlib.sha256(f"{CACHE_VERSION}::{url}::{query}".encode()).hexdigest()[:16]
             cache_dir = self.cd / "evidences"
             cache_dir.mkdir(parents=True, exist_ok=True)
             payload = {"url": url, "query": query, "saved_at": datetime.now().isoformat(), "evidences": evidences}
@@ -631,7 +655,7 @@ class AsyncFetcher:
     def _load_evidence_cache(self, url, query, ttl_days=7):
         """Загружает evidences из кэша. Возвращает None, если кэша нет, он устарел (TTL), пуст или повреждён."""
         try:
-            key = hashlib.sha256(f"{url}::{query}".encode()).hexdigest()[:16]
+            key = hashlib.sha256(f"{CACHE_VERSION}::{url}::{query}".encode()).hexdigest()[:16]
             cache_file = self.cd / "evidences" / f"{key}.json"
             if not cache_file.exists(): return None
             payload = json.loads(cache_file.read_text(encoding="utf-8"))
@@ -696,17 +720,40 @@ DEFAULT_SEARCH_CATEGORIES = ["general", "it", "science"]
 
 class AsyncSearcher:
     def __init__(self, url, mc=3):
-        self.url=url.rstrip("/"); self.sem=asyncio.Semaphore(mc); self.bucket=TokenBucket(1.0,3)
+        self.url = url.rstrip("/")
+        self.sem = asyncio.Semaphore(mc)
+        self.bucket = TokenBucket(1.0, 3)
+        self._client = None
+
+    async def _get_client(self):
+        if self._client is None or self._client.is_closed:
+            self._client = httpx.AsyncClient(timeout=20.0)
+        return self._client
+
     async def search(self, query, cats=None):
-        import httpx; cats=cats or DEFAULT_SEARCH_CATEGORIES
+        cats = cats or DEFAULT_SEARCH_CATEGORIES
         async with self.sem:
             await self.bucket.acquire()
-            async with httpx.AsyncClient(timeout=20.0) as cl:
-                try:
-                    r=await cl.get(f"{self.url}/search",params={"q":query,"format":"json","categories":",".join(cats),"language":"auto"})
-                    if r.status_code==429: logger.warning("429: %s",query); return []
-                    r.raise_for_status(); return r.json().get("results",[])[:10]
-                except Exception as e: logger.warning("Search fail '%s': %s",query,e); return []
+            cl = await self._get_client()
+            try:
+                r = await cl.get(
+                    f"{self.url}/search",
+                    params={"q": query, "format": "json",
+                            "categories": ",".join(cats), "language": "auto"},
+                )
+                if r.status_code == 429:
+                    logger.warning("429: %s", query)
+                    return []
+                r.raise_for_status()
+                return r.json().get("results", [])[:10]
+            except Exception as e:
+                logger.warning("Search fail '%s': %s", query, e)
+                return []
+
+    async def aclose(self):
+        if self._client and not self._client.is_closed:
+            await self._client.aclose()
+            self._client = None
 
 class UnsupportedClaimDetector:
     PATTERNS=[r"(\d+(?:[.,]\d+)?)\s*(?:млн|млрд|billion|million|%|руб|\$|¥|EUR|CNY)\s*\[(\d+)\]",r"\$\s*(\d+(?:[.,]\d+)?)\s*(?:млн|млрд|billion|million)?\s*\[(\d+)\]"]
@@ -727,11 +774,24 @@ class UnsupportedClaimDetector:
         return issues
 
 def detect_lineage(evidences):
-    for i,a in enumerate(evidences):
-        for j,b in enumerate(evidences):
-            if i>=j or b.parent_source_id: continue
-            if a.source_title and b.source_title and SequenceMatcher(None,a.source_title.lower(),b.source_title.lower()).ratio()>0.9:
-                b.parent_source_id=a.evidence_id
+    """Prefilter O(n) → fuzzy только внутри групп. Вместо O(n²)."""
+    from collections import defaultdict
+    groups = defaultdict(list)
+    for e in evidences:
+        title = (e.source_title or "").strip().lower()
+        if title:
+            groups[title].append(e)
+    for grp in groups.values():
+        if len(grp) < 2:
+            continue
+        for i, a in enumerate(grp):
+            for b in grp[i + 1:]:
+                if b.parent_source_id:
+                    continue
+                if (a.source_title and b.source_title and
+                        SequenceMatcher(None, a.source_title.lower(),
+                                        b.source_title.lower()).ratio() > 0.9):
+                    b.parent_source_id = a.evidence_id
     return len(set(e.parent_source_id or e.evidence_id for e in evidences))
 
 
@@ -752,6 +812,18 @@ class DeepResearch:
         self.ext_total=0
         self.processed_urls_by_subtopic: dict = {}  # Единый источник истины для resume
         self.drop_total = 0
+
+    async def aclose(self):
+        """Гарантированное закрытие ресурсов."""
+        for name, obj in [("fetcher", self.fetcher),
+                          ("searcher", self.searcher),
+                          ("llm", getattr(self, "llm", None))]:
+            if obj is None or not hasattr(obj, "aclose"):
+                continue
+            try:
+                await obj.aclose()
+            except Exception as e:
+                logger.warning("%s.aclose: %s", name, e)
     @staticmethod
     def _mkid(topic):
         ts=datetime.now().strftime("%Y%m%d_%H%M%S"); slug=re.sub(r"[^\w]+","_",topic.lower(),flags=re.U)[:30].strip("_")
@@ -1090,11 +1162,16 @@ def main():
     else:
         if not args.topic: print("--topic required",file=sys.stderr); sys.exit(1)
         agent=DeepResearch(args.topic,args.depth)
-    try: asyncio.run(agent.run(dry_run=args.dry_run))
+    async def _run_and_close():
+        try:
+            await agent.run(dry_run=args.dry_run)
+        finally:
+            await agent.aclose()
+
+    try:
+        asyncio.run(_run_and_close())
     except KeyboardInterrupt:
         agent.save_ckpt()
-        try: asyncio.run(agent.llm.aclose())
-        except Exception: pass
         print(f"\nInterrupted. Resume: --resume {agent.rid}")
 
 if __name__=="__main__":
