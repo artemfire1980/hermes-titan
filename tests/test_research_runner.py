@@ -7,8 +7,6 @@ Covers:
 - P0-4: checkpoint processed_urls_by_subtopic round-trip
 - P0-2 (fallback): url_to_cid передаётся в generate_fallback_summary
 """
-import asyncio
-import os
 import sys
 from pathlib import Path
 from types import SimpleNamespace
@@ -22,9 +20,8 @@ for p in (str(ROOT), str(SCRIPTS)):
     if p not in sys.path:
         sys.path.insert(0, p)
 
-import research_runner as rr  # noqa: E402
-import summary_generator as sg  # noqa: E402
-
+import research_runner as rr
+import summary_generator as sg
 
 # ─── P0-1: single POST ──────────────────────────────────────────────
 

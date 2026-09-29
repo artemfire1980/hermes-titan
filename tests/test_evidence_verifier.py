@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
-# ruff: noqa: F821 (exec loads research_runner into globals)
 """Unit-тесты для EvidenceVerifier"""
-import sys
-sys.path.insert(0, '/home/khadas/bin')
+from research_runner import EvidenceVerifier
 
-exec(open('scripts/research_runner.py').read(), globals())
 
 def test_evidence_verifier_exact_match():
     """Тест: точное совпадение текста"""

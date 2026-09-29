@@ -1,12 +1,7 @@
 #!/usr/bin/env python3
-# ruff: noqa: F821 (exec loads research_runner into globals)
 """Unit-тесты для ConflictDetector"""
-import sys
-sys.path.insert(0, '/home/khadas/bin')
+from research_runner import ConflictDetector, Evidence
 
-
-# Импортируем классы из runner
-exec(open('scripts/research_runner.py').read(), globals())
 
 def test_conflict_detector_same_metric():
     """Тест: одинаковые метрики с разными значениями должны создавать конфликт"""

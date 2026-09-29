@@ -4,6 +4,7 @@ import json
 import tempfile
 from pathlib import Path
 
+
 def test_sidecar_reading():
     """Тест: wrapper корректно читает sidecar JSON"""
     # Создаём фейковый sidecar
