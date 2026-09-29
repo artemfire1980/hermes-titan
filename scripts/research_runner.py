@@ -758,121 +758,86 @@ class DeepResearch:
         return f"{ts}_{slug or 'research'}"
     async def plan(self):
         """
-        Plan research: generate subtopics with multilingual queries.
-        
-        Strategy aligned with FreeLLMAPI v0.11.0 docs:
-        - Use simple prompts that free models reliably follow
-        - Don't fight response_format limitations across 34 providers
-        - Generate subtopics LOCALLY (deterministic, no LLM needed)
+        Plan research: generate subtopics adapted to topic type.
+
+        Strategy:
+        - Detect topic type by keywords (market / product / generic)
+        - Use tailored subtopics per type (no LLM needed for planning)
         - Only use LLM for optional scope enrichment
         """
         n = max(1, self.depth * 3)
         topic = self.topic
-        
-        # Generate subtopics locally — deterministic, no LLM dependency
-        # This avoids the core problem: free models through relay inconsistently
-        # follow complex JSON schemas with nested arrays
-        standard_subtopics = [
-            {
-                "name": "Market size, growth rate and forecast",
+        topic_lower = topic.lower()
+
+        # ---- Detect topic type ----
+        market_kw = ["market", "industry", "рынок", "отрасль", "индустр",
+                     "market size", "cagr", "forecast", "доля рынка"]
+        product_kw = ["specifications", "specs", "review", "technical",
+                      "характеристики", "спецификация", "обзор",
+                      "features", "benchmark", "hardware", "software"]
+
+        is_market = any(kw in topic_lower for kw in market_kw)
+        is_product = any(kw in topic_lower for kw in product_kw)
+
+        # ---- Subtopic templates ----
+        if is_market:
+            templates = [
+                ("Market size, growth rate and forecast",
+                 "market size growth forecast", "市场规模 增长率 预测", "размер рынка темпы роста прогноз"),
+                ("Key players, market share and competitive landscape",
+                 "key players market share competitive", "主要厂商 市场份额 竞争格局", "ключевые игроки доля рынка конкуренция"),
+                ("Technology trends, innovations and applications",
+                 "technology trends innovations applications", "技术趋势 创新 应用", "технологические тренды инновации"),
+                ("Regional markets and geography",
+                 "regional market geography", "区域市场 地理", "региональные рынки география"),
+                ("Industry segments and end-use applications",
+                 "industry segments end-use applications", "行业细分 终端应用", "сегменты отрасли применение"),
+                ("Supply chain, materials and pricing",
+                 "supply chain materials pricing", "供应链 材料 定价", "цепочка поставок материалы цены"),
+            ]
+        elif is_product:
+            templates = [
+                ("Technical specifications and features",
+                 "technical specifications features", "技术规格 特性", "технические характеристики особенности"),
+                ("Software support, OS and compatibility",
+                 "software support operating system compatibility", "软件支持 操作系统 兼容性", "поддержка ПО операционная система совместимость"),
+                ("Price, availability and ordering",
+                 "price availability buy order", "价格 供货 订购", "цена наличие заказ"),
+                ("Reviews, benchmarks and comparisons",
+                 "review benchmark comparison test", "评测 基准 对比 测试", "обзор бенчмарк сравнение тест"),
+                ("Use cases, projects and community",
+                 "use cases projects community", "用例 项目 社区", "сценарии проекты сообщество"),
+            ]
+        else:
+            templates = [
+                ("Overview and key facts",
+                 "overview key facts", "概述 关键事实", "обзор ключевые факты"),
+                ("Details, specifications and features",
+                 "details specifications features", "细节 规格 特性", "детали характеристики особенности"),
+                ("Comparisons and alternatives",
+                 "comparison alternatives versus", "对比 替代方案", "сравнение альтернативы"),
+                ("Reviews and user feedback",
+                 "review user feedback opinions", "评测 用户反馈", "обзоры отзывы пользователей"),
+            ]
+
+        # ---- Build subtopics ----
+        selected = templates[:n] if n <= len(templates) else templates
+        subtopics = []
+        for name, en_q, zh_q, ru_q in selected:
+            subtopics.append({
+                "name": name,
                 "queries": [
-                    {"text": f"{topic} market size growth forecast 2024 2025", "lang": "en"},
-                    {"text": f"{topic} 市场规模 增长率 预测 2024 2025", "lang": "zh"},
-                    {"text": f"размер рынка {topic} темпы роста прогноз 2024 2025", "lang": "ru"},
+                    {"text": f"{topic} {en_q} 2024 2025", "lang": "en"},
+                    {"text": f"{topic} {zh_q} 2024 2025", "lang": "zh"},
+                    {"text": f"{topic} {ru_q} 2024 2025", "lang": "ru"},
                 ],
                 "categories": DEFAULT_SEARCH_CATEGORIES,
-            },
-            {
-                "name": "Key players, market share and competitive landscape",
-                "queries": [
-                    {"text": f"{topic} key players market share competitive landscape 2025", "lang": "en"},
-                    {"text": f"{topic} 主要厂商 市场份额 竞争格局 2025", "lang": "zh"},
-                    {"text": f"ключевые игроки {topic} доля рынка конкурентный ландшафт 2025", "lang": "ru"},
-                ],
-                "categories": DEFAULT_SEARCH_CATEGORIES,
-            },
-            {
-                "name": "Technology trends, innovations and applications",
-                "queries": [
-                    {"text": f"{topic} technology trends innovations applications 2025", "lang": "en"},
-                    {"text": f"{topic} 技术趋势 创新 应用领域 2025", "lang": "zh"},
-                    {"text": f"технологические тренды {topic} инновации применение 2025", "lang": "ru"},
-                ],
-                "categories": DEFAULT_SEARCH_CATEGORIES,
-            },
-            {
-                "name": "Regional markets and geography",
-                "queries": [
-                    {"text": f"{topic} regional market China USA Europe Asia 2025", "lang": "en"},
-                    {"text": f"{topic} 区域市场 中国 美国 欧洲 亚洲 2025", "lang": "zh"},
-                    {"text": f"региональные рынки {topic} Китай США Европа Азия 2025", "lang": "ru"},
-                ],
-                "categories": DEFAULT_SEARCH_CATEGORIES,
-            },
-            {
-                "name": "Industry segments and end-use applications",
-                "queries": [
-                    {"text": f"{topic} industry segments end-use applications consumer industrial 2025", "lang": "en"},
-                    {"text": f"{topic} 行业细分 终端应用 消费级 工业级 2025", "lang": "zh"},
-                    {"text": f"сегменты отрасли {topic} конечное применение потребительский промышленный 2025", "lang": "ru"},
-                ],
-                "categories": DEFAULT_SEARCH_CATEGORIES,
-            },
-            {
-                "name": "Supply chain, materials and pricing",
-                "queries": [
-                    {"text": f"{topic} supply chain materials pricing cost trends 2025", "lang": "en"},
-                    {"text": f"{topic} 供应链 材料 定价 成本趋势 2025", "lang": "zh"},
-                    {"text": f"цепочка поставок {topic} материалы ценообразование тенденции 2025", "lang": "ru"},
-                ],
-                "categories": DEFAULT_SEARCH_CATEGORIES,
-            },
-            {
-                "name": "Regulatory environment and standards",
-                "queries": [
-                    {"text": f"{topic} regulations standards certification compliance 2025", "lang": "en"},
-                    {"text": f"{topic} 法规 标准 认证 合规 2025", "lang": "zh"},
-                    {"text": f"регулирование {topic} стандарты сертификация соответствие 2025", "lang": "ru"},
-                ],
-                "categories": DEFAULT_SEARCH_CATEGORIES,
-            },
-            {
-                "name": "Investment, M&A and funding activity",
-                "queries": [
-                    {"text": f"{topic} investment funding M&A acquisitions startups 2025", "lang": "en"},
-                    {"text": f"{topic} 投资 融资 并购 收购 初创企业 2025", "lang": "zh"},
-                    {"text": f"инвестиции {topic} финансирование слияния поглощения стартапы 2025", "lang": "ru"},
-                ],
-                "categories": DEFAULT_SEARCH_CATEGORIES,
-            },
-            {
-                "name": "Challenges, risks and market barriers",
-                "queries": [
-                    {"text": f"{topic} challenges risks barriers limitations problems 2025", "lang": "en"},
-                    {"text": f"{topic} 挑战 风险 障碍 局限性 问题 2025", "lang": "zh"},
-                    {"text": f"проблемы {topic} риски барьеры ограничения вызовы 2025", "lang": "ru"},
-                ],
-                "categories": DEFAULT_SEARCH_CATEGORIES,
-            },
-        ]
-        
-        subs = standard_subtopics[:n]
-        
-        # Optional: enrich scope via LLM (non-blocking, best-effort)
-        scope = {"geography": ["Global"], "period": {"start": 2020, "end": 2025}, "industry_scope": [topic]}
-        try:
-            scope_prompt = f"Для темы \"{topic}\" определи географию и период исследования. Верни ТОЛЬКО JSON: {{\"geography\":[\"...\",...],\"period\":{{\"start\":2020,\"end\":2025}}}}"
-            raw_scope = await self.llm.chat(scope_prompt, task_type="plan", max_tokens=300, temp=0.1)
-            parsed_scope = parse_json_resilient(raw_scope)
-            if parsed_scope and isinstance(parsed_scope, dict):
-                if "geography" in parsed_scope: scope["geography"] = parsed_scope["geography"]
-                if "period" in parsed_scope: scope["period"] = parsed_scope["period"]
-                logger.info("Scope enriched from LLM: %s", scope)
-        except Exception as e:
-            logger.info("Scope enrichment skipped (using defaults): %s", e)
-        for st in subs: st.setdefault("queries",[]); st.setdefault("categories",DEFAULT_SEARCH_CATEGORIES)
-        self.subtopics=subs; logger.info("Plan: %d subtopics",len(subs))
-        return {"scope":scope,"subtopics":subs}
+            })
+        self.subtopics = subtopics
+        logger.info("Plan: %d subtopics (type=%s)", len(subtopics),
+                    "market" if is_market else ("product" if is_product else "generic"))
+        return subtopics
+
     async def process_subtopic(self, idx, st):
         name=st.get("name",f"sub-{idx}"); logger.info("[%d/%d] %s",idx+1,len(self.subtopics),name)
         # Load processed URLs from checkpoint for this subtopic

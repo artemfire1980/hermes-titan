@@ -1,19 +1,19 @@
 use_default_settings:
   engines:
     keep_only:
-      # General-purpose (находят любые сайты)
-      - duckduckgo
-      - mojeek
-      - wikidata
       - wikipedia
-      # IT / программирование
       - github
       - stackoverflow
+      - arch linux wiki
       - mdn
+      - arxiv
+      - semantic scholar
+      - google scholar
+      - pubmed
+      - docker hub
+      - pypi
       - superuser
       - askubuntu
-      # Наука
-      - arxiv
 
 general:
   instance_name: "Hermes-Titan Search"
