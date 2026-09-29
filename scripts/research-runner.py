@@ -15,15 +15,38 @@ from summary_generator import ExecutiveSummaryGenerator, SummaryConfig
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 logger = logging.getLogger("deep-research")
 
+def _env_candidates():
+    """Пути к .env в порядке приоритета."""
+    candidates = []
+    # 1. HERMES_HOME (основной источник — там Hermes хранит .env)
+    hh = os.environ.get("HERMES_HOME")
+    if hh:
+        candidates.append(Path(hh) / ".env")
+    # 2. /mnt/ai-ssd/hermes/.env (hardcoded для VIM4 на случай, если HERMES_HOME не выставлен)
+    candidates.append(Path("/mnt/ai-ssd/hermes/.env"))
+    # 3. ~/.hermes/.env (если HERMES_HOME не задан и нет симлинка)
+    candidates.append(Path.home() / ".hermes" / ".env")
+    # 4. Fallback: локальный .env в ai-system (для тестов/отладки)
+    candidates.append(Path.home() / "ai-system" / ".env")
+    return candidates
+
 def _load_dotenv():
-    env_file = Path.home() / "ai-system" / ".env"
-    if not env_file.exists(): return
-    for line in env_file.read_text().splitlines():
-        line = line.strip()
-        if not line or line.startswith("#") or "=" not in line: continue
-        k, _, v = line.partition("=")
-        k = k.strip(); v = v.strip().strip('"').strip("'")
-        os.environ.setdefault(k, v)
+    """Загружает .env из первого доступного источника. Не перезаписывает уже установленные env."""
+    for env_file in _env_candidates():
+        if not env_file.exists():
+            continue
+        logger.info("Loading env from: %s", env_file)
+        for line in env_file.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            k, _, v = line.partition("=")
+            k = k.strip()
+            v = v.strip().strip('"').strip("'")
+            os.environ.setdefault(k, v)
+        return  # грузим только первый найденный
+    logger.warning("No .env file found in candidates: %s", [str(p) for p in _env_candidates()])
+
 _load_dotenv()
 
 FREELLM_URL = os.environ.get("FREELLM_URL", "http://127.0.0.1:3001")
@@ -466,17 +489,82 @@ class LLMGateway:
         return self._client
     async def aclose(self):
         if self._client and not self._client.is_closed: await self._client.aclose()
-    async def chat(self, prompt, task_type="general", max_tokens=1500, temp=0.2, use_fusion=False, model_offset=0):
+    async def chat(self, prompt=None, task_type="general", max_tokens=1500, temp=0.2,
+                   use_fusion=False, model_offset=0, *, system_prompt=None, messages=None,
+                   json_mode=None):
+        """Backward-compatible chat().
+
+        Старые вызовы: chat(prompt, task_type=...)
+        Новые вызовы:  chat(messages=[...], task_type=...)
+                       chat(prompt, system_prompt=..., task_type=...)
+        """
         import httpx
+
+        # ─── Формирование messages ───
+        if messages is None:
+            if prompt is None:
+                raise ValueError("chat(): нужен prompt или messages")
+            messages = []
+            if system_prompt:
+                messages.append({"role": "system", "content": system_prompt})
+            messages.append({"role": "user", "content": prompt})
+        else:
+            if prompt is not None or system_prompt is not None:
+                raise ValueError("chat(): передавайте либо messages, либо prompt/system_prompt")
+
+        # ─── JSON mode: явный или дефолт по task_type ───
+        if json_mode is None:
+            wants_json = (not use_fusion and task_type in ("extract", "plan", "summary"))
+        else:
+            wants_json = bool(json_mode) and not use_fusion
+
         chain = MODEL_CHAIN_EXTRACT if (not use_fusion and task_type in ("extract", "plan")) else ["fusion" if use_fusion else "auto"]
         last_err = None
+
         for attempt in range(1, self.max_attempts + 1):
             model = "fusion" if use_fusion else chain[min(model_offset + attempt - 1, len(chain) - 1)]
-            payload = {"model": model,
-                       "messages": [{"role": "user", "content": prompt}],
-                       "temperature": temp, "max_tokens": max_tokens, "stream": False}
-            if not use_fusion and task_type in ("extract", "plan"):
-                payload["response_format"] = {"type": "json_object"}
+
+            # ─── Best-effort JSON: 1 retry без response_format при rejection ───
+            use_json = wants_json
+            resp = None
+            for json_retry in range(2):
+                payload = {"model": model,
+                           "messages": messages,
+                           "temperature": temp, "max_tokens": max_tokens, "stream": False}
+                if use_json:
+                    payload["response_format"] = {"type": "json_object"}
+                if use_fusion:
+                    payload["fusion"] = {"panel_size": 3, "show_details": False}
+
+                await self.breaker.wait_if_open()
+                async with self.semaphore:
+                    await self.pacer.wait_turn()
+                    try:
+                        client = await self._get_client()
+                        resp = await client.post("/v1/chat/completions", json=payload,
+                                                 headers={"x-freellm-task-type": task_type})
+                    except httpx.TransportError as e:
+                        last_err = str(e)
+                        self.breaker.record_failure()
+                        await asyncio.sleep(min(4 * (2 ** (attempt-1)), 60) * random.uniform(0.7, 1.3))
+                        resp = None
+                        break
+
+                # Проверяем 400 на rejection response_format
+                if resp.status_code == 400 and use_json and json_retry == 0:
+                    body = resp.text[:300].lower()
+                    if any(k in body for k in ("response_format", "json_object", "json_schema",
+                                                "not support", "unrecognized", "unsupported")):
+                        logger.warning("model=%s отверг response_format=json_object -> retry без него", model)
+                        use_json = False
+                        wants_json = False
+                        continue
+                break
+
+            if resp is None:
+                continue
+
+            # ─── Обработка статусов ───
             if use_fusion: payload["fusion"] = {"panel_size": 3, "show_details": False}
             await self.breaker.wait_if_open()
             async with self.semaphore:
@@ -666,7 +754,7 @@ class DeepResearch:
         self.llm=LLMGateway(FREELLM_URL,FREELLM_API_KEY,max_attempts=4)
         self.evidences=[]; self.sources={}; self.subtopics=[]; self.done={}
         self.ext_total=0
-        self._purls_map = {}  # Для оптимизации checkpoint I/O
+        self.processed_urls_by_subtopic: dict = {}  # Единый источник истины для resume
         self.drop_total = 0
     @staticmethod
     def _mkid(topic):
@@ -793,7 +881,7 @@ class DeepResearch:
         name=st.get("name",f"sub-{idx}"); logger.info("[%d/%d] %s",idx+1,len(self.subtopics),name)
         # Load processed URLs from checkpoint for this subtopic
         ckpt_state = self.ckpt.load(self.rid) or {}
-        processed_urls = set(ckpt_state.get("processed_urls_by_subtopic", {}).get(str(idx), []))
+        processed_urls = set(self.processed_urls_by_subtopic.get(str(idx), set()))
         seen,queries=set(),[]
         for q in st.get("queries",[]):
             txt=q["text"] if isinstance(q,dict) else str(q); h=hashlib.sha256(txt.lower().strip().encode()).hexdigest()
@@ -881,15 +969,9 @@ class DeepResearch:
             except Exception as e: logger.error("Extract fail '%s' (%s): %s",name,url[:50],e); self.drop_total+=1; continue
             # Save progress after each document
             processed_urls.add(url)
-            ckpt_data = self.ckpt.load(self.rid) or {}
-            purls_map = ckpt_data.get("processed_urls_by_subtopic", {})
-            purls_map[str(idx)] = list(processed_urls)
-            ckpt_data["processed_urls_by_subtopic"] = purls_map
-            self.ckpt.save(self.rid, {**{"research_id":self.rid,"topic":self.topic,"depth":self.depth,
-                "subtopics":self.subtopics,"done":self.done,
-                "evidences":[e.to_dict() for e in self.evidences],"sources":self.sources,
-                "ext_total":self.ext_total,"drop_total":self.drop_total},
-                "processed_urls_by_subtopic": purls_map})
+            # P0-4: единый источник — self.processed_urls_by_subtopic
+            self.processed_urls_by_subtopic[str(idx)] = set(processed_urls)
+            self.save_ckpt()
         logger.info("Done: %d evidences total, %d dropped",len(self.evidences),self.drop_total)
         self.done[str(idx)]=True
     def _build_ev(self, raw, subtopic, url, title):
@@ -920,13 +1002,14 @@ class DeepResearch:
     def save_ckpt(self):
         self.ckpt.save(self.rid,{"research_id":self.rid,"topic":self.topic,"depth":self.depth,"subtopics":self.subtopics,"done":self.done,
             "evidences":[e.to_dict() for e in self.evidences],"sources":self.sources,"ext_total":self.ext_total,"drop_total":self.drop_total,
-            "processed_urls_by_subtopic": getattr(self, "_purls_map", {})})
+            "processed_urls_by_subtopic": {k: sorted(v) for k, v in self.processed_urls_by_subtopic.items()}})
     def load_ckpt(self):
         s=self.ckpt.load(self.rid)
         if not s: return False
         self.subtopics=s.get("subtopics",[]); self.done=s.get("done",{})
         self.evidences=[Evidence.from_dict(d) for d in s.get("evidences",[])]
         self.sources=s.get("sources",{}); self.ext_total=s.get("ext_total",0); self.drop_total=s.get("drop_total",0)
+        self.processed_urls_by_subtopic = {k: set(v) for k, v in s.get("processed_urls_by_subtopic", {}).items()}
         logger.info("Resumed %s: %d/%d done, %d evidences",self.rid,len(self.done),len(self.subtopics),len(self.evidences))
         return True
     async def build_report(self):

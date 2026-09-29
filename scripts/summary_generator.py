@@ -448,23 +448,24 @@ class ExecutiveSummaryGenerator:
         attempts = 0
         raw_content = ""  # Initialize before loop to avoid UnboundLocalError on LLM exception
 
+        # Базовый user_prompt (исходные facts) — нужен для repair
+        base_user_prompt = user_prompt
+        current_messages = list(messages)
+
         for attempt in range(self.config.max_retries + 1):
             attempts += 1
             try:
                 # Build request params
                 # Build prompt from messages (take last user message)
-                user_prompt = ""
-                for msg in messages:
-                    if msg["role"] == "user":
-                        user_prompt = msg["content"]
-                
-                # Call LLM via provided callable (LLMGateway.chat or similar)
+                # P0-1: передаём полный messages (system + user)
+                # P0-3: json_mode=True для summary
                 raw_content = await self.llm_chat(
-                    user_prompt,
+                    messages=current_messages,
                     task_type="summary",
                     max_tokens=self.config.max_tokens,
                     temp=self.config.temperature,
-                    use_fusion=self.config.use_fusion
+                    use_fusion=self.config.use_fusion,
+                    json_mode=True,
                 )
                 
                 # Step 1: JSON extraction (scanner-based)
@@ -493,18 +494,25 @@ class ExecutiveSummaryGenerator:
                 logger.warning(error_msg)
 
                 if attempt < self.config.max_retries:
-                    # Repair retry with error feedback
-                    repair_prompt = (
-                        f"Предыдущий ответ вызвал ошибку валидации:\n"
-                        f"{str(e)}\n\n"
-                        f"Исправь ошибку и выдай ТОЛЬКО валидный JSON с 5-7 пунктами "
-                        f"на русском языке. Допустимые citation IDs: {sorted(valid_citation_ids)}"
+                    # P0-2: repair самодостаточен — содержит исходные facts + ошибку
+                    repair_system = (
+                        f"{system_prompt}\n\n"
+                        "Ты исправляешь предыдущий ответ. "
+                        "Не выдумывай новые факты, источники или цитаты. "
+                        "Используй только исходные facts и допустимые citation IDs. "
+                        "Верни только один валидный JSON-объект без markdown."
                     )
-                    # Only add assistant message if we got any response
-                    # (raw_content may be empty if LLM call raised exception)
-                    if raw_content:
-                        messages.append({"role": "assistant", "content": raw_content})
-                    messages.append({"role": "user", "content": repair_prompt})
+                    repair_user = (
+                        f"{base_user_prompt}\n\n"
+                        f"<previous_error>{str(e)}</previous_error>\n\n"
+                        f"Допустимые citation IDs: {sorted(valid_citation_ids)}\n\n"
+                        "Исправь ошибку и верни ТОЛЬКО валидный JSON-объект формата "
+                        "{\"bullets\": [...]}. 5-7 пунктов на русском языке."
+                    )
+                    current_messages = [
+                        {"role": "system", "content": repair_system},
+                        {"role": "user", "content": repair_user},
+                    ]
 
         # All retries exhausted - use fallback
         logger.warning("All LLM attempts failed. Using deterministic fallback.")

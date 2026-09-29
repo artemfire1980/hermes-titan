@@ -196,7 +196,7 @@ def test_render_markdown():
 async def test_generator_with_mock_llm():
     """Test full generator pipeline with mock LLM."""
     # Mock LLM chat function
-    async def mock_llm_chat(prompt, task_type, max_tokens, temp, use_fusion):
+    async def mock_llm_chat(prompt=None, task_type=None, max_tokens=None, temp=None, use_fusion=None, **kwargs):
         return """
 <think>Thinking...</think>
 {
@@ -229,7 +229,7 @@ async def test_generator_with_repair():
     """Test generator repair retry on validation failure."""
     # Mock LLM chat function that fails first, succeeds second
     call_count = 0
-    async def mock_llm_chat(prompt, task_type, max_tokens, temp, use_fusion):
+    async def mock_llm_chat(prompt=None, task_type=None, max_tokens=None, temp=None, use_fusion=None, **kwargs):
         nonlocal call_count
         call_count += 1
         if call_count == 1:
@@ -259,7 +259,7 @@ async def test_generator_with_repair():
 async def test_generator_fallback_on_total_failure():
     """Test generator uses fallback when all retries fail."""
     # Mock LLM chat function that always fails
-    async def mock_llm_chat(prompt, task_type, max_tokens, temp, use_fusion):
+    async def mock_llm_chat(prompt=None, task_type=None, max_tokens=None, temp=None, use_fusion=None, **kwargs):
         raise Exception("LLM completely failed")
     
     config = SummaryConfig(model="test-model", max_retries=1)
