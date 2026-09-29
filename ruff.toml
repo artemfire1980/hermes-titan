@@ -1,0 +1,18 @@
+# Ruff config для Hermes-Titan
+line-length = 100
+target-version = "py312"
+
+[lint.per-file-ignores]
+"tests/*.py" = [
+    "TRY002",  # raise Exception в mock-функциях — оправдано
+    "TRY003",  # длинные сообщения об ошибках в тестах
+    "S101",    # assert в тестах — норма
+    "BLE001",  # except Exception в тестах — проверяем что ошибка брошена
+    "TRY301",  # raise внутри try в тестах — норма
+    "TRY400",  # logging.exception vs error — тесты
+    "F841",    # unused variable — бывает в тестах
+    "B017",    # pytest.raises(Exception) — оправдано
+    "TRY004",  # TypeError vs ValueError в тестах
+    "RUF012",  # mutable class attr без ClassVar — в fake-классах оправдано
+    "RUF059",  # unused unpacked variable — проверяем только часть tuple
+]

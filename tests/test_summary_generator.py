@@ -2,7 +2,6 @@
 Unit tests for summary_generator module.
 Tests JSON extraction, Pydantic validation, citation validation, and fallback.
 """
-import asyncio
 
 # Add parent directory to path
 import sys
@@ -272,45 +271,3 @@ async def test_generator_fallback_on_total_failure():
     assert result.source == "fallback"
     assert len(result.bullets) >= 5
     print("✅ test_generator_fallback_on_total_failure PASSED")
-
-
-def run_all_tests():
-    """Run all synchronous tests."""
-    print("\n" + "="*70)
-    print("RUNNING SYNCHRONOUS TESTS")
-    print("="*70 + "\n")
-    
-    test_extract_json_with_think_tags()
-    test_extract_json_nested()
-    test_extract_json_multiple()
-    test_pydantic_schema_validation()
-    test_pydantic_rejects_no_citations()
-    test_citation_validator()
-    test_citation_validator_rejects_invalid()
-    test_fallback_from_facts()
-    test_fallback_emergency()
-    test_render_markdown()
-    
-    print("\n✅ All synchronous tests PASSED\n")
-
-
-async def run_async_tests():
-    """Run all async tests."""
-    print("\n" + "="*70)
-    print("RUNNING ASYNC TESTS")
-    print("="*70 + "\n")
-    
-    await test_generator_with_mock_llm()
-    await test_generator_with_repair()
-    await test_generator_fallback_on_total_failure()
-    
-    print("\n✅ All async tests PASSED\n")
-
-
-if __name__ == "__main__":
-    run_all_tests()
-    asyncio.run(run_async_tests())
-    
-    print("="*70)
-    print("🎉 ALL TESTS PASSED! summary_generator.py is production-ready")
-    print("="*70)
