@@ -686,11 +686,19 @@ class TokenBucket:
             else:
                 self.tokens-=1
 
+# Категории SearXNG для research pipeline.
+# general — wikipedia, wikidata, duckduckgo, mojeek
+# it — github, stackoverflow, superuser, askubuntu, mdn, docker hub, pypi, arch linux wiki
+# science — arxiv, semantic scholar, pubmed, google scholar
+# news НЕ включаем — у нас нет news-движков.
+DEFAULT_SEARCH_CATEGORIES = ["general", "it", "science"]
+
+
 class AsyncSearcher:
     def __init__(self, url, mc=3):
         self.url=url.rstrip("/"); self.sem=asyncio.Semaphore(mc); self.bucket=TokenBucket(1.0,3)
     async def search(self, query, cats=None):
-        import httpx; cats=cats or ["general","news"]
+        import httpx; cats=cats or DEFAULT_SEARCH_CATEGORIES
         async with self.sem:
             await self.bucket.acquire()
             async with httpx.AsyncClient(timeout=20.0) as cl:
@@ -772,7 +780,7 @@ class DeepResearch:
                     {"text": f"{topic} 市场规模 增长率 预测 2024 2025", "lang": "zh"},
                     {"text": f"размер рынка {topic} темпы роста прогноз 2024 2025", "lang": "ru"},
                 ],
-                "categories": ["general", "news"],
+                "categories": DEFAULT_SEARCH_CATEGORIES,
             },
             {
                 "name": "Key players, market share and competitive landscape",
@@ -781,7 +789,7 @@ class DeepResearch:
                     {"text": f"{topic} 主要厂商 市场份额 竞争格局 2025", "lang": "zh"},
                     {"text": f"ключевые игроки {topic} доля рынка конкурентный ландшафт 2025", "lang": "ru"},
                 ],
-                "categories": ["general", "news"],
+                "categories": DEFAULT_SEARCH_CATEGORIES,
             },
             {
                 "name": "Technology trends, innovations and applications",
@@ -790,7 +798,7 @@ class DeepResearch:
                     {"text": f"{topic} 技术趋势 创新 应用领域 2025", "lang": "zh"},
                     {"text": f"технологические тренды {topic} инновации применение 2025", "lang": "ru"},
                 ],
-                "categories": ["general", "news"],
+                "categories": DEFAULT_SEARCH_CATEGORIES,
             },
             {
                 "name": "Regional markets and geography",
@@ -799,7 +807,7 @@ class DeepResearch:
                     {"text": f"{topic} 区域市场 中国 美国 欧洲 亚洲 2025", "lang": "zh"},
                     {"text": f"региональные рынки {topic} Китай США Европа Азия 2025", "lang": "ru"},
                 ],
-                "categories": ["general", "news"],
+                "categories": DEFAULT_SEARCH_CATEGORIES,
             },
             {
                 "name": "Industry segments and end-use applications",
@@ -808,7 +816,7 @@ class DeepResearch:
                     {"text": f"{topic} 行业细分 终端应用 消费级 工业级 2025", "lang": "zh"},
                     {"text": f"сегменты отрасли {topic} конечное применение потребительский промышленный 2025", "lang": "ru"},
                 ],
-                "categories": ["general", "news"],
+                "categories": DEFAULT_SEARCH_CATEGORIES,
             },
             {
                 "name": "Supply chain, materials and pricing",
@@ -817,7 +825,7 @@ class DeepResearch:
                     {"text": f"{topic} 供应链 材料 定价 成本趋势 2025", "lang": "zh"},
                     {"text": f"цепочка поставок {topic} материалы ценообразование тенденции 2025", "lang": "ru"},
                 ],
-                "categories": ["general", "news"],
+                "categories": DEFAULT_SEARCH_CATEGORIES,
             },
             {
                 "name": "Regulatory environment and standards",
@@ -826,7 +834,7 @@ class DeepResearch:
                     {"text": f"{topic} 法规 标准 认证 合规 2025", "lang": "zh"},
                     {"text": f"регулирование {topic} стандарты сертификация соответствие 2025", "lang": "ru"},
                 ],
-                "categories": ["general", "news"],
+                "categories": DEFAULT_SEARCH_CATEGORIES,
             },
             {
                 "name": "Investment, M&A and funding activity",
@@ -835,7 +843,7 @@ class DeepResearch:
                     {"text": f"{topic} 投资 融资 并购 收购 初创企业 2025", "lang": "zh"},
                     {"text": f"инвестиции {topic} финансирование слияния поглощения стартапы 2025", "lang": "ru"},
                 ],
-                "categories": ["general", "news"],
+                "categories": DEFAULT_SEARCH_CATEGORIES,
             },
             {
                 "name": "Challenges, risks and market barriers",
@@ -844,7 +852,7 @@ class DeepResearch:
                     {"text": f"{topic} 挑战 风险 障碍 局限性 问题 2025", "lang": "zh"},
                     {"text": f"проблемы {topic} риски барьеры ограничения вызовы 2025", "lang": "ru"},
                 ],
-                "categories": ["general", "news"],
+                "categories": DEFAULT_SEARCH_CATEGORIES,
             },
         ]
         
@@ -862,7 +870,7 @@ class DeepResearch:
                 logger.info("Scope enriched from LLM: %s", scope)
         except Exception as e:
             logger.info("Scope enrichment skipped (using defaults): %s", e)
-        for st in subs: st.setdefault("queries",[]); st.setdefault("categories",["general","news"])
+        for st in subs: st.setdefault("queries",[]); st.setdefault("categories",DEFAULT_SEARCH_CATEGORIES)
         self.subtopics=subs; logger.info("Plan: %d subtopics",len(subs))
         return {"scope":scope,"subtopics":subs}
     async def process_subtopic(self, idx, st):
