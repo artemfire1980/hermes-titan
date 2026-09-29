@@ -1,0 +1,6 @@
+# Hermes-Titan — dev dependencies
+-r requirements.txt
+
+# Tests
+pytest>=9.1
+pytest-asyncio>=1.4
