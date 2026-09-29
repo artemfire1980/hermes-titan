@@ -1,0 +1,41 @@
+use_default_settings:
+  engines:
+    keep_only:
+      - wikipedia
+      - github
+      - stackoverflow
+      - arch linux wiki
+      - mdn
+      - arxiv
+      - semantic scholar
+      - google scholar
+      - pubmed
+      - docker hub
+      - pypi
+      - superuser
+      - askubuntu
+
+general:
+  instance_name: "Hermes-Titan Search"
+  enable_metrics: false
+
+search:
+  safe_search: 0
+  autocomplete: ""
+  default_lang: "auto"
+  formats:
+    - html
+    - json
+
+server:
+  base_url: "http://127.0.0.1:8888/"
+  limiter: false
+  public_instance: false
+  bind_address: "0.0.0.0"
+  port: 8080
+
+outgoing:
+  request_timeout: 6.0
+  max_request_timeout: 15.0
+  pool_connections: 50
+  enable_http2: true
