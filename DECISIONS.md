@@ -519,3 +519,11 @@ research-telegram.sh, git-auto-push.sh, check-*.sh,
 Проверено: 29 тестов passed. Не тронуто: - docs/README-v1-archive.md (исторический 
 артефакт v1)
 - ~/.config/systemd/user/holographic-patch.service (shell, без Python)
+
+## DEC-035: CP-021 не тегирован
+
+P0-патчи research pipeline (двойной POST, url_to_cid в fallback,
+мёртвый ckpt_state) вошли в коммит CP-020 (13c818b).
+Отдельный тег CP-021 не создавался.
+
+Принято: тег пропущен, история не переписывается. Пропуск зафиксирован.
