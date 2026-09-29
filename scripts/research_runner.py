@@ -674,13 +674,17 @@ class AsyncFetcher:
             cf=self._cp(url); cached=self._cg(cf)
             if cached: return cached
             try:
-                async with httpx.AsyncClient(timeout=15.0,follow_redirects=True) as cl:
-                    r=await cl.get(url,headers={"User-Agent":self.UA})
-                    if r.status_code!=200: return ""
-                    html=r.text
-                    if len(html)>self.MH: logger.warning("Skip large %d: %s",len(html),url); return ""
-            except Exception as e: logger.warning("Fetch fail %s: %s",url,e); return ""
-            loop=asyncio.get_event_loop()
+                cl = await self._get_client()
+                r = await cl.get(url)
+                if r.status_code != 200: return ""
+                html = r.text
+                if len(html) > self.MH:
+                    logger.warning("Skip large %d: %s", len(html), url)
+                    return ""
+            except Exception as e:
+                logger.warning("Fetch fail %s: %s", url, e)
+                return ""
+            loop = asyncio.get_running_loop()
             text=await loop.run_in_executor(self._exec, lambda: trafilatura.extract(html,include_tables=True,include_comments=False,fast=True) or "")
             if text and len(text) < 500:
                 text2=await loop.run_in_executor(self._exec, lambda: trafilatura.extract(html,include_tables=True,include_comments=False) or "")
