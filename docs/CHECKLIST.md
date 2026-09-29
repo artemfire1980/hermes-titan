@@ -56,7 +56,7 @@
 - [x] Node.js v24.21.0 LTS
 - [x] ctx7 0.5.12 (CLI+Skills, DEC-006)
 - [x] Aider 0.86.2 через pipx
-- [x] `aider-runner.py` с Ultra
+- [x] `aider_runner.py` с Ultra
 - [x] Тест: hello.py + goodbye.py созданы
 - [x] Тег `CP-006`
 

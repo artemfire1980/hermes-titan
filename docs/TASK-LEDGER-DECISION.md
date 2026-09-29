@@ -23,15 +23,15 @@
 3. **Интеграция с project:** `hermes project bind-board` даёт детерминированные
    worktree + branch для задач.
 
-4. **Интеграция с Aider:** worker → terminal tool → `aider-runner.py`.
+4. **Интеграция с Aider:** worker → terminal tool → `aider_runner.py`.
 
 5. **Проверено:** задача `t_a11011c9` завершена за 26 секунд полным циклом.
 
 ## Что НЕ используем
 
 - Свою `tasks.db` (`scripts/task_ledger.py`) — оставлен **только для логирования**
-  запусков Aider (импортируется из `aider-runner.py`).
-- `scripts/ledger-viewer.py` — для просмотра старой `tasks.db` (архив).
+  запусков Aider (импортируется из `aider_runner.py`).
+- `scripts/ledger_viewer.py` — для просмотра старой `tasks.db` (архив).
 
 ## Старая `data/tasks.legacy.db`
 

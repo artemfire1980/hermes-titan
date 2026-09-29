@@ -73,7 +73,7 @@ fi
 echo ""
 echo "🔍 === Smoke: FORBIDDEN_ROOTS защита ==="
 # Тестируем ИМЕННО FORBIDDEN_ROOTS: /mnt/ai-ssd/hermes (ядро)
-OUTPUT="$("$PY" ./scripts/aider-runner.py /mnt/ai-ssd/hermes "test" 2>&1 || true)"
+OUTPUT="$("$PY" ./scripts/aider_runner.py /mnt/ai-ssd/hermes "test" 2>&1 || true)"
 if echo "$OUTPUT" | grep -qE "FORBIDDEN|INVALID_PROJECT"; then
     echo "✅ FORBIDDEN_ROOTS защита работает"
 else
@@ -85,10 +85,10 @@ fi
 # ── 7. Smoke test: NVIDIA key не в argv ────────────────────────
 echo ""
 echo "🔍 === Smoke: NVIDIA key не в argv ==="
-if grep -q -- '--api-key.*nvidia' scripts/aider-runner.py; then
+if grep -q -- '--api-key.*nvidia' scripts/aider_runner.py; then
     echo "❌ NVIDIA key в argv"; exit 1
 fi
-if grep -q 'NVIDIA_NIM_API_KEY' scripts/aider-runner.py; then
+if grep -q 'NVIDIA_NIM_API_KEY' scripts/aider_runner.py; then
     echo "✅ NVIDIA key через env"
 else
     echo "❌ NVIDIA key не найден в env"; exit 1
@@ -97,7 +97,7 @@ fi
 # ── 8. Smoke test: drop_total инициализирован ──────────────────
 echo ""
 echo "🔍 === Smoke: self.drop_total инициализирован ==="
-if grep -q "self\.drop_total\s*=\s*0" scripts/research-runner.py; then
+if grep -q "self\.drop_total\s*=\s*0" scripts/research_runner.py; then
     echo "✅ self.drop_total инициализирован"
 else
     echo "❌ self.drop_total не инициализирован"; exit 1

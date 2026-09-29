@@ -29,7 +29,7 @@ echo ""
 BEFORE_FILES=$(ls -1 "$REPORTS_DIR"/*.md 2>/dev/null | sort)
 
 # Запустить runner с таймаутом
-timeout $((TIMEOUT_MIN * 60)) $VENV_PYTHON ~/bin/research-runner.py \
+timeout $((TIMEOUT_MIN * 60)) $VENV_PYTHON ~/bin/research_runner.py \
     --topic "$TOPIC" --depth "$DEPTH" > /tmp/research.log 2>&1
 RC=$?
 
@@ -38,7 +38,7 @@ if [ $RC -eq 124 ]; then
     tail -20 /tmp/research.log
     exit 1
 elif [ $RC -ne 0 ]; then
-    echo "❌ Ошибка research-runner (exit code: $RC)"
+    echo "❌ Ошибка research_runner (exit code: $RC)"
     tail -30 /tmp/research.log
     exit $RC
 fi
@@ -84,7 +84,7 @@ if $VENV_PYTHON "$SCRIPTS_DIR/md2docx.py" "$NEW_MD" "$NEW_DOCX" 2>&1; then
     # Отправить DOCX в Telegram
     echo ""
     echo "📤 Отправка в Telegram..."
-    if $VENV_PYTHON "$SCRIPTS_DIR/send-to-telegram.py" "$NEW_DOCX" --caption "$CAPTION"; then
+    if $VENV_PYTHON "$SCRIPTS_DIR/send_to_telegram.py" "$NEW_DOCX" --caption "$CAPTION"; then
         echo "✅ Отчёт отправлен в Telegram"
     else
         echo "⚠️ Не удалось отправить DOCX в Telegram"
@@ -100,7 +100,7 @@ if $VENV_PYTHON "$SCRIPTS_DIR/md2docx.py" "$NEW_MD" "$NEW_DOCX" 2>&1; then
 $SUMMARY
 
 📎 Полный отчёт в прикреплённом DOCX"
-        $VENV_PYTHON "$SCRIPTS_DIR/send-to-telegram.py" "$NEW_DOCX" \
+        $VENV_PYTHON "$SCRIPTS_DIR/send_to_telegram.py" "$NEW_DOCX" \
             --caption "$CAPTION" --message "$MSG" 2>/dev/null || true
     fi
 else

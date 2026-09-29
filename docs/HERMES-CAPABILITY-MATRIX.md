@@ -55,7 +55,7 @@
 | **`git-auto-push.sh`** | Secret detection + auto-commit для `~/ai-system` |
 | **`backup.sh` (для наших данных)** | Дамп `tasks.db` (если будет), `configs/`, документации |
 | **`tasks.db` (частично)** | Только для того, что kanban не покрывает: git-теги, решения, артефакты. Решение — на CP-007 после изучения схемы `kanban.db` |
-| **`research-runner.py`** (если будет) | Уникальный pipeline с citations, если SearXNG + skills не покроют |
+| **`research_runner.py`** (если будет) | Уникальный pipeline с citations, если SearXNG + skills не покроют |
 | **`ctx7` через CLI+Skills** | DEC-006 — не MCP |
 
 ---

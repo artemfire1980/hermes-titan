@@ -517,7 +517,7 @@ class ExecutiveSummaryGenerator:
         # All retries exhausted - use fallback
         logger.warning("All LLM attempts failed. Using deterministic fallback.")
         fallback_bullets = generate_fallback_summary(
-            facts, valid_citation_ids, evidences
+            facts, valid_citation_ids, evidences, url_to_cid=url_to_cid
         )
 
         return SummaryResult(

@@ -81,7 +81,7 @@ if __name__ == "__main__":
         show_task(sys.argv[2])
     else:
         print("Использование:")
-        print("  ledger-viewer.py stats          — статистика")
-        print("  ledger-viewer.py recent [N]     — последние N задач")
-        print("  ledger-viewer.py show <task_id> — детали задачи")
+        print("  ledger_viewer.py stats          — статистика")
+        print("  ledger_viewer.py recent [N]     — последние N задач")
+        print("  ledger_viewer.py show <task_id> — детали задачи")
 

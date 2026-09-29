@@ -15,9 +15,9 @@
 - **Модель:** FreeLLMAPI (`auto`, 1M контекст)
 - **Поиск:** SearXNG (`http://127.0.0.1:8888`)
 - **Telegram:** whitelist по `TELEGRAM_ALLOWED_USERS`
-- **Двигатель данных:** `scripts/research-runner.py` (evidence pipeline)
+- **Двигатель данных:** `scripts/research_runner.py` (evidence pipeline)
 - **Executive Summary:** `scripts/summary_generator.py` (Pydantic + citations)
-- **Исполнитель кода:** `scripts/aider-runner.py` (изоляция через `/mnt/ai-ssd/ai-system/projects/`)
+- **Исполнитель кода:** `scripts/aider_runner.py` (изоляция через `/mnt/ai-ssd/ai-system/projects/`)
 
 ## Тесты
 

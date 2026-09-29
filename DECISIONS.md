@@ -91,15 +91,15 @@
 
 Обоснование: `vim4_golden_snapshot.7z` содержал production-скрипты старой системы.
 Перенесено (в `~/ai-system/scripts/`):
-- `research-runner.py` — двигатель данных (evidence, dedup, conflict, circuit breaker)
+- `research_runner.py` — двигатель данных (evidence, dedup, conflict, circuit breaker)
 - `summary_generator.py` — Executive Summary (Pydantic, citations, fallback)
-- `aider-runner.py` — изолированный исполнитель кода
-- `task_ledger.py` + `ledger-viewer.py` — лог запусков Aider (не конфликтует с kanban)
+- `aider_runner.py` — изолированный исполнитель кода
+- `task_ledger.py` + `ledger_viewer.py` — лог запусков Aider (не конфликтует с kanban)
 - `git-auto-push.sh` — auto-commit + gitleaks
-- `research-telegram.sh`, `send-to-telegram.py`, `md2docx.py`
+- `research-telegram.sh`, `send_to_telegram.py`, `md2docx.py`
 - `check-freellm-quotas.sh`, `check-memory-peak.sh`, `check_r2_budget.sh`
 - `selfcheck.sh`, `backup-projects.sh`
-- `sync-tasks-to-supabase.py` (Supabase перенесён по решению)
+- `sync_tasks_to_supabase.py` (Supabase перенесён по решению)
 - Тесты: `tests/test_*.py` (4 файла)
 - Документация: `CODE_EDITING_RULES.md`, `PERSONALIZATION.md`, `IMPLEMENTATION_NOTES.md`
 
@@ -141,7 +141,7 @@
 - `AttributeError: 'dict' object has no attribute 'type'`
 
 Проверка consumers:
-- Production использует только `len(conflicts)` (строка 935 `research-runner.py`)
+- Production использует только `len(conflicts)` (строка 935 `research_runner.py`)
 - `.conflict_type` и `.type` в production не используются
 
 Решение: `ConflictDict(dict)` с `__getattr__`:
@@ -226,7 +226,7 @@ nemotron-3-super (работает, но меньше), deepseek-v4.1-flash (з�
 - Dispatcher: встроен в gateway, ticks every 60s
 
 Цепочка: Kanban task → Dispatcher → Worker (profile default) → Hermes agent
-→ Terminal tool → aider-runner.py → Aider + Ultra → результат.
+→ Terminal tool → aider_runner.py → Aider + Ultra → результат.
 
 Проверено: задача `t_a11011c9` (создать hello.py) завершена за 26 секунд.
 Worker сам создал файл, проверил через `python3 hello`, отметил задачу `done`.
@@ -495,3 +495,27 @@ UPDATE/DELETE. Причина — рассинхрон FTS5-индекса дл�
 
 Правило: WAL — единый режим для всех баз. `delete` — не использовать
 (устаревший, менее безопасный, конфликтует с дефолтом SQLite 3.53.1).
+
+## DEC-033: Fallback не используется — FreeLLMAPI сам ротирует
+Обоснование: FreeLLMAPI — агрегатор с внутренней ротацией провайдеров. Hermes не 
+должен дублировать эту логику. Решение: - MODEL_CHAIN_EXTRACT = ["auto"] — 
+остаётся. - hermes fallback add — НЕ используется. - FREELLM_MODEL_CHAIN — НЕ 
+задаётся. - Локальный retry — только для transport/5xx к самому агрегатору. - 
+Circuit breaker — защита от полного падения агрегатора.
+- Deterministic fallback (summary) — если всё упало.
+
+## DEC-034: Python-файлы переименованы в underscore
+Обоснование: Python не может импортировать модуль с дефисом в имени. `import 
+research_runner` падал с ModuleNotFoundError при тестах. Переименовано 
+(Python-only, shell-скрипты не трогаем): - aider-runner.py → aider_runner.py - 
+research-runner.py → research_runner.py - ledger-viewer.py → ledger_viewer.py - 
+send-to-telegram.py → send_to_telegram.py - sync-tasks-to-supabase.py → 
+sync_tasks_to_supabase.py Обновлены все ссылки: - scripts/*.py, scripts/*.sh - 
+tests/*.py - README.md, DECISIONS.md, IMPLEMENTATION_NOTES.md - docs/*.md (кроме 
+README-v1-archive.md) Shell-скрипты остались с дефисами (не импортируются): - 
+research-telegram.sh, git-auto-push.sh, check-*.sh,
+  backup-projects.sh, resource-governor.sh, holographic-patch.sh, 
+  git-credential-github.sh
+Проверено: 29 тестов passed. Не тронуто: - docs/README-v1-archive.md (исторический 
+артефакт v1)
+- ~/.config/systemd/user/holographic-patch.service (shell, без Python)

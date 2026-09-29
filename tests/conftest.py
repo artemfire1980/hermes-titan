@@ -1,6 +1,6 @@
 """Конфигурация pytest для Hermes-Titan.
 
-Добавляет scripts/ в sys.path, чтобы research-runner.py мог
+Добавляет scripts/ в sys.path, чтобы research_runner.py мог
 импортировать summary_generator и другие локальные модули.
 """
 import sys

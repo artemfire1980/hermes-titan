@@ -564,18 +564,6 @@ class LLMGateway:
             if resp is None:
                 continue
 
-            # ─── Обработка статусов ───
-            if use_fusion: payload["fusion"] = {"panel_size": 3, "show_details": False}
-            await self.breaker.wait_if_open()
-            async with self.semaphore:
-                await self.pacer.wait_turn()
-                try:
-                    client = await self._get_client()
-                    resp = await client.post("/v1/chat/completions", json=payload,
-                                             headers={"x-freellm-task-type": task_type})
-                except httpx.TransportError as e:
-                    last_err = str(e); self.breaker.record_failure()
-                    await asyncio.sleep(min(4 * (2 ** (attempt-1)), 60) * random.uniform(0.7, 1.3)); continue
             if resp.status_code == 429:
                 self.pacer.on_throttle(); last_err = f"429 on model={model} (rotating)"
                 logger.warning("429 on model=%s -> next attempt rotates model", model)
@@ -880,7 +868,6 @@ class DeepResearch:
     async def process_subtopic(self, idx, st):
         name=st.get("name",f"sub-{idx}"); logger.info("[%d/%d] %s",idx+1,len(self.subtopics),name)
         # Load processed URLs from checkpoint for this subtopic
-        ckpt_state = self.ckpt.load(self.rid) or {}
         processed_urls = set(self.processed_urls_by_subtopic.get(str(idx), set()))
         seen,queries=set(),[]
         for q in st.get("queries",[]):

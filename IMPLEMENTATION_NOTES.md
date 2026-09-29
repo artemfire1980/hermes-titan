@@ -46,15 +46,15 @@ Summary generated via NEW pipeline (source=llm, attempts=1)
 ✅ Success rate: ~95% (vs ~70% до)
 ✅ Reasoning leakage: <2% (vs 10-15% до)
 Использование
-# Через research-runner
-~/bin/research-runner.py --topic "Тема" --depth 2
+# Через research_runner
+~/bin/research_runner.py --topic "Тема" --depth 2
 
 # Через Telegram
 research-telegram.sh "Тема" 2
 Файлы
-~/bin/research-runner.py - основной runner (66 KB)
+~/bin/research_runner.py - основной runner (66 KB)
 ~/bin/summary_generator.py - production-grade модуль (18 KB)
-scripts/research-runner.py - исходный код в git
+scripts/research_runner.py - исходный код в git
 scripts/summary_generator.py - исходный код модуля в git
 tests/test_summary_generator.py - unit tests (13 тестов)
 Известные ограничения
