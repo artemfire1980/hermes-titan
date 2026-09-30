@@ -92,27 +92,6 @@ def _relevance_score(text, query_terms):
     hits = sum(1 for t in query_terms if t in tl)
     return hits / len(query_terms)
 
-def url_is_valuable(url: str) -> bool:
-    try:
-        parsed = urllib.parse.urlparse(url)
-        domain = parsed.netloc.lower().removeprefix("www.")
-        path = parsed.path.lower()
-        # Exact domain match
-        if any(d == domain or domain.endswith("." + d) for d in JUNK_DOMAINS):
-            return False
-        # Substring match for patterns like support.*, forum.*
-        if any(sub in domain for sub in JUNK_DOMAIN_SUBSTRINGS):
-            return False
-        # Path patterns
-        if any(jp in path for jp in JUNK_PATHS):
-            return False
-        # Binary extensions
-        if path.endswith(JUNK_EXTENSIONS):
-            return False
-        return True
-    except Exception:
-        return False
-
 # === EVIDENCE SCHEMA ===
 @dataclass
 class Evidence:
@@ -296,17 +275,6 @@ class EvidenceVerifier:
             if ov > 0.60: return True, "token_overlap", ov
         return False, "none", 0.0
 
-class EvidenceDeduplicator:
-    @classmethod
-    def deduplicate(cls, evidences):
-        seen = {}
-        for e in evidences:
-            key = (e.metric, e.value, e.unit, e.year, normalize_scope(e.market_scope), normalize_geography(e.geography))
-            if key in seen:
-                if e.source_url not in seen[key].source_urls: seen[key].source_urls.append(e.source_url)
-            else: e.source_urls = [e.source_url]; seen[key] = e
-        return list(seen.values())
-
 class ConflictDict(dict):
     """Dict с атрибутным доступом — совместимость с .type и ["conflict_type"]."""
     def __getattr__(self, name):
@@ -341,24 +309,6 @@ class ConflictDetector:
                     "evidences":[{"evidence_id":e.evidence_id,"value":e.value,"value_raw":e.value_raw,"source_url":e.source_url,"source_type":e.source_type,"year":e.year} for e in grp],
                     "resolution_hint":{"DIRECT_CONFLICT":"report both","METHODOLOGY_DIFF":"explain methodology","SCOPE_DIFF":"clarify scope","TIME_DIFF":"note time diff"}.get(ct,"report both")}))
         return conflicts
-
-class TokenBudgetGuard:
-    CPT = 3; MC = 4000
-    @classmethod
-    def estimate(cls, t): return max(1, len(t)//cls.CPT)
-    @classmethod
-    def chunk(cls, doc, mt=60000):
-        if cls.estimate(doc) <= mt: return [doc]
-        cs = cls.MC * cls.CPT; return [doc[i:i+cs] for i in range(0,len(doc),cs)]
-    @classmethod
-    def relevant(cls, chunks, query, n=5):
-        qt = set(query.lower().split()); scored = []
-        for c in chunks:
-            cl = c.lower(); s = sum(1 for t in qt if t in cl)
-            if re.search(r"\d+", c): s += 2
-            scored.append((s,c))
-        scored.sort(key=lambda x:x[0], reverse=True)
-        return [c for _,c in scored[:n]]
 
 # === ADAPTIVE PACER (AIMD) ===
 class AdaptivePacer:
@@ -758,24 +708,6 @@ class AsyncSearcher:
         if self._client and not self._client.is_closed:
             await self._client.aclose()
             self._client = None
-
-class UnsupportedClaimDetector:
-    PATTERNS=[r"(\d+(?:[.,]\d+)?)\s*(?:млн|млрд|billion|million|%|руб|\$|¥|EUR|CNY)\s*\[(\d+)\]",r"\$\s*(\d+(?:[.,]\d+)?)\s*(?:млн|млрд|billion|million)?\s*\[(\d+)\]"]
-    @classmethod
-    def detect(cls, report, cmap, evidences):
-        issues=[]
-        for pat in cls.PATTERNS:
-            for m in re.finditer(pat,report):
-                ns,cn=m.group(1),int(m.group(2)); eid=cmap.get(cn)
-                if not eid: issues.append({"number":ns,"citation":cn,"reason":"missing"}); continue
-                ev=next((e for e in evidences if e.evidence_id==eid),None)
-                if not ev: issues.append({"number":ns,"citation":cn,"reason":"no evidence"}); continue
-                if ev.value is not None:
-                    try:
-                        cv=float(ns.replace(",","."))
-                        if abs(cv-ev.value)/max(ev.value,0.001)>0.02: issues.append({"number":ns,"citation":cn,"reason":f"mismatch {cv} vs {ev.value}"})
-                    except: pass
-        return issues
 
 def detect_lineage(evidences):
     """Prefilter O(n) → fuzzy только внутри групп. Вместо O(n²)."""

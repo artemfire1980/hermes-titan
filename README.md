@@ -4,39 +4,54 @@
 
 ## Состояние
 
-- **Контрольная точка:** CP-005
-- **Версия:** 0.5.0
+- **Контрольная точка:** CP-030
+- **Версия:** 0.30.0
 - **Хранилище:** `/mnt/ai-ssd/ai-system` (симлинк `~/ai-system`)
 - **GitHub:** `artemfire1980/hermes-titan`
 
 ## Архитектура
 
-- **Ядро:** Hermes Agent `v0.21.5+2453` (`/mnt/ai-ssd/hermes/`)
-- **Модель:** FreeLLMAPI (`auto`, 1M контекст)
-- **Поиск:** SearXNG (`http://127.0.0.1:8888`)
-- **Telegram:** whitelist по `TELEGRAM_ALLOWED_USERS`
-- **Двигатель данных:** `scripts/research_runner.py` (evidence pipeline)
+- **Ядро:** Hermes Agent `v0.21.5+3779` (`/mnt/ai-ssd/hermes/`)
+- **Модель:** FreeLLMAPI (`auto`, 1M контекст, 314 моделей)
+- **Aider:** `nvidia_nim/nvidia/nemotron-3-ultra-550b-a55b`
+- **Поиск:** SearXNG (Docker, 10 движков)
+- **Telegram:** whitelist + home channel + уведомления
+- **Kanban:** board `hermes-titan` + native tools + dispatcher
+- **Память:** Holographic (patch v2) + built-in + memory tool
+- **Двигатель данных:** `scripts/research_runner.py` (topic-aware plan)
 - **Executive Summary:** `scripts/summary_generator.py` (Pydantic + citations)
 - **Исполнитель кода:** `scripts/aider_runner.py` (изоляция через `/mnt/ai-ssd/ai-system/projects/`)
 
 ## Тесты
 
-21 passed in 0.44s
+42 passed
+
+Покрытие:
+- `test_conflict_detector.py` (3 теста)
+- `test_evidence_verifier.py` (4 теста)
+- `test_research_runner.py` (8 тестов, P0-fixes)
+- `test_summary_generator.py` (13 тестов)
+- `test_llm_gateway.py` (6 тестов, respx)
+- `test_async_fetcher.py` (8 тестов, respx)
 
 ## Документация
 
-- `DECISIONS.md` — архитектурные решения (DEC-001…DEC-018)
+- `DECISIONS.md` — архитектурные решения (DEC-001…DEC-036)
 - `ARCHITECTURE.md` — общая архитектура
+- `CHANGELOG.md` — история версий
+- `IMPLEMENTATION_STATUS.md` — статус внедрения
+- `IMPLEMENTATION_NOTES.md` — Executive Summary pipeline
 - `docs/HERMES-CAPABILITY-MATRIX.md` — аудит возможностей ядра (CP-003)
 - `docs/CODE_EDITING_RULES.md` — правила работы с кодом
-- `docs/PERSONALIZATION.md` — инструкция по настройке env
-- `IMPLEMENTATION_NOTES.md` — архитектура Executive Summary pipeline
-- `IMPLEMENTATION_STATUS.md` — статус внедрения
-- `docs/README-v1-archive.md` — документация старой системы (архив)
+- `docs/PERSONALIZATION.md` — настройка env
+- `docs/RECOVERY.md` — восстановление (3 уровня)
+- `docs/CHECKLIST.md` — чек-лист всех CP
+- `docs/TASK-LEDGER-DECISION.md` — решение по трекеру задач
+- `docs/MEMORY-BENCHMARK.md` — бенчмарк памяти (CP-008)
+- `docs/CP-008-BASELINE.md` — baseline CP-008
 
-## Принципы
+## Принципы (12)
 
-12 принципов проекта — см. `DECISIONS.md`:
 1. Hermes-first
 2. Discover-before-build
 3. Reuse-before-build

@@ -86,9 +86,6 @@ def send_document(file_path: Path, caption: str = ""):
 
 def send_message(text: str):
     """Отправляет текстовое сообщение"""
-    import urllib.request
-    import json
-
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     data = urllib.parse.urlencode({
         'chat_id': CHAT_ID,
