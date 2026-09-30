@@ -19,6 +19,7 @@ from difflib import SequenceMatcher
 from pathlib import Path
 
 import httpx
+from research.checkpoint import CheckpointManager
 
 # === CONFIG ===
 # _env_candidates, _load_dotenv перенесены в research.config (CP-036)
@@ -162,38 +163,9 @@ JUNK_DOMAIN_SUBSTRINGS = (
 # Импорт: from research.text_utils import ... (выше)
 
 
-class CheckpointManager:
-    SCHEMA_VERSION = 2
-
-    def __init__(self, d):
-        self.d = d
-        d.mkdir(parents=True, exist_ok=True)
-
-    def save(self, rid, state):
-        p = self.d / f"{rid}.json"
-        t = p.with_suffix(".json.tmp")
-        state["schema_version"] = self.SCHEMA_VERSION
-        state["last_updated"] = datetime.now().isoformat()
-        with open(t, "w", encoding="utf-8") as f:
-            json.dump(state, f, ensure_ascii=False, indent=2)
-            f.flush()
-            os.fsync(f.fileno())
-        t.replace(p)
-
-    def load(self, rid):
-        p = self.d / f"{rid}.json"
-        if not p.exists():
-            return None
-        try:
-            s = json.loads(p.read_text(encoding="utf-8"))
-            return s if s.get("schema_version") == self.SCHEMA_VERSION else None
-        except:
-            return None
-
-    def cleanup(self, rid):
-        p = self.d / f"{rid}.json"
-        if p.exists():
-            p.unlink()
+# === CHECKPOINT ===
+# CheckpointManager перенесён в research.checkpoint (CP-036)
+# Импорт: from research.checkpoint import CheckpointManager (вые)
 
 
 class SourceQualityScorer:
