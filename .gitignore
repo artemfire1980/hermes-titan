@@ -42,3 +42,7 @@ projects/*
 *.bak.*
 *.swp
 *.swo
+
+# Бэкапы скриптов (CP-036 модуляризация)
+scripts/*.bak-*
+scripts/*.py.bak-*

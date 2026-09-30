@@ -641,3 +641,61 @@ runtime — `tools/python-3.14.7` (NumPy 2.5.3 уже там). Директор�
 - Оставить Patch 1 и Patch 2 (они не отправлены).
 
 Статус: Open, ждём CI/review.
+
+## DEC-038: PR #129521 — статус ожидания CI approve
+
+Дата проверки: 2026-09-30.
+Статус: open, mergeable_state=unstable, draft=false.
+Actions runs: 8, все `completed / action_required`.
+Events: 5× labeled by alt-glitch (2026-09-30 18:58).
+Comments: нет.
+
+Причина: first-time contributor → GitHub требует ручной approve workflow
+перед запуском. `action_required` ≠ failure.
+
+План:
+- 1–2 дня: ждать.
+- 3 дня (2026-10-02): вежливый ping в PR, если approve не пришёл.
+- 7 дней: более настойчивый ping.
+- При merge: обновить holographic-patch.sh до v4 (убрать Patch 3),
+  commit, tag CP-036+.
+
+Действий от нас не требуется.
+
+## DEC-039: CP-036 — модуляризация research_runner.py
+
+Файл: 1864 строки, 15 классов, ~20 функций.
+План: разбить на scripts/research/ (12 модулей) + thin CLI.
+
+Граф зависимостей (без циклов):
+- models.py       Evidence
+- config.py       _env_candidates, _load_dotenv
+- text_utils.py   _relevance_score, normalize_scope, normalize_geography
+- json_utils.py   repair_json, parse_json_resilient
+- checkpoint.py   CheckpointManager
+- scoring.py      SourceQualityScorer, ConfidenceScorer
+- evidence.py     FactValidator, EvidenceVerifier, ConflictDict, ConflictDetector
+- lineage.py      detect_lineage
+- llm.py          AdaptivePacer, CircuitBreaker, LLMGateway
+- fetch.py        AsyncFetcher, TokenBucket
+- search.py       AsyncSearcher
+- runner.py       DeepResearch
+
+scripts/research_runner.py → thin CLI (~40 строк).
+
+Порядок работ (с pytest после каждого шага):
+1. models.py
+2. text_utils.py
+3. json_utils.py
+4. config.py
+5. checkpoint.py
+6. scoring.py (зависит от text_utils)
+7. evidence.py (зависит от models + text_utils)
+8. lineage.py (зависит от models)
+9. llm.py (зависит от json_utils)
+10. fetch.py
+11. search.py
+12. runner.py (зависит от всех)
+13. thin CLI в research_runner.py
+
+Бэкап: pre-CP-036-backup, research_runner.py.bak-20260930.

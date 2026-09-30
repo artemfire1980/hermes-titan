@@ -14,12 +14,12 @@ import time
 import urllib.parse
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
 from difflib import SequenceMatcher
 from pathlib import Path
 
 import httpx
+from research.models import Evidence
 
 # Production-grade summary generator
 from summary_generator import ExecutiveSummaryGenerator, SummaryConfig
@@ -190,50 +190,8 @@ def _relevance_score(text, query_terms):
 
 
 # === EVIDENCE SCHEMA ===
-@dataclass
-class Evidence:
-    evidence_id: str = ""
-    claim: str = ""
-    metric: str | None = None
-    value: float | None = None
-    value_raw: str | None = None
-    unit: str | None = None
-    currency: str | None = None
-    year: int | None = None
-    period_start: str | None = None
-    period_end: str | None = None
-    forecast_type: str = "historical"
-    source_url: str = ""
-    source_title: str = ""
-    source_type: str = "unknown"
-    source_authority: float = 0.5
-    evidence_quality: float = 0.5
-    parent_source_id: str | None = None
-    evidence_text: str = ""
-    evidence_text_original: str | None = None
-    market_scope: str = "unknown"
-    geography: str = "unknown"
-    verification_status: str = "unverified"
-    verification_score: float = 0.0
-    verification_method: str = "none"
-    confidence: str = "medium"
-    source_urls: list[str] = field(default_factory=list)
-    subtopic: str = ""
-
-    @property
-    def dedup_key(self):
-        norm = re.sub(r"\W+", " ", self.claim.lower()).strip()[:100]
-        return hashlib.sha256(
-            f"{norm}|{self.source_url}|{self.year}|{self.value}".encode()
-        ).hexdigest()[:16]
-
-    def to_dict(self):
-        return asdict(self)
-
-    @classmethod
-    def from_dict(cls, d):
-        known = {f.name for f in cls.__dataclass_fields__.values()}
-        return cls(**{k: v for k, v in d.items() if k in known})
+# Evidence перенесён в research.models (CP-036)
+# Импорт: from research.models import Evidence (выше)
 
 
 SCOPE_ALIASES = {
