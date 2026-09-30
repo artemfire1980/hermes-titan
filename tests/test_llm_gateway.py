@@ -1,10 +1,8 @@
 """Тесты LLMGateway.chat через respx (mock HTTP)."""
 import httpx
 import pytest
-import respx
-
 import research_runner as rr
-
+import respx
 
 # ─── Helpers ────────────────────────────────────────────────────────
 

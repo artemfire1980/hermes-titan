@@ -1,11 +1,8 @@
 """Тесты AsyncFetcher и AsyncSearcher через respx (mock HTTP)."""
-import asyncio
 import httpx
 import pytest
-import respx
-
 import research_runner as rr
-
+import respx
 
 # ─── AsyncFetcher ───────────────────────────────────────────────────
 

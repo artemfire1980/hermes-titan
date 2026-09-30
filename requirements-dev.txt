@@ -4,3 +4,4 @@
 # Tests
 pytest>=9.1
 pytest-asyncio>=1.4
+respx>=0.23
