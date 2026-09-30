@@ -12,11 +12,12 @@ Key decisions (from expert review):
   - max_tokens=1500 (not 2000) - enough for 7 bullets
   - Fallback uses top_claims_by_authority, not first N lines
 """
+
 import json
 import logging
 import re
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Set
+from typing import Any
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -27,9 +28,11 @@ logger = logging.getLogger(__name__)
 # Schema layer: structure + text only, NO citation ID validation
 # ============================================================================
 
+
 class ExecutiveSummary(BaseModel):
     """Pydantic schema: validates structure only."""
-    bullets: List[str] = Field(
+
+    bullets: list[str] = Field(
         ...,
         min_length=5,
         max_length=7,
@@ -38,10 +41,10 @@ class ExecutiveSummary(BaseModel):
 
     @field_validator("bullets", mode="before")
     @classmethod
-    def normalize_bullets(cls, bullets: List) -> List[str]:
+    def normalize_bullets(cls, bullets: list) -> list[str]:
         """
         Normalize bullets from various LLM formats to list[str].
-        
+
         Accepts:
         - ["- Bullet [1]", ...]  (standard)
         - [{"text": "Bullet", "citation": 1}, ...]  (structured)
@@ -49,7 +52,7 @@ class ExecutiveSummary(BaseModel):
         """
         if not isinstance(bullets, list):
             raise ValueError(f"bullets must be a list, got {type(bullets)}")
-        
+
         normalized = []
         for i, item in enumerate(bullets):
             if isinstance(item, str):
@@ -60,7 +63,7 @@ class ExecutiveSummary(BaseModel):
                 text = item.get("text", "")
                 if not text:
                     raise ValueError(f"Bullet {i + 1} dict missing 'text' field")
-                
+
                 # Check if citation already in text
                 if not re.search(r"\[\d+\]", text):
                     # Add citation from dict
@@ -71,18 +74,18 @@ class ExecutiveSummary(BaseModel):
                         else:
                             citation_str = f"[{citation}]"
                         text = f"{text} {citation_str}"
-                
+
                 normalized.append(text)
             else:
                 raise ValueError(f"Bullet {i + 1} must be string or dict, got {type(item)}")
-        
+
         return normalized
 
     @field_validator("bullets")
     @classmethod
-    def validate_bullets_structure(cls, bullets: List[str]) -> List[str]:
+    def validate_bullets_structure(cls, bullets: list[str]) -> list[str]:
         """Check each bullet is a string with at least one [N] citation."""
-        cleaned: List[str] = []
+        cleaned: list[str] = []
         citation_pattern = re.compile(r"\[(\d+)\]")
 
         for i, raw_bullet in enumerate(bullets):
@@ -100,9 +103,7 @@ class ExecutiveSummary(BaseModel):
 
             citations = [int(c) for c in citation_pattern.findall(bullet)]
             if not citations:
-                raise ValueError(
-                    f"Bullet {i + 1} has no [N] citation: '{bullet[:50]}...'"
-                )
+                raise ValueError(f"Bullet {i + 1} has no [N] citation: '{bullet[:50]}...'")
 
             cleaned.append(f"- {bullet}")
 
@@ -113,10 +114,11 @@ class ExecutiveSummary(BaseModel):
 # JSON extractor: scanner-based, NOT regex
 # ============================================================================
 
-def extract_last_valid_json(text: str) -> Dict[str, Any]:
+
+def extract_last_valid_json(text: str) -> dict[str, Any]:
     """
     Extracts last valid JSON object via JSONDecoder.raw_decode.
-    
+
     Robust to:
     - <think>...</think> tags (DeepSeek-R1, QwQ)
     - ```json ... ``` markdown wrappers
@@ -125,16 +127,16 @@ def extract_last_valid_json(text: str) -> Dict[str, Any]:
     """
     decoder = json.JSONDecoder()
     clean_text = text.strip()
-    
+
     # Remove <think>...</think> blocks (but not required - scanner ignores them)
     clean_text = re.sub(r"(?s)<think>.*?</think>", "", clean_text).strip()
-    
+
     # Remove markdown code fences
     clean_text = re.sub(r"```(?:json)?\s*", "", clean_text)
     clean_text = re.sub(r"```\s*", "", clean_text).strip()
 
     # Find ALL JSON objects via scanner, return LAST valid one
-    last_valid: Optional[Dict[str, Any]] = None
+    last_valid: dict[str, Any] | None = None
     pos = 0
     length = len(clean_text)
 
@@ -171,13 +173,14 @@ def extract_last_valid_json(text: str) -> Dict[str, Any]:
 # Citation validator: separate from Pydantic (no runtime context dependency)
 # ============================================================================
 
-def validate_citations(bullets: List[str], valid_citation_ids: Set[int]) -> List[str]:
+
+def validate_citations(bullets: list[str], valid_citation_ids: set[int]) -> list[str]:
     """
     Validates that all [N] citations in bullets exist in valid_citation_ids.
     Returns cleaned bullets or raises ValueError.
     """
     citation_pattern = re.compile(r"\[(\d+)\]")
-    cleaned: List[str] = []
+    cleaned: list[str] = []
 
     for i, bullet in enumerate(bullets):
         # Strip leading "- " if present
@@ -204,21 +207,22 @@ def validate_citations(bullets: List[str], valid_citation_ids: Set[int]) -> List
 # Fallback: deterministic selection by authority, NOT first N lines
 # ============================================================================
 
+
 def top_claims_by_authority(
-    evidences: List[Any],
-    valid_citation_ids: Set[int],
+    evidences: list[Any],
+    valid_citation_ids: set[int],
     top_n: int = 7,
-    url_to_cid: Optional[Dict[str, int]] = None,
-) -> List[str]:
+    url_to_cid: dict[str, int] | None = None,
+) -> list[str]:
     """
     Selects top-N most authoritative claims from evidence.
-    
+
     Scoring:
       - source_authority (0-1): primary factor
-      - evidence_quality (0-1): secondary factor  
+      - evidence_quality (0-1): secondary factor
       - has_metric: +0.2 bonus
       - has_year: +0.1 bonus
-    
+
     Returns formatted bullet strings with citations.
     """
     if not evidences:
@@ -231,19 +235,19 @@ def top_claims_by_authority(
         # CP-017: compute citation id from source_url via url_to_cid map
         cid = None
         if url_to_cid:
-            cid = url_to_cid.get(getattr(e, 'source_url', ''))
+            cid = url_to_cid.get(getattr(e, "source_url", ""))
             if cid is None or cid not in valid_citation_ids:
                 continue
 
         # Calculate score
-        authority = getattr(e, 'source_authority', 0.5)
-        quality = getattr(e, 'evidence_quality', 0.5)
-        has_metric = 1.0 if getattr(e, 'metric', None) else 0.0
-        has_year = 1.0 if getattr(e, 'year', None) else 0.0
+        authority = getattr(e, "source_authority", 0.5)
+        quality = getattr(e, "evidence_quality", 0.5)
+        has_metric = 1.0 if getattr(e, "metric", None) else 0.0
+        has_year = 1.0 if getattr(e, "year", None) else 0.0
 
         score = authority * 0.5 + quality * 0.3 + has_metric * 0.2 + has_year * 0.1
 
-        claim = getattr(e, 'claim', '').strip()
+        claim = getattr(e, "claim", "").strip()
 
         if claim and cid is not None:
             scored_claims.append((score, claim, cid))
@@ -265,13 +269,13 @@ def top_claims_by_authority(
 
 def generate_fallback_summary(
     facts_text: str,
-    valid_citation_ids: Set[int],
-    evidences: Optional[List[Any]] = None,
-    url_to_cid: Optional[Dict[str, int]] = None,
-) -> List[str]:
+    valid_citation_ids: set[int],
+    evidences: list[Any] | None = None,
+    url_to_cid: dict[str, int] | None = None,
+) -> list[str]:
     """
     Deterministic fallback when LLM generation fails.
-    
+
     Priority:
       1. Use top_claims_by_authority if evidences provided
       2. Otherwise extract claims with valid citations from facts_text
@@ -331,9 +335,11 @@ def generate_fallback_summary(
 # Generator: main pipeline
 # ============================================================================
 
+
 @dataclass
 class SummaryConfig:
     """Configuration for summary generation."""
+
     model: str = "auto"
     temperature: float = 0.0
     top_p: float = 1.0  # NOT 0.1 - avoid artificial constraint stacking
@@ -345,16 +351,17 @@ class SummaryConfig:
 @dataclass
 class SummaryResult:
     """Result of summary generation."""
-    bullets: List[str]
+
+    bullets: list[str]
     source: str  # "llm" or "fallback"
     attempts: int
-    errors: List[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
 
 
 class ExecutiveSummaryGenerator:
     """Production-grade Executive Summary generator."""
 
-    def __init__(self, llm_chat_func: Any, config: Optional[SummaryConfig] = None):
+    def __init__(self, llm_chat_func: Any, config: SummaryConfig | None = None):
         """
         Args:
             llm_chat_func: Async callable with signature:
@@ -365,10 +372,7 @@ class ExecutiveSummaryGenerator:
         self.config = config or SummaryConfig()
 
     def _build_prompts(
-        self,
-        topic: str,
-        facts: str,
-        valid_citation_ids: Set[int]
+        self, topic: str, facts: str, valid_citation_ids: set[int]
     ) -> tuple[str, str]:
         """Build system and user prompts for JSON generation."""
         sorted_ids = sorted(valid_citation_ids)
@@ -423,13 +427,13 @@ class ExecutiveSummaryGenerator:
         self,
         topic: str,
         facts: str,
-        valid_citation_ids: Set[int],
-        evidences: Optional[List[Any]] = None,
-        url_to_cid: Optional[Dict[str, int]] = None,
+        valid_citation_ids: set[int],
+        evidences: list[Any] | None = None,
+        url_to_cid: dict[str, int] | None = None,
     ) -> SummaryResult:
         """
         Generate Executive Summary with validation, repair, and fallback.
-        
+
         Pipeline:
           1. LLM generation (JSON mode)
           2. JSON extraction (scanner-based)
@@ -467,7 +471,7 @@ class ExecutiveSummaryGenerator:
                     use_fusion=self.config.use_fusion,
                     json_mode=True,
                 )
-                
+
                 # Step 1: JSON extraction (scanner-based)
                 json_data = extract_last_valid_json(raw_content)
 
@@ -475,10 +479,7 @@ class ExecutiveSummaryGenerator:
                 summary_model = ExecutiveSummary.model_validate(json_data)
 
                 # Step 3: Citation validation (separate from Pydantic)
-                validated_bullets = validate_citations(
-                    summary_model.bullets,
-                    valid_citation_ids
-                )
+                validated_bullets = validate_citations(summary_model.bullets, valid_citation_ids)
 
                 logger.info(f"Summary generated successfully on attempt {attempts}")
                 return SummaryResult(
@@ -489,7 +490,7 @@ class ExecutiveSummaryGenerator:
                 )
 
             except Exception as e:
-                error_msg = f"Attempt {attempts} failed: {str(e)}"
+                error_msg = f"Attempt {attempts} failed: {e!s}"
                 errors.append(error_msg)
                 logger.warning(error_msg)
 
@@ -504,10 +505,10 @@ class ExecutiveSummaryGenerator:
                     )
                     repair_user = (
                         f"{base_user_prompt}\n\n"
-                        f"<previous_error>{str(e)}</previous_error>\n\n"
+                        f"<previous_error>{e!s}</previous_error>\n\n"
                         f"Допустимые citation IDs: {sorted(valid_citation_ids)}\n\n"
                         "Исправь ошибку и верни ТОЛЬКО валидный JSON-объект формата "
-                        "{\"bullets\": [...]}. 5-7 пунктов на русском языке."
+                        '{"bullets": [...]}. 5-7 пунктов на русском языке.'
                     )
                     current_messages = [
                         {"role": "system", "content": repair_system},
@@ -528,6 +529,6 @@ class ExecutiveSummaryGenerator:
         )
 
 
-def render_markdown(bullets: List[str]) -> str:
+def render_markdown(bullets: list[str]) -> str:
     """Convert bullet list to Markdown format."""
     return "\n".join(bullets)

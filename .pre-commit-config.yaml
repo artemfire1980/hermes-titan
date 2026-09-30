@@ -1,7 +1,7 @@
 # Pre-commit hooks для Hermes-Titan
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.8.4
+    rev: v0.16.9
     hooks:
       - id: ruff
         args: [--fix]

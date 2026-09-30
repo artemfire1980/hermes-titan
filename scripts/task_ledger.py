@@ -7,11 +7,12 @@ Single source of truth for all coding tasks.
 Schema versioning via PRAGMA user_version.
 UPSERT semantics: preserves started_at, updates only provided fields.
 """
+
+import json
 import sqlite3
 import sys
-import json
 from contextlib import closing
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 DB_PATH = Path.home() / "ai-system" / "data" / "tasks.db"
@@ -19,7 +20,7 @@ SCHEMA_VERSION = 2
 
 
 def _utc_now():
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now(UTC).isoformat()
 
 
 def _ensure_schema(conn):
@@ -58,7 +59,9 @@ def _ensure_schema(conn):
         if "finished_at" not in existing:
             conn.execute("ALTER TABLE tasks ADD COLUMN finished_at TEXT")
         # Backfill started_at for existing rows from timestamp
-        conn.execute("UPDATE tasks SET started_at = COALESCE(started_at, timestamp) WHERE started_at IS NULL")
+        conn.execute(
+            "UPDATE tasks SET started_at = COALESCE(started_at, timestamp) WHERE started_at IS NULL"
+        )
 
     conn.execute("CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status)")
     conn.execute("CREATE INDEX IF NOT EXISTS idx_tasks_project ON tasks(project)")
@@ -88,32 +91,44 @@ def log_task(task_id, project, task, status, **kwargs):
     """
     with closing(get_conn()) as conn:
         # JSON-encode lists
-        if kwargs.get('changed_files'):
-            kwargs['changed_files'] = json.dumps(kwargs['changed_files'])
-        if kwargs.get('pre_existing_changes'):
-            kwargs['pre_existing_changes'] = json.dumps(kwargs['pre_existing_changes'])
+        if kwargs.get("changed_files"):
+            kwargs["changed_files"] = json.dumps(kwargs["changed_files"])
+        if kwargs.get("pre_existing_changes"):
+            kwargs["pre_existing_changes"] = json.dumps(kwargs["pre_existing_changes"])
 
         now = _utc_now()
-        terminal = {'COMPLETED', 'FAILED', 'AIDER_FAILED', 'TIMEOUT',
-                    'POST_FLIGHT_FAILED', 'DIRTY_REPOSITORY', 'INVALID_PROJECT',
-                    'NOT_GIT_REPOSITORY', 'GIT_STATUS_FAILED', 'GIT_CONFLICT',
-                    'AIDER_BUSY', 'AIDER_NOT_FOUND', 'NVIDIA_API_KEY_MISSING',
-                    'NO_ORIGIN_REMOTE', 'DETACHED_HEAD'}
+        terminal = {
+            "COMPLETED",
+            "FAILED",
+            "AIDER_FAILED",
+            "TIMEOUT",
+            "POST_FLIGHT_FAILED",
+            "DIRTY_REPOSITORY",
+            "INVALID_PROJECT",
+            "NOT_GIT_REPOSITORY",
+            "GIT_STATUS_FAILED",
+            "GIT_CONFLICT",
+            "AIDER_BUSY",
+            "AIDER_NOT_FOUND",
+            "NVIDIA_API_KEY_MISSING",
+            "NO_ORIGIN_REMOTE",
+            "DETACHED_HEAD",
+        }
 
         # Columns for INSERT
-        cols = ['task_id', 'timestamp', 'started_at', 'project', 'task', 'status']
+        cols = ["task_id", "timestamp", "started_at", "project", "task", "status"]
         vals = [task_id, now, now, project, task, status]
 
         for key, val in kwargs.items():
             cols.append(key)
             vals.append(val)
 
-        placeholders = ','.join(['?'] * len(vals))
-        col_names = ','.join(cols)
+        placeholders = ",".join(["?"] * len(vals))
+        col_names = ",".join(cols)
 
         # Update clause: all except task_id, started_at
-        update_cols = [c for c in cols if c not in ('task_id', 'started_at')]
-        update_clause = ','.join(f"{c}=excluded.{c}" for c in update_cols)
+        update_cols = [c for c in cols if c not in ("task_id", "started_at")]
+        update_clause = ",".join(f"{c}=excluded.{c}" for c in update_cols)
 
         # finished_at handling
         if status in terminal:
@@ -121,24 +136,30 @@ def log_task(task_id, project, task, status, **kwargs):
         else:
             finished_at_set = ""
 
-        conn.execute(f"""
+        conn.execute(
+            f"""
             INSERT INTO tasks ({col_names})
             VALUES ({placeholders})
             ON CONFLICT(task_id) DO UPDATE SET
                 {update_clause}
                 {finished_at_set}
-        """, vals)
+        """,
+            vals,
+        )
         conn.commit()
 
 
 def get_recent_tasks(limit=10):
     """Get recent tasks for display."""
     with closing(get_conn()) as conn:
-        rows = conn.execute("""
+        rows = conn.execute(
+            """
             SELECT * FROM tasks
             ORDER BY timestamp DESC
             LIMIT ?
-        """, (limit,)).fetchall()
+        """,
+            (limit,),
+        ).fetchall()
         return [dict(row) for row in rows]
 
 
@@ -166,9 +187,9 @@ if __name__ == "__main__":
         limit = int(sys.argv[2]) if len(sys.argv) > 2 else 10
         tasks = get_recent_tasks(limit)
         for t in tasks:
-            status_icon = "✅" if t['status'] == 'COMPLETED' else "❌"
+            status_icon = "✅" if t["status"] == "COMPLETED" else "❌"
             print(f"{status_icon} {t['timestamp'][:16]} | {t['project'][-30:]} | {t['status']}")
-            if t.get('commit_message'):
+            if t.get("commit_message"):
                 print(f"   └─ {t['commit_message']}")
 
     elif cmd == "get" and len(sys.argv) > 2:

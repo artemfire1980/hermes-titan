@@ -7,6 +7,7 @@ Covers:
 - P0-4: checkpoint processed_urls_by_subtopic round-trip
 - P0-2 (fallback): url_to_cid передаётся в generate_fallback_summary
 """
+
 import sys
 from pathlib import Path
 from types import SimpleNamespace
@@ -24,6 +25,7 @@ import research_runner as rr
 import summary_generator as sg
 
 # ─── P0-1: single POST ──────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_chat_sends_one_request(monkeypatch):
@@ -55,6 +57,7 @@ async def test_chat_sends_one_request(monkeypatch):
 
 
 # ─── P0-1: messages / system_prompt API ─────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_chat_with_messages(monkeypatch):
@@ -110,8 +113,9 @@ async def test_chat_with_system_prompt(monkeypatch):
     monkeypatch.setattr(httpx.AsyncClient, "post", fake_post)
 
     gw = rr.LLMGateway("http://test", "k", max_attempts=1)
-    await gw.chat("user prompt", system_prompt="system instruction",
-                  task_type="general", json_mode=False)
+    await gw.chat(
+        "user prompt", system_prompt="system instruction", task_type="general", json_mode=False
+    )
     await gw.aclose()
 
     assert captured["payload"]["messages"] == [
@@ -132,6 +136,7 @@ async def test_chat_rejects_prompt_and_messages():
 
 
 # ─── P0-3: JSON mode best-effort fallback ───────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_summary_json_mode_400_fallback(monkeypatch):
@@ -167,6 +172,7 @@ async def test_summary_json_mode_400_fallback(monkeypatch):
 
 # ─── P0-2: repair retry contains facts ──────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_repair_contains_facts():
     """Repair-попытка должна содержать исходные facts + previous_error."""
@@ -178,9 +184,7 @@ async def test_repair_contains_facts():
             raise ValueError("invalid JSON")
         return '{"bullets": ["- A valid Russian bullet [1]", "- B [1]", "- C [1]", "- D [1]", "- E [1]"]}'
 
-    gen = sg.ExecutiveSummaryGenerator(
-        mock_llm_chat, sg.SummaryConfig(max_retries=1)
-    )
+    gen = sg.ExecutiveSummaryGenerator(mock_llm_chat, sg.SummaryConfig(max_retries=1))
     await gen.generate_summary("topic", "ORIGINAL_FACTS_MARKER", {1})
 
     assert len(calls) >= 2
@@ -191,6 +195,7 @@ async def test_repair_contains_facts():
 
 
 # ─── P0-4: checkpoint processed_urls round-trip ─────────────────────
+
 
 def test_checkpoint_processed_urls(tmp_path):
     """save_ckpt → load_ckpt сохраняет processed_urls_by_subtopic."""
@@ -218,6 +223,7 @@ def test_checkpoint_processed_urls(tmp_path):
 
 # ─── P0-2 fallback: url_to_cid ──────────────────────────────────────
 
+
 def test_fallback_uses_url_to_cid():
     """generate_fallback_summary использует url_to_cid для проставления citation IDs."""
     ev = SimpleNamespace(
@@ -236,5 +242,3 @@ def test_fallback_uses_url_to_cid():
     )
     assert bullets
     assert "[7]" in bullets[0]
-
-

@@ -133,7 +133,7 @@ def test_citation_validator():
         "- Bullet five [5]",
     ]
     valid_ids = {1, 2, 3, 4, 5}
-    
+
     result = validate_citations(bullets, valid_ids)
     assert len(result) == 5
     print("✅ test_citation_validator PASSED")
@@ -143,7 +143,7 @@ def test_citation_validator_rejects_invalid():
     """Test citation validator rejects invalid IDs."""
     bullets = ["- Bullet one [1]", "- Bullet two [99]"]
     valid_ids = {1, 2, 3}
-    
+
     try:
         validate_citations(bullets, valid_ids)
         assert False, "Should have raised ValueError"
@@ -164,7 +164,7 @@ def test_fallback_from_facts():
 """
     valid_ids = {1, 2, 3}
     fallback = generate_fallback_summary(facts, valid_ids)
-    
+
     assert len(fallback) == 5
     assert all("[1]" in b or "[2]" in b or "[3]" in b for b in fallback)
     print("✅ test_fallback_from_facts PASSED")
@@ -174,7 +174,7 @@ def test_fallback_emergency():
     """Test emergency fallback when no valid bullets found."""
     facts = "No valid bullets here"
     valid_ids = {1, 2, 3}
-    
+
     fallback = generate_fallback_summary(facts, valid_ids)
     assert len(fallback) >= 5
     assert all("[1]" in b for b in fallback)
@@ -195,8 +195,11 @@ def test_render_markdown():
 
 async def test_generator_with_mock_llm():
     """Test full generator pipeline with mock LLM."""
+
     # Mock LLM chat function
-    async def mock_llm_chat(prompt=None, task_type=None, max_tokens=None, temp=None, use_fusion=None, **kwargs):
+    async def mock_llm_chat(
+        prompt=None, task_type=None, max_tokens=None, temp=None, use_fusion=None, **kwargs
+    ):
         return """
 <think>Thinking...</think>
 {
@@ -209,15 +212,15 @@ async def test_generator_with_mock_llm():
   ]
 }
 """
-    
+
     config = SummaryConfig(model="test-model", max_retries=1)
     generator = ExecutiveSummaryGenerator(llm_chat_func=mock_llm_chat, config=config)
-    
+
     facts = "Факты о выставке..."
     valid_ids = {1, 2, 3}
 
     result = await generator.generate_summary("Canton Fair", facts, valid_ids)
-    
+
     assert result.source == "llm"
     assert result.attempts == 1
     assert len(result.bullets) == 5
@@ -229,7 +232,10 @@ async def test_generator_with_repair():
     """Test generator repair retry on validation failure."""
     # Mock LLM chat function that fails first, succeeds second
     call_count = 0
-    async def mock_llm_chat(prompt=None, task_type=None, max_tokens=None, temp=None, use_fusion=None, **kwargs):
+
+    async def mock_llm_chat(
+        prompt=None, task_type=None, max_tokens=None, temp=None, use_fusion=None, **kwargs
+    ):
         nonlocal call_count
         call_count += 1
         if call_count == 1:
@@ -244,7 +250,7 @@ async def test_generator_with_repair():
             "- Пятое длинное утверждение о статистике и показателях [5]"
         ]
     }"""
-    
+
     config = SummaryConfig(model="test-model", max_retries=1)
     generator = ExecutiveSummaryGenerator(llm_chat_func=mock_llm_chat, config=config)
 
@@ -258,16 +264,19 @@ async def test_generator_with_repair():
 
 async def test_generator_fallback_on_total_failure():
     """Test generator uses fallback when all retries fail."""
+
     # Mock LLM chat function that always fails
-    async def mock_llm_chat(prompt=None, task_type=None, max_tokens=None, temp=None, use_fusion=None, **kwargs):
+    async def mock_llm_chat(
+        prompt=None, task_type=None, max_tokens=None, temp=None, use_fusion=None, **kwargs
+    ):
         raise Exception("LLM completely failed")
-    
+
     config = SummaryConfig(model="test-model", max_retries=1)
     generator = ExecutiveSummaryGenerator(llm_chat_func=mock_llm_chat, config=config)
-    
+
     facts = "- Valid fact [1]\n- Another fact [2]\n- Third fact [3]\n- Fourth [4]\n- Fifth [5]"
     result = await generator.generate_summary("Topic", facts, {1, 2, 3, 4, 5})
-    
+
     assert result.source == "fallback"
     assert len(result.bullets) >= 5
     print("✅ test_generator_fallback_on_total_failure PASSED")

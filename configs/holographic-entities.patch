@@ -3,7 +3,7 @@ index a913cf2d..dc5498f2 100644
 --- a/plugins/memory/holographic/store.py
 +++ b/plugins/memory/holographic/store.py
 @@ -74,7 +74,20 @@ _HELPFUL_DELTA, _UNHELPFUL_DELTA = 0.05, -0.10
- 
+
  # Entity extraction patterns, applied in order: capitalized multi-word phrases ("John Doe"), double-quoted terms,
  # single-quoted terms, then "X aka Y" (both sides).
 -_RE_SINGLE_ENTITY = (re.compile(r'\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)\b'), re.compile(r'"([^"]+)"'), re.compile(r"'([^']+)'"))
@@ -50,5 +50,5 @@ index a913cf2d..dc5498f2 100644
 +
 +            uniq[key] = name
          return list(uniq.values())
- 
+
      def _link_entities(self, fact_id: int, content: str) -> None:

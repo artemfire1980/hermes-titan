@@ -1,10 +1,12 @@
 """Тесты AsyncFetcher и AsyncSearcher через respx (mock HTTP)."""
+
 import httpx
 import pytest
 import research_runner as rr
 import respx
 
 # ─── AsyncFetcher ───────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 @respx.mock
@@ -17,9 +19,7 @@ async def test_fetch_ok(tmp_path):
         "<p>" + ("This is a long paragraph about Khadas VIM4. " * 20) + "</p>"
         "</article></body></html>"
     )
-    respx.get("http://example.com/page").mock(
-        return_value=httpx.Response(200, text=html)
-    )
+    respx.get("http://example.com/page").mock(return_value=httpx.Response(200, text=html))
     fetcher = rr.AsyncFetcher(cd=tmp_path, mc=1)
     try:
         text = await fetcher.fetch("http://example.com/page")
@@ -33,9 +33,7 @@ async def test_fetch_ok(tmp_path):
 @respx.mock
 async def test_fetch_404_returns_empty(tmp_path):
     """fetch(): 404 → "" (без исключения)."""
-    respx.get("http://example.com/missing").mock(
-        return_value=httpx.Response(404, text="not found")
-    )
+    respx.get("http://example.com/missing").mock(return_value=httpx.Response(404, text="not found"))
     fetcher = rr.AsyncFetcher(cd=tmp_path, mc=1)
     try:
         text = await fetcher.fetch("http://example.com/missing")
@@ -48,9 +46,7 @@ async def test_fetch_404_returns_empty(tmp_path):
 @respx.mock
 async def test_fetch_transport_error_returns_empty(tmp_path):
     """fetch(): ConnectError → "" (graceful)."""
-    respx.get("http://example.com/error").mock(
-        side_effect=httpx.ConnectError("simulated")
-    )
+    respx.get("http://example.com/error").mock(side_effect=httpx.ConnectError("simulated"))
     fetcher = rr.AsyncFetcher(cd=tmp_path, mc=1)
     try:
         text = await fetcher.fetch("http://example.com/error")
@@ -73,6 +69,7 @@ async def test_fetch_client_reuse(tmp_path):
 
 
 # ─── AsyncSearcher ──────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 @respx.mock

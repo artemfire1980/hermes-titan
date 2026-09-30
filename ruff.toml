@@ -4,15 +4,26 @@ target-version = "py312"
 
 [lint.per-file-ignores]
 "tests/*.py" = [
-    "TRY002",  # raise Exception в mock-функциях — оправдано
-    "TRY003",  # длинные сообщения об ошибках в тестах
-    "S101",    # assert в тестах — норма
-    "BLE001",  # except Exception в тестах — проверяем что ошибка брошена
-    "TRY301",  # raise внутри try в тестах — норма
-    "TRY400",  # logging.exception vs error — тесты
-    "F841",    # unused variable — бывает в тестах
-    "B017",    # pytest.raises(Exception) — оправдано
-    "TRY004",  # TypeError vs ValueError в тестах
-    "RUF012",  # mutable class attr без ClassVar — в fake-классах оправдано
-    "RUF059",  # unused unpacked variable — проверяем только часть tuple
+    "TRY002", "TRY003", "S101", "BLE001", "TRY301", "TRY400",
+    "F841", "B017", "TRY004", "RUF012", "RUF059",
+]
+"scripts/*.py" = [
+    "BLE001",  # except Exception — graceful degradation
+    "E722",    # bare except — техдолг, чиним в отдельном CP
+    "S110",    # try-except-pass — graceful degradation
+    "S112",    # try-except-continue
+    "S101",    # assert
+    "DTZ005",  # datetime.now() без tz — техдолг
+    "DTZ006",  # datetime.fromtimestamp() без tz — техдолг
+    "RUF012",  # mutable class attr — техдолг
+    "TRY002",  # кастомные исключения
+    "TRY003",  # длинные сообщения
+    "TRY004",  # TypeError vs ValueError
+    "SIM102",  # nested if
+    "SIM115",  # open без with
+    "SIM118",  # in dict.keys()
+    "C401",    # set comprehension
+    "UP022",   # capture_output
+    "ASYNC230",# open в async
+    "F841",    # unused variable
 ]

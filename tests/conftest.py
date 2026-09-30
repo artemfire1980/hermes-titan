@@ -3,6 +3,7 @@
 Добавляет scripts/ в sys.path, чтобы research_runner.py мог
 импортировать summary_generator и другие локальные модули.
 """
+
 import sys
 from pathlib import Path
 

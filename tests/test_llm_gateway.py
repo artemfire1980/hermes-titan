@@ -1,10 +1,12 @@
 """Тесты LLMGateway.chat через respx (mock HTTP)."""
+
 import httpx
 import pytest
 import research_runner as rr
 import respx
 
 # ─── Helpers ────────────────────────────────────────────────────────
+
 
 def _make_gateway(url="http://test-llm.local"):
     """Минимальный LLMGateway для тестов."""
@@ -16,6 +18,7 @@ def _ok_json(content="Hello!"):
 
 
 # ─── Тесты ──────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 @respx.mock

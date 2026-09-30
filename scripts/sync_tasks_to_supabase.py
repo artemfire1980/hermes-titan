@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 """Sync local task ledger to Supabase (idempotent upsert)."""
-import os
-import sys
+
 import json
+import os
 import sqlite3
+import sys
 from pathlib import Path
+
 from supabase import create_client
 
 DB_PATH = Path.home() / "ai-system" / "data" / "tasks.db"
+
 
 def load_env():
     env_file = Path.home() / "ai-system" / ".env"
@@ -16,6 +19,7 @@ def load_env():
             if "=" in line and not line.startswith("#"):
                 k, _, v = line.partition("=")
                 os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
+
 
 def main():
     load_env()
@@ -45,7 +49,7 @@ def main():
     for row in rows:
         data = dict(row)
         # Convert JSON fields
-        for json_key in ('changed_files', 'pre_existing_changes'):
+        for json_key in ("changed_files", "pre_existing_changes"):
             if data.get(json_key):
                 try:
                     data[json_key] = json.loads(data[json_key])
@@ -58,8 +62,11 @@ def main():
             errors += 1
             print(f"⚠️ {data.get('task_id')}: {e}")
 
-    print(f"✅ Synced {synced}/{len(rows)} tasks to Supabase" +
-          (f" ({errors} errors)" if errors else ""))
+    print(
+        f"✅ Synced {synced}/{len(rows)} tasks to Supabase"
+        + (f" ({errors} errors)" if errors else "")
+    )
+
 
 if __name__ == "__main__":
     main()

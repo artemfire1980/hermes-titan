@@ -19,7 +19,7 @@ if [ "$1" = "get" ]; then
             host=*) host="${line#*=}" ;;
         esac
     done
-    
+
     if [ "$host" = "github.com" ] && [ -n "$GITHUB_TOKEN" ]; then
         echo "protocol=$protocol"
         echo "host=$host"

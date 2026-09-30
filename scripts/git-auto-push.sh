@@ -42,7 +42,7 @@ for file in $(git diff --cached --name-only | grep -v '\.gitignore$'); do
         echo "   Файл будет исключён из коммита."
         git reset HEAD "$file" 2>/dev/null || true
         SECRETS_FOUND=1
-        
+
         # Отправляем уведомление в Telegram
         if [ -n "${TELEGRAM_BOT_TOKEN:-}" ] && [ -n "${TELEGRAM_CHAT_ID:-}" ]; then
             MSG="⚠️ Автопуш: возможный секрет в $file (файл исключён из коммита)"
