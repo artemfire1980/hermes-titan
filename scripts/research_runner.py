@@ -19,6 +19,11 @@ from difflib import SequenceMatcher
 from pathlib import Path
 
 import httpx
+
+# === CONFIG ===
+# _env_candidates, _load_dotenv перенесены в research.config (CP-036)
+# Импорт: from research.config import _env_candidates, _load_dotenv (выше)
+from research.config import _load_dotenv
 from research.json_utils import parse_json_resilient
 from research.models import Evidence
 from research.text_utils import (
@@ -32,41 +37,6 @@ from summary_generator import ExecutiveSummaryGenerator, SummaryConfig
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 logger = logging.getLogger("deep-research")
-
-
-def _env_candidates():
-    """Пути к .env в порядке приоритета."""
-    candidates = []
-    # 1. HERMES_HOME (основной источник — там Hermes хранит .env)
-    hh = os.environ.get("HERMES_HOME")
-    if hh:
-        candidates.append(Path(hh) / ".env")
-    # 2. /mnt/ai-ssd/hermes/.env (hardcoded для VIM4 на случай, если HERMES_HOME не выставлен)
-    candidates.append(Path("/mnt/ai-ssd/hermes/.env"))
-    # 3. ~/.hermes/.env (если HERMES_HOME не задан и нет симлинка)
-    candidates.append(Path.home() / ".hermes" / ".env")
-    # 4. Fallback: локальный .env в ai-system (для тестов/отладки)
-    candidates.append(Path.home() / "ai-system" / ".env")
-    return candidates
-
-
-def _load_dotenv():
-    """Загружает .env из первого доступного источника. Не перезаписывает уже установленные env."""
-    for env_file in _env_candidates():
-        if not env_file.exists():
-            continue
-        logger.info("Loading env from: %s", env_file)
-        for line in env_file.read_text(encoding="utf-8").splitlines():
-            line = line.strip()
-            if not line or line.startswith("#") or "=" not in line:
-                continue
-            k, _, v = line.partition("=")
-            k = k.strip()
-            v = v.strip().strip('"').strip("'")
-            os.environ.setdefault(k, v)
-        return  # грузим только первый найденный
-    logger.warning("No .env file found in candidates: %s", [str(p) for p in _env_candidates()])
-
 
 _load_dotenv()
 
