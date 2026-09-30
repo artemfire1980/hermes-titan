@@ -618,3 +618,26 @@ runtime — `tools/python-3.14.7` (NumPy 2.5.3 уже там). Директор�
 - Маркеры: строки 77, 237 в `store.py`.
 
 Проверено: `holographic-patch.sh` идемпотентен (v3).
+
+## DEC-039: Upstream PR #129521 — entity extraction
+
+Открыт PR в NousResearch/hermes-agent:
+- URL: https://github.com/NousResearch/hermes-agent/pull/129521
+- Ветка: feature/extract-entities-cyrillic-camelcase
+- Коммит: b4c9def
+- Файл: plugins/memory/holographic/store.py (+45 / −4)
+
+Что отправлено:
+- _RE_SINGLE_ENTITY расширен (Cyrillic, ALL CAPS, CamelCase, hyphen)
+- _STOP_WORDS добавлены
+- _extract_entities — фильтр + дедуп подстрок
+
+Локально НЕ отправлено (hermes-titan-specific):
+- __init__.py: replace/remove в on_memory_write (patch v2)
+- retrieval.py: retrieval_count в search() (patch v2)
+
+После merge upstream:
+- Удалить Patch 3 (store.py) из holographic-patch.sh.
+- Оставить Patch 1 и Patch 2 (они не отправлены).
+
+Статус: Open, ждём CI/review.

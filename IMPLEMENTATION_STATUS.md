@@ -24,6 +24,7 @@
 | Recovery (backup.sh + checkpoints) | ✅ | CP-010 |
 | Kanban toolset (native tools) | ✅ | CP-012 |
 | Скрипты перенесены из бэкапа | ✅ | CP-005 |
+| Upstream PR #129521 (entity extraction) | ⏳ open | CP-035 |
 | Python underscore renaming | ✅ | CP-022 |
 
 ## Не сделано
