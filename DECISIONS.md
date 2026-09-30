@@ -572,3 +572,26 @@ gateway. NumPy ставили в первые два, а нужен был в т
 - Полный baseline: `docs/CP-008-BASELINE.md`
 - Связанные: DEC-024 (Hindsight отклонён), DEC-025 (Holographic выбран),
   DEC-026 (Holographic принят с ограничениями).
+
+## DEC-037: ruff.toml должен быть в git ДО первого CI-прогона
+
+Проблема: CI #1 (`92ba2db`) упал с 122 ошибками ruff, хотя локально
+`ruff check .` давал `All checks passed!`.
+
+Причина: `ruff.toml` с `[lint.per-file-ignores]` для `scripts/*.py`
+не был в git на момент CI #1. CI применял дефолтные правила ruff
+(I001 import sorting, UP017 datetime.UTC, BLE001 broad except и др.),
+которые локально отключены через ruff.toml.
+
+Решение:
+- `ruff.toml` добавлен в `2b5599a` (fix CP-032).
+- CI #2 (`2b5599a`) — зелёный.
+- `requirements.lock.txt` содержит pinned версии (httpx, pydantic и др.).
+
+Правило: любой конфиг-файл (ruff.toml, pyproject.toml, .pre-commit-config.yaml)
+должен попадать в первый коммит CP, ДО запуска CI. Иначе CI применяет
+дефолтные правила и даёт ложные ошибки.
+
+Коммиты:
+- CI #1 (`92ba2db`): RED, 122 ошибки ruff.
+- CI #2 (`2b5599a`): GREEN, 50s, все jobs passed.
