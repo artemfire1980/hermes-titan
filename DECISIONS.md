@@ -595,3 +595,26 @@ gateway. NumPy ставили в первые два, а нужен был в т
 Коммиты:
 - CI #1 (`92ba2db`): RED, 122 ошибки ruff.
 - CI #2 (`2b5599a`): GREEN, 50s, все jobs passed.
+
+## DEC-038: ensure-hrr-numpy удалён, store.py в патч v3
+
+Проблема 1: `ensure-hrr-numpy` (в `bin/` + systemd drop-in) проверял
+`installs/21af0c3aa8d717d2/environments/661225cb.../venv`, но активный
+runtime — `tools/python-3.14.7` (NumPy 2.5.3 уже там). Директория
+`661225cb` могла исчезнуть при `hermes update` → gateway бы не стартовал.
+
+Решение 1: удалён `ensure-hrr-numpy` + drop-in `ensure-hrr-numpy.conf`.
+Проверено: gateway работает, NumPy 2.5.3 в активном runtime.
+
+Проблема 2: `store.py` был изменён вручную (расширенный `_extract_entities`
+с Cyrillic, ALL CAPS, CamelCase, `_STOP_WORDS`). Эти изменения НЕ входили
+в `holographic-patch.sh` → потерялись бы при `hermes update`.
+
+Решение 2: `holographic-patch.sh` v3 — добавлен Patch 3 для `store.py`:
+- Проверяет, расширены ли `_RE_SINGLE_ENTITY` (Cyrillic) и есть ли `_STOP_WORDS`.
+- Если да — добавляет маркеры `HOLOGRAPHIC_PATCH_v3`, не меняет код.
+- Если нет — полная замена upstream-версии на расширенную.
+- Бэкап `store.py.orig` (один раз).
+- Маркеры: строки 77, 237 в `store.py`.
+
+Проверено: `holographic-patch.sh` идемпотентен (v3).
