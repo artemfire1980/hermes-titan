@@ -174,81 +174,9 @@ JUNK_DOMAIN_SUBSTRINGS = (
 
 # === EVIDENCE ===
 # FactValidator, EvidenceVerifier перенесены в research.evidence (CP-036, шаг 7a)
-# ConflictDict, ConflictDetector пока остаются (шаг 7b)
-# Импорт: from research.evidence import FactValidator, EvidenceVerifier (выше)
-from research.evidence import EvidenceVerifier, FactValidator
-
-
-class ConflictDict(dict):
-    """Dict с атрибутным доступом — совместимость с .type и ["conflict_type"]."""
-
-    def __getattr__(self, name):
-        try:
-            return self[name]
-        except KeyError:
-            raise AttributeError(name)
-
-
-class ConflictDetector:
-    @classmethod
-    def detect(cls, evidences):
-        groups = defaultdict(list)
-        for e in evidences:
-            if e.value is None or not e.metric:
-                continue
-            # Убираем scope из ключа - он уже нормализован через aliases
-            key = (e.metric, normalize_geography(e.geography), e.unit, e.currency)
-            groups[key].append(e)
-        conflicts = []
-        for key, grp in groups.items():
-            if len(grp) < 2:
-                continue
-            vals = [e.value for e in grp]
-            mn, mx = min(vals), max(vals)
-            if mn == 0:
-                continue
-            div = (mx - mn) / mn
-            stypes = {e.source_type for e in grp}
-            years = {e.year for e in grp if e.year}
-            scopes = {e.market_scope for e in grp}
-            if len(years) > 1:
-                ct, th = "TIME_DIFF", 0.30
-            elif len(scopes) > 1:
-                ct, th = "SCOPE_DIFF", 0.30
-            elif len(stypes) > 1:
-                ct, th = "METHODOLOGY_DIFF", 0.25
-            else:
-                ct, th = "DIRECT_CONFLICT", 0.15
-            if div > th:
-                conflicts.append(
-                    ConflictDict(
-                        {
-                            "metric_key": [str(k) for k in key],
-                            "conflict_type": ct,
-                            "type": ct,
-                            "divergence": round(div, 3),
-                            "threshold": th,
-                            "evidences": [
-                                {
-                                    "evidence_id": e.evidence_id,
-                                    "value": e.value,
-                                    "value_raw": e.value_raw,
-                                    "source_url": e.source_url,
-                                    "source_type": e.source_type,
-                                    "year": e.year,
-                                }
-                                for e in grp
-                            ],
-                            "resolution_hint": {
-                                "DIRECT_CONFLICT": "report both",
-                                "METHODOLOGY_DIFF": "explain methodology",
-                                "SCOPE_DIFF": "clarify scope",
-                                "TIME_DIFF": "note time diff",
-                            }.get(ct, "report both"),
-                        }
-                    )
-                )
-        return conflicts
+# ConflictDict, ConflictDetector перенесены в research.evidence (CP-036, шаг 7b)
+# Импорт: from research.evidence import ConflictDetector, ConflictDict, EvidenceVerifier, FactValidator (выше)
+from research.evidence import ConflictDetector, EvidenceVerifier, FactValidator
 
 
 # === ADAPTIVE PACER (AIMD) ===
