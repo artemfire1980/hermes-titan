@@ -700,7 +700,7 @@ scripts/research_runner.py → thin CLI (~40 строк).
 
 Бэкап: pre-CP-036-backup, research_runner.py.bak-20260930.
 
-## DEC-023: Модуляризация research_runner.py (CP-036)
+## DEC-031: Модуляризация research_runner.py (CP-036)
 
 Обоснование: монолитный файл 858 строк — сложно поддерживать, тестировать, развивать.
 
