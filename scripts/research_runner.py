@@ -6,20 +6,28 @@ import asyncio
 import hashlib
 import json
 import logging
-import os
 import re
 import sys
 import time
 from collections import defaultdict
 from datetime import UTC, datetime
-from pathlib import Path
 
 from research.checkpoint import CheckpointManager
 
 # === CONFIG ===
 # _env_candidates, _load_dotenv перенесены в research.config (CP-036)
 # Импорт: from research.config import _env_candidates, _load_dotenv (выше)
-from research.config import _load_dotenv
+from research.config import (
+    CACHE_DIR,
+    EXTRACT_PROMPT,
+    FREELLM_API_KEY,
+    FREELLM_URL,
+    METRICS_FILE,
+    REPORTS_DIR,
+    SEARXNG_URL,
+    WORKING_DIR,
+    _load_dotenv,
+)
 from research.models import Evidence
 from research.scoring import ConfidenceScorer, SourceQualityScorer
 from research.text_utils import (
@@ -36,14 +44,6 @@ logger = logging.getLogger("deep-research")
 
 _load_dotenv()
 
-FREELLM_URL = os.environ.get("FREELLM_URL", "http://127.0.0.1:3001")
-FREELLM_API_KEY = os.environ.get("OPENAI_API_KEY", "")
-SEARXNG_URL = os.environ.get("SEARXNG_URL", "http://127.0.0.1:8888")
-RESEARCH_DIR = Path(os.environ.get("RESEARCH_DIR", str(Path.home() / "research")))
-REPORTS_DIR = RESEARCH_DIR / "reports"
-CACHE_DIR = RESEARCH_DIR / "cache"
-WORKING_DIR = RESEARCH_DIR / "working"
-METRICS_FILE = RESEARCH_DIR / "metrics.jsonl"
 
 # === URL PREFILTER ===
 JUNK_DOMAINS = {
@@ -173,6 +173,19 @@ JUNK_DOMAIN_SUBSTRINGS = (
 # Импорт: from research.evidence import ConflictDetector, ConflictDict, EvidenceVerifier, FactValidator (выше)
 from research.evidence import ConflictDetector, EvidenceVerifier, FactValidator
 
+# === JSON UTILS ===
+# repair_json, parse_json_resilient перенесены в research.json_utils (CP-036)
+# Импорт: from research.json_utils import repair_json, parse_json_resilient (выше)
+# === LLM GATEWAY ===
+# MODEL_CHAIN_EXTRACT, LLMGateway перенесены в research.llm (CP-036, шаг 9b)
+# Импорт: from research.llm import AdaptivePacer, CircuitBreaker, LLMGateway, MODEL_CHAIN_EXTRACT (выше)
+# Версия алгоритма extraction — при изменении инвалидирует кэш
+# CACHE_VERSION = "extract-v1"  # moved to research.config
+# === FETCHER ===
+# AsyncFetcher перенесён в research.fetch (CP-036, шаг 10)
+# Импорт: from research.fetch import AsyncFetcher (выше)
+from research.fetch import AsyncFetcher
+
 # === LINEAGE ===
 # detect_lineage перенесена в research.lineage (CP-036, шаг 8)
 # Импорт: from research.lineage import detect_lineage (выше)
@@ -184,35 +197,12 @@ from research.lineage import detect_lineage
 # Импорт: from research.llm import AdaptivePacer, CircuitBreaker, LLMGateway, MODEL_CHAIN_EXTRACT (выше)
 from research.llm import LLMGateway
 
-# === JSON UTILS ===
-# repair_json, parse_json_resilient перенесены в research.json_utils (CP-036)
-# Импорт: from research.json_utils import repair_json, parse_json_resilient (выше)
-
-
-# === LLM GATEWAY ===
-# MODEL_CHAIN_EXTRACT, LLMGateway перенесены в research.llm (CP-036, шаг 9b)
-# Импорт: from research.llm import AdaptivePacer, CircuitBreaker, LLMGateway, MODEL_CHAIN_EXTRACT (выше)
-
-
-# Версия алгоритма extraction — при изменении инвалидирует кэш
-CACHE_VERSION = "extract-v1"
-
-# === FETCHER ===
-# AsyncFetcher перенесён в research.fetch (CP-036, шаг 10)
-# Импорт: from research.fetch import AsyncFetcher (выше)
-from research.fetch import AsyncFetcher
-
 # === SEARCH ===
 # TokenBucket, DEFAULT_SEARCH_CATEGORIES, AsyncSearcher перенесены в research.search (CP-036, шаг 11)
 # Импорт: from research.search import TokenBucket, DEFAULT_SEARCH_CATEGORIES, AsyncSearcher (выше)
 from research.search import DEFAULT_SEARCH_CATEGORIES, AsyncSearcher
 
-EXTRACT_PROMPT = """Fact extraction specialist. Извлеки ТОЛЬКО из текста. Не придумывай.
-ПОДТЕМА: {subtopic}
-ДОКУМЕНТ:
-{document}
-Верни JSON: {{"evidences":[{{"claim":"...","metric":"market_size|market_share|production|growth_rate|other","value":12.0,"value_raw":"12 млн т","unit":"million_tonnes|USD_bn|percent","currency":null,"year":2023,"forecast_type":"historical|current|published_forecast","evidence_text":"ТОЧНАЯ цитата","market_scope":"...","geography":"...","confidence":"high|medium|low"}}]}}
-Максимум 5 evidences. evidence_text=ДОСЛОВНАЯ цитата. Никаких placeholder. Пустой список если нет."""
+# EXTRACT_PROMPT moved to research.config
 
 
 class DeepResearch:
