@@ -27,3 +27,6 @@ target-version = "py312"
     "ASYNC230",# open в async
     "F841",    # unused variable
 ]
+# research_runner.py: импорты для обратной совместимости с тестами
+# (тесты используют `from research_runner import X` и `rr.X`)
+"scripts/research_runner.py" = ["F401"]
