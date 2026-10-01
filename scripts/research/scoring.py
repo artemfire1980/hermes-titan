@@ -77,3 +77,30 @@ class SourceQualityScorer:
         if any(k in d for k in ["blogspot", "medium", "wordpress", "habr"]):
             return "blog"
         return "news"
+
+
+class ConfidenceScorer:
+    @classmethod
+    def score(cls, e):
+        s = 0
+        if e.source_authority > 0.8:
+            s += 2
+        elif e.source_authority > 0.6:
+            s += 1
+        if e.evidence_quality > 0.7:
+            s += 2
+        elif e.evidence_quality > 0.5:
+            s += 1
+        if e.year and 2020 <= e.year <= 2026:
+            s += 1
+        if e.value is not None:
+            s += 1
+        if e.verification_status == "verified_exact":
+            s += 2
+        elif e.verification_status.startswith("verified_"):
+            s += 1
+        if s >= 6:
+            return "high"
+        if s >= 4:
+            return "medium"
+        return "low"

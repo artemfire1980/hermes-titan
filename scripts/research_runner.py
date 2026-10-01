@@ -26,7 +26,7 @@ from research.checkpoint import CheckpointManager
 from research.config import _load_dotenv
 from research.json_utils import parse_json_resilient
 from research.models import Evidence
-from research.scoring import SourceQualityScorer
+from research.scoring import ConfidenceScorer, SourceQualityScorer
 from research.text_utils import (
     _relevance_score,
     normalize_geography,
@@ -169,35 +169,8 @@ JUNK_DOMAIN_SUBSTRINGS = (
 
 
 # === SCORING ===
-# SourceQualityScorer перенесён в research.scoring (CP-036, шаг 6a)
-# Импорт: from research.scoring import SourceQualityScorer (выше)
-
-
-class ConfidenceScorer:
-    @classmethod
-    def score(cls, e):
-        s = 0
-        if e.source_authority > 0.8:
-            s += 2
-        elif e.source_authority > 0.6:
-            s += 1
-        if e.evidence_quality > 0.7:
-            s += 2
-        elif e.evidence_quality > 0.5:
-            s += 1
-        if e.year and 2020 <= e.year <= 2026:
-            s += 1
-        if e.value is not None:
-            s += 1
-        if e.verification_status == "verified_exact":
-            s += 2
-        elif e.verification_status.startswith("verified_"):
-            s += 1
-        if s >= 6:
-            return "high"
-        if s >= 4:
-            return "medium"
-        return "low"
+# SourceQualityScorer, ConfidenceScorer перенесены в research.scoring (CP-036, шаги 6a+6b)
+# Импорт: from research.scoring import SourceQualityScorer, ConfidenceScorer (выше)
 
 
 class FactValidator:
