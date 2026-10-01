@@ -1,0 +1,3 @@
+
+[tool.ruff.lint.per-file-ignores]
+"scripts/research_runner.py" = ["F401"]  # импорты для обратной совместимости
