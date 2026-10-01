@@ -1,3 +1,10 @@
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
 
 [tool.ruff.lint.per-file-ignores]
-"scripts/research_runner.py" = ["F401"]  # импорты для обратной совместимости
+# research_runner.py: импорты для обратной совместимости с тестами
+# (тесты используют `from research_runner import X` и `rr.X`)
+"scripts/research_runner.py" = ["F401"]
