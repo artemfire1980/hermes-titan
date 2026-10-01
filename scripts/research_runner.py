@@ -17,6 +17,18 @@ from research.config import (
 # Импорты для обратной совместимости с тестами
 # (тесты используют `from research_runner import X` и `rr.X`)
 # pylint: disable=unused-import
+from research.evidence import ConflictDetector, EvidenceVerifier, FactValidator
+from research.fetch import AsyncFetcher
+from research.lineage import detect_lineage
+from research.llm import LLMGateway
+from research.models import Evidence
+from research.scoring import ConfidenceScorer, SourceQualityScorer
+from research.search import DEFAULT_SEARCH_CATEGORIES, AsyncSearcher
+from research.text_utils import (
+    _relevance_score,
+    normalize_geography,
+    normalize_scope,
+)
 
 # Production-grade summary generator
 
