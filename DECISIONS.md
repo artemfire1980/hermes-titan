@@ -699,3 +699,20 @@ scripts/research_runner.py → thin CLI (~40 строк).
 13. thin CLI в research_runner.py
 
 Бэкап: pre-CP-036-backup, research_runner.py.bak-20260930.
+
+## DEC-022: Модуляризация research_runner.py (CP-036)
+
+Обоснование: монолитный файл 858 строк — сложно поддерживать, тестировать, развивать.
+
+Решение: разбить на 12 модулей в `research/`:
+- `models`, `text_utils`, `json_utils`, `config`, `checkpoint`, `scoring`,
+  `evidence`, `lineage`, `llm`, `fetch`, `search`, `runner`.
+
+`research_runner.py` = 97 строк: тонкий CLI + реэкспорт для обратной совместимости
+(тесты используют `from research_runner import X`).
+
+Метод: `auto-modularize.sh` + Aider (Ultra) с точечными промптами.
+
+Итог: 18 коммитов, 42 pytest passed на каждом шаге.
+
+См. `docs/CP-036-MODULARIZATION.md`.
