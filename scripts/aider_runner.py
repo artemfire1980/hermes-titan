@@ -20,18 +20,17 @@ import re
 import signal
 import subprocess
 import sys
-import sys as _sys
 import time
 import uuid
 from datetime import UTC, datetime
 from pathlib import Path
 
-_sys.path.insert(0, str(Path("/home/khadas/ai-system/scripts")))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 import task_ledger
 
 HOME = Path.home()
 # Aider установлен через pipx
-AIDER_BIN = Path("/home/khadas/.local/bin/aider")
+AIDER_BIN = Path.home() / ".local" / "bin" / "aider"
 if not AIDER_BIN.exists():
     import shutil as _sh
 
