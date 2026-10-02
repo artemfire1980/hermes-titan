@@ -716,3 +716,22 @@ scripts/research_runner.py → thin CLI (~40 строк).
 Итог: 18 коммитов, 42 pytest passed на каждом шаге.
 
 См. `docs/CP-036-MODULARIZATION.md`.
+
+
+## DEC-040: Оптимизация промпта для Telegram (CP-037)
+
+Обоснование: фиксированный overhead Hermes в Telegram достигал ~101 KB.
+
+Решение:
+- Плагин `progressive-skill` — Skills: 5 456 → 0 B
+- `tools.compact_schemas: true` — System prompt: 16 477 → 13 153 B
+- `tool_search.defer` — отложены delegation, session_search, todo и др.
+- `skills.platform_disabled.telegram` — 20 скиллов отключены
+- 12 toolsets отключены для Telegram
+
+Результат: **~101 KB → ~52 KB (−48%)**.
+
+Проверено: бот видит 35 скиллов в 10 категориях.
+
+Источники: RFC #64876, Issue #34667, #67273, #20880, PR #40993, #39184.
+См. `docs/PROMPT-OPTIMIZATION-CP037.md`.
