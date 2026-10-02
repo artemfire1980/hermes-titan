@@ -1,6 +1,6 @@
 # Статус внедрения v7.2
 
-Версия: 0.36.0 · Контрольная точка: CP-036
+Версия: 0.37.0 · Контрольная точка: CP-037
 
 ## Состояние компонентов
 
@@ -21,7 +21,7 @@
 | Интеграция Kanban→Hermes→Aider | ✅ (26s тест) | CP-007 |
 | Memory provider: Holographic | ✅ (recall 5/5) | CP-008 |
 | Resource governor (CP-009) | ✅ | CP-009 |
-| Recovery (backup.sh + checkpoints) | ✅ | CP-010 |
+| Recovery (backup.sh + checkpoints) | ✅ тест 2026-10-02 | CP-010 |
 | Kanban toolset (native tools) | ✅ | CP-012 |
 | Скрипты перенесены из бэкапа | ✅ | CP-005 |
 | Upstream PR #129521 (entity extraction) | ⏳ open | CP-035 |
@@ -36,6 +36,7 @@
 ## Следующие шаги
 
 - CP-011 — базовый уровень разработки (финальный)
+- См. `docs/RECOVERY-TEST-2026-10-02.md` — тест восстановления пройден
 
 ## Тесты
 
