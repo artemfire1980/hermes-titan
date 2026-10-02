@@ -111,7 +111,8 @@
 - `SUPABASE_*` (HTTP 200)
 - `AWS_*` (R2 access key 32 chars)
 - `HERMES_TIMEZONE=Europe/Minsk`
-- `SEARXNG_BASE_URL`, `SEARXNG_INSTANCE_URL`
+- `SEARXNG_BASE_URL` (для SearXNG-контейнера, `configs/searxng/docker-compose.yml`)
+- `SEARXNG_URL` (для кода: `scripts/research/config.py:47`)
 
 `GITHUB_REPO=hermes-vim4` НЕ перенесён — у нас `hermes-titan`.
 
