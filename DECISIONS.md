@@ -755,3 +755,16 @@ scripts/research_runner.py → thin CLI (~40 строк).
 **Решение:** оставить по умолчанию. 8 процессов ≈ 8 GB RAM, соответствует VIM4.
 
 **Переопределение (если понадобится):** `hermes config set kanban.max_in_progress <N>`.
+## DEC-046: nemo_relay отсутствует — штатное состояние
+
+**Факт:** при старте gateway в логах появляется `ModuleNotFoundError: No module named 'nemo_relay'` (agent.log, errors.log).
+
+**Причина:** `nemo_relay` — optional extra Hermes, в `uv.lock` помечен `nemo-relay = false`. На Python 3.12 не устанавливается.
+
+**Поведение Hermes:** при отсутствии пакета `RelayHostRegistry` ловит `ImportError` и создаёт `NoopRelayRuntime`. Все функции Relay становятся no-op, ядро Hermes работает полностью.
+
+**Решение:** не устанавливать. Relay-телеметрия в проекте не используется. Пакет имеет известные проблемы (рассинхрон scope stack, зависания сессий) и не даёт выгоды.
+
+**Upstream:** PR #74850 признаёт WARNING в логах шумом, фикс в работе.
+
+**Проверено:** 2026-10-02. Основные функции (Telegram, kanban, Aider, memory) работают без Relay.
