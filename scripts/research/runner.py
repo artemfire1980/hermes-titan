@@ -567,6 +567,7 @@ class DeepResearch:
         rp = REPORTS_DIR / f"{self.rid}.md"
         rp.write_text("\n".join(lines), encoding="utf-8")
         sidecar = {
+            "schema_version": "1.0",
             "research_id": self.rid,
             "topic": self.topic,
             "generated_at": datetime.now(UTC).isoformat(timespec="seconds"),
