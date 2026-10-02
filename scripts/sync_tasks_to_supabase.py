@@ -12,17 +12,11 @@ from supabase import create_client
 DB_PATH = Path.home() / "ai-system" / "data" / "tasks.db"
 
 
-def load_env():
-    env_file = Path.home() / "ai-system" / ".env"
-    if env_file.exists():
-        for line in env_file.read_text().splitlines():
-            if "=" in line and not line.startswith("#"):
-                k, _, v = line.partition("=")
-                os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
+from env_utils import load_env
 
 
 def main():
-    load_env()
+    load_env([Path.home() / "ai-system" / ".env"])
 
     url = os.environ.get("SUPABASE_URL")
     key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")

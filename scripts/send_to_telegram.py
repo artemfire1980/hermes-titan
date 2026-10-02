@@ -9,25 +9,9 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
+from env_utils import load_env
 
-def load_env():
-    """Загружает переменные из .env"""
-    env_file = Path.home() / "ai-system" / ".env"
-    if not env_file.exists():
-        env_file = Path.home() / ".hermes" / ".env"
-    if env_file.exists():
-        for line in env_file.read_text().splitlines():
-            line = line.strip()
-            if not line or line.startswith("#") or "=" not in line:
-                continue
-            k, _, v = line.partition("=")
-            k = k.strip()
-            v = v.strip().strip('"').strip("'")
-            if k not in os.environ:
-                os.environ[k] = v
-
-
-load_env()
+load_env([Path.home() / "ai-system" / ".env", Path.home() / ".hermes" / ".env"])
 
 BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")

@@ -25,22 +25,19 @@ def _env_candidates():
     return candidates
 
 
+# Импорт общего парсера (scripts/env_utils.py)
+import sys as _sys
+from pathlib import Path as _Path
+
+_SCRIPTS = _Path(__file__).resolve().parent.parent
+if str(_SCRIPTS) not in _sys.path:
+    _sys.path.insert(0, str(_SCRIPTS))
+from env_utils import load_env as _load_env
+
+
 def _load_dotenv():
     """Загружает .env из первого доступного источника. Не перезаписывает уже установленные env."""
-    for env_file in _env_candidates():
-        if not env_file.exists():
-            continue
-        logger.info("Loading env from: %s", env_file)
-        for line in env_file.read_text(encoding="utf-8").splitlines():
-            line = line.strip()
-            if not line or line.startswith("#") or "=" not in line:
-                continue
-            k, _, v = line.partition("=")
-            k = k.strip()
-            v = v.strip().strip('"').strip("'")
-            os.environ.setdefault(k, v)
-        return  # грузим только первый найденный
-    logger.warning("No .env file found in candidates: %s", [str(p) for p in _env_candidates()])
+    _load_env(_env_candidates(), log=logger)
 
 
 # === CONSTANTS (moved from research_runner.py, CP-036, step 12a) ===
