@@ -35,7 +35,7 @@ class CheckpointManager:
         try:
             s = json.loads(p.read_text(encoding="utf-8"))
             return s if s.get("schema_version") == self.SCHEMA_VERSION else None
-        except:
+        except (OSError, ValueError, AttributeError):
             return None
 
     def cleanup(self, rid):

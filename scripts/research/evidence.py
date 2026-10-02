@@ -43,7 +43,7 @@ class FactValidator:
             if m:
                 try:
                     e.value = float(m.group(1).replace(",", "."))
-                except:
+                except ValueError:
                     pass
         return hard, soft
 

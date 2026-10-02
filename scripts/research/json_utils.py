@@ -77,7 +77,7 @@ def parse_json_resilient(text, array_key="evidences"):
                 return parsed
             if isinstance(parsed, list):
                 return {"evidences": parsed}
-        except:
+        except (ValueError, TypeError):
             continue
     # Salvage individual objects
     objs = []
@@ -104,7 +104,7 @@ def parse_json_resilient(text, array_key="evidences"):
                 obj = json.loads(repair_json(text[start : i + 1]))
                 if isinstance(obj, dict) and obj:
                     objs.append(obj)
-            except:
+            except (ValueError, TypeError):
                 continue
     if objs:
         items = [o for o in objs if array_key not in o]

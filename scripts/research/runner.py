@@ -386,7 +386,7 @@ class DeepResearch:
             return None
         try:
             val = float(raw["value"]) if raw.get("value") is not None else None
-        except:
+        except (ValueError, TypeError, KeyError):
             val = None
         e = Evidence(
             claim=claim,
@@ -593,7 +593,7 @@ class DeepResearch:
                     )
                     + "\n"
                 )
-        except:
+        except (OSError, TypeError, ValueError):
             pass
         return {"report": str(rp), "sidecar": str(sp), "stats": stats}
 
@@ -603,7 +603,7 @@ class DeepResearch:
             for ln in open("/proc/self/status"):
                 if ln.startswith("VmRSS"):
                     return round(int(ln.split()[1]) / 1024, 1)
-        except:
+        except (OSError, ValueError, IndexError):
             pass
         return -1
 
