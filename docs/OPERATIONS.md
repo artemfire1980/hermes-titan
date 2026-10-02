@@ -214,6 +214,9 @@
 > 55 установлено, 20 отключено для Telegram, 35 доступно.
 >
 > Источник: hermes skills list + skills.platform_disabled.telegram в /mnt/ai-ssd/hermes/config.yaml.
+>
+> Обоснование отключения — DEC-040: оптимизация промпта Telegram, overhead ~101 KB → ~52 KB (−48%).
+> Детали: docs/PROMPT-OPTIMIZATION-CP037.md
 
 ### 4.1. Доступные (35)
 
@@ -498,6 +501,11 @@ AIDER_FAILED, TIMEOUT, POST_FLIGHT_FAILED, GIT_CONFLICT, GIT_STATUS_FAILED.
 
 ### 7.4. Архитектура (Deep Research Agent v3.0)
 
+DEC-043: монолитный файл 858 строк разбит на 12 модулей в research/.
+research_runner.py = 97 строк (тонкий CLI + реэкспорт для тестов).
+Метод: auto-modularize.sh + Aider (Ultra). Итог: 18 коммитов, 42 pytest passed.
+Детали: docs/CP-036-MODULARIZATION.md.
+
 Модули (CP-036):
 
 - research.checkpoint — CheckpointManager
@@ -615,7 +623,15 @@ Project: hermes-titan (p_7464919e)
 - Dispatcher в gateway
 - Worker создаётся из task → вызывает Aider
 
-Детали: DEC-021, DEC-022, DEC-028, DEC-029.
+### 11.4. kanban.max_in_progress
+
+DEC-042: параметр не задан явно, Hermes использует memory-derived default = 8.
+8 процессов ≈ 8 GB RAM, соответствует VIM4.
+
+Переопределение (если понадобится):
+    hermes config set kanban.max_in_progress <N>
+
+Детали: DEC-021, DEC-022, DEC-028, DEC-029, DEC-042.
 
 ---
 
@@ -648,6 +664,15 @@ Memory tool: включён
 - v2: retrieval_count для search() (issue #101521)
 - v3: расширенный _extract_entities (Cyrillic, ALL CAPS, CamelCase, стоп-слова)
 
+DEC-038: ensure-hrr-numpy (в bin/ + systemd drop-in) удалён — указывал на
+несуществующий venv после hermes update. store.py включён в патч v3 (раньше
+патчился вручную). Маркеры: строки 77, 237 в store.py.
+
+Логика Patch 3 (store.py):
+- Если _RE_SINGLE_ENTITY расширен (Cyrillic) и есть _STOP_WORDS → добавить маркеры v3, не менять код
+- Иначе → полная замена upstream-версии на расширенную
+- Бэкап store.py.orig (один раз)
+
 Идемпотентность: маркеры HOLOGRAPHIC_PATCH_v1/v2/v3 в трёх файлах, повторный запуск — no-op.
 
 Патчит:
@@ -658,8 +683,6 @@ Memory tool: включён
 Переприменение:
 
     ~/ai-system/scripts/holographic-patch.sh
-
-Бэкапы: .orig файлы перед правками.
 
 ### 12.3. Управление через Telegram
 
@@ -786,12 +809,30 @@ Top-level секции:
 - skills — platform_disabled.telegram (20 скиллов)
 - tools — compact_schemas true, tool_search.defer (18 инструментов)
 
-### 16.1. Deferred tools (18)
+### 16.1. Оптимизация промпта Telegram (DEC-040)
+
+- Плагин progressive-skill — Skills: 5 456 → 0 B
+- tools.compact_schemas: true — System prompt: 16 477 → 13 153 B
+- tool_search.defer — отложены delegation, session_search, todo и др.
+- 20 скиллов отключены для Telegram
+- 12 toolsets отключены для Telegram
+
+Результат: ~101 KB → ~52 KB (−48%).
+Детали: docs/PROMPT-OPTIMIZATION-CP037.md.
+
+### 16.2. Deferred tools (18)
 
     computer_use, session_search, image_generate, todo_list, process_manage,
     cronjob_manage, drive_preview, gui_tour, desktop_preview, annotate_preview,
     show_tip, desktop_project, close_terminal, apply_layout, read_terminal,
     read_window_below, focus_pane, delegation
+
+### 16.3. PyYAML в runtime Python (DEC-041)
+
+Установлен в /mnt/ai-ssd/hermes/tools/python-3.14.7+.../bin/python3.14 -m pip install pyyaml.
+
+Риск: при hermes update / hermes pm install runtime Python может перезаписаться.
+Проверять после обновлений — иначе progressive-skill будет работать на defaults.
 
 ---
 
@@ -831,7 +872,7 @@ Top-level секции:
 | check-freellm-quotas.sh | Квоты FreeLLMAPI |
 | check-memory-peak.sh | Пик памяти |
 | check_r2_budget.sh | Бюджет R2 |
-| env_utils.py | Утилиты env |
+| env_utils.py | Единый парсер .env (DEC-047) |
 | git-auto-push.sh | Авто-пуш |
 | git-credential-github.sh | GitHub credential helper |
 | holographic-patch.sh | Патч Holographic v3 |
@@ -847,6 +888,22 @@ Top-level секции:
 | task_ledger.py | SQLite task storage |
 
 Поддиректории: coding-engine/, data-engine/, research/
+
+### 18.1. env_utils.py (DEC-047)
+
+Единый парсер .env для трёх скриптов: send_to_telegram.py, sync_tasks_to_supabase.py,
+scripts/research/config.py.
+
+Сигнатура: load_env(candidates, override=False, log=None)
+
+Читает первый существующий файл из candidates, делает setdefault (не перезаписывает
+уже установленные env), опционально логирует источник.
+
+Не унифицированы candidates — три разных списка путей. Реально существует только
+/mnt/ai-ssd/hermes/.env (HERMES_HOME). Остальные (~/ai-system/.env, ~/.hermes/.env)
+не существуют — скрипты работают только если env уже установлен снаружи.
+
+Коммит: faea162.
 
 ---
 
@@ -877,6 +934,13 @@ Top-level секции:
 - sudo tailscale status — Tailscale
 - hermes gateway status — Gateway
 - journalctl --user -u hermes-gateway-469b1f3f.service -f — логи gateway
+
+### 20.1. Штатные warning-и (игнорировать)
+
+DEC-046: ModuleNotFoundError: No module named 'nemo_relay' — штатное состояние.
+nemo_relay — optional extra Hermes, помечен nemo-relay = false в uv.lock.
+RelayHostRegistry ловит ImportError → NoopRelayRuntime. Relay-телеметрия не используется.
+Игнорировать warning в логах.
 
 ---
 
