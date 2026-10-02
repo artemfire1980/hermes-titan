@@ -12,11 +12,11 @@ from supabase import create_client
 DB_PATH = Path.home() / "ai-system" / "data" / "tasks.db"
 
 
-from env_utils import load_env
+from env_utils import default_candidates, load_env
 
 
 def main():
-    load_env([Path.home() / "ai-system" / ".env"])
+    load_env(default_candidates())
 
     url = os.environ.get("SUPABASE_URL")
     key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")

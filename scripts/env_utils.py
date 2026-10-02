@@ -8,6 +8,26 @@ import os
 logger = logging.getLogger(__name__)
 
 
+def default_candidates():
+    """Стандартный список путей .env по приоритету.
+
+    1. $HERMES_HOME/.env (основной источник, если переменная задана)
+    2. /mnt/ai-ssd/hermes/.env (hardcoded для VIM4)
+    3. ~/.hermes/.env
+    4. ~/ai-system/.env (fallback для тестов/отладки)
+    """
+    from pathlib import Path as _Path
+
+    candidates = []
+    hh = os.environ.get("HERMES_HOME")
+    if hh:
+        candidates.append(_Path(hh) / ".env")
+    candidates.append(_Path("/mnt/ai-ssd/hermes/.env"))
+    candidates.append(_Path.home() / ".hermes" / ".env")
+    candidates.append(_Path.home() / "ai-system" / ".env")
+    return candidates
+
+
 def load_env(candidates, override=False, log=None):
     """Загружает .env из первого существующего кандидата.
 

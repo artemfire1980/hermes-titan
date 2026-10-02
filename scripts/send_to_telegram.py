@@ -9,9 +9,9 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-from env_utils import load_env
+from env_utils import default_candidates, load_env
 
-load_env([Path.home() / "ai-system" / ".env", Path.home() / ".hermes" / ".env"])
+load_env(default_candidates())
 
 BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
