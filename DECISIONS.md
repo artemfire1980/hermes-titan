@@ -642,7 +642,7 @@ runtime — `tools/python-3.14.7` (NumPy 2.5.3 уже там). Директор�
 
 Статус: Open, ждём CI/review.
 
-## DEC-038: PR #129521 — статус ожидания CI approve
+## DEC-044: PR #129521 — статус ожидания CI approve
 
 Дата проверки: 2026-09-30.
 Статус: open, mergeable_state=unstable, draft=false.
@@ -662,7 +662,7 @@ Comments: нет.
 
 Действий от нас не требуется.
 
-## DEC-039: CP-036 — модуляризация research_runner.py
+## DEC-045: CP-036 — модуляризация research_runner.py
 
 Файл: 1864 строки, 15 классов, ~20 функций.
 План: разбить на scripts/research/ (12 модулей) + thin CLI.
@@ -700,7 +700,7 @@ scripts/research_runner.py → thin CLI (~40 строк).
 
 Бэкап: pre-CP-036-backup, research_runner.py.bak-20260930.
 
-## DEC-031: Модуляризация research_runner.py (CP-036)
+## DEC-043: Модуляризация research_runner.py (CP-036)
 
 Обоснование: монолитный файл 858 строк — сложно поддерживать, тестировать, развивать.
 
