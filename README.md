@@ -4,23 +4,30 @@
 
 ## Состояние
 
-- **Контрольная точка:** CP-030
-- **Версия:** 0.30.0
+- **Контрольная точка:** CP-037
+- **Версия:** 0.37.0
 - **Хранилище:** `/mnt/ai-ssd/ai-system` (симлинк `~/ai-system`)
 - **GitHub:** `artemfire1980/hermes-titan`
 
 ## Архитектура
 
-- **Ядро:** Hermes Agent `v0.21.5+3779` (`/mnt/ai-ssd/hermes/`)
-- **Модель:** FreeLLMAPI (`auto`, 1M контекст, 314 моделей)
+- **Ядро:** Hermes Agent `v0.21.5+4925.gb4c9def` (`/mnt/ai-ssd/hermes/`)
+- **Модель:** FreeLLMAPI `v0.13.2` (Docker `127.0.0.1:3001`, `auto`, 1M контекст)
 - **Aider:** `nvidia_nim/nvidia/nemotron-3-ultra-550b-a55b`
 - **Поиск:** SearXNG (Docker, 10 движков)
 - **Telegram:** whitelist + home channel + уведомления
 - **Kanban:** board `hermes-titan` + native tools + dispatcher
 - **Память:** Holographic (patch v2) + built-in + memory tool
-- **Двигатель данных:** `scripts/research_runner.py` (topic-aware plan)
+- **Двигатель данных:** `scripts/research_runner.py` (shim) + `scripts/research/` (CP-036)
 - **Executive Summary:** `scripts/summary_generator.py` (Pydantic + citations)
 - **Исполнитель кода:** `scripts/aider_runner.py` (изоляция через `/mnt/ai-ssd/ai-system/projects/`)
+
+## Документация
+
+- **`docs/OPERATIONS.md`** — полный справочник: команды, скрипты, диагностика
+- **`DECISIONS.md`** — 48 архитектурных решений (DEC-001…DEC-048)
+- **`ARCHITECTURE.md`** — общая архитектура
+- **`docs/RECOVERY.md`** — три уровня восстановления
 
 ## Тесты
 
