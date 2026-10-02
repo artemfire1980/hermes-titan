@@ -22,7 +22,8 @@ trap 'rmdir "$LOCK_FILE" 2>/dev/null' EXIT
 cd "$REPO_DIR" || exit 1
 
 # 1. Добавляем ТОЛЬКО безопасные директории (белый список)
-git add scripts/ configs/ tests/ docs/ .gitignore README.md ARCHITECTURE.md DECISIONS.md CHANGELOG.md IMPLEMENTATION_NOTES.md IMPLEMENTATION_STATUS.md pytest.ini 2>/dev/null || true
+STAGE_PATHS=(scripts/ configs/ tests/ docs/ .gitignore README.md ARCHITECTURE.md DECISIONS.md CHANGELOG.md IMPLEMENTATION_NOTES.md IMPLEMENTATION_STATUS.md pytest.ini)
+git add "${STAGE_PATHS[@]}" 2>/dev/null || true
 
 # 2. Проверка: есть ли изменения?
 if [ -z "$(git status --porcelain 2>/dev/null)" ]; then
@@ -74,7 +75,7 @@ if [ -x "$REPO_DIR/scripts/selfcheck.sh" ]; then
     if ! "$REPO_DIR/scripts/selfcheck.sh"; then
         echo "❌ Selfcheck не пройден — коммит отменён"
         # Сбрасываем staging чтобы не было "висящих" изменений
-        git reset HEAD >/dev/null 2>&1 || true
+        git reset HEAD -- "${STAGE_PATHS[@]}" >/dev/null 2>&1 || true
         exit 1
     fi
 else
