@@ -735,3 +735,23 @@ scripts/research_runner.py → thin CLI (~40 строк).
 
 Источники: RFC #64876, Issue #34667, #67273, #20880, PR #40993, #39184.
 См. `docs/PROMPT-OPTIMIZATION-CP037.md`.
+
+## DEC-041: PyYAML в runtime Python для плагинов
+
+**Проблема:** плагин `progressive-skill` загружается через runtime Python (`tools/python-3.14.7...`), а не через venv Hermes. PyYAML там отсутствовал → `plugin.yaml` игнорировался, плагин работал на defaults.
+
+**Решение:** установить PyYAML в runtime Python:
+
+    /mnt/ai-ssd/hermes/tools/python-3.14.7+20260901-linux-arm64/bin/python3.14 -m pip install pyyaml
+
+**Риск:** при `hermes update` / `hermes pm install` runtime Python может перезаписаться. Проверять после обновлений.
+
+**Проверено:** 2026-10-02. Warning исчез, prompt-size не изменился (оптимизация работала и до этого).
+
+## DEC-042: kanban.max_in_progress — оставить по умолчанию
+
+**Найдено:** в логах gateway при старте. Параметр `kanban.max_in_progress` существует, не задан, Hermes использует memory-derived default = 8.
+
+**Решение:** оставить по умолчанию. 8 процессов ≈ 8 GB RAM, соответствует VIM4.
+
+**Переопределение (если понадобится):** `hermes config set kanban.max_in_progress <N>`.

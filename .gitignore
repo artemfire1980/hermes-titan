@@ -46,3 +46,6 @@ projects/*
 # Бэкапы скриптов (CP-036 модуляризация)
 scripts/*.bak-*
 scripts/*.py.bak-*
+
+# Случайный артефакт (пустой файл от redirect)
+/kanban

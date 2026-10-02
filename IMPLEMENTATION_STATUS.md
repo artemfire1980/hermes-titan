@@ -20,7 +20,7 @@
 | Project `hermes-titan` (`p_7464919e`) | ✅ | CP-007 |
 | Интеграция Kanban→Hermes→Aider | ✅ (26s тест) | CP-007 |
 | Memory provider: Holographic | ✅ (recall 5/5) | CP-008 |
-| Resource governor (CP-009) | ✅ | CP-009 |
+| Resource governor (CP-009) + kanban.max_in_progress | ✅ (default=8) | CP-009 |
 | Recovery (backup.sh + checkpoints) | ✅ тест 2026-10-02 | CP-010 |
 | Kanban toolset (native tools) | ✅ | CP-012 |
 | Скрипты перенесены из бэкапа | ✅ | CP-005 |
