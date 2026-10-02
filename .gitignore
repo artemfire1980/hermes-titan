@@ -49,3 +49,6 @@ scripts/*.py.bak-*
 
 # Случайный артефакт (пустой файл от redirect)
 /kanban
+
+# Ruff cache
+.ruff_cache/
