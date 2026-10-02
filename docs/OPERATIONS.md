@@ -211,12 +211,19 @@
 
 ## 4. Telegram — skill-команды
 
-> 55 установлено, 20 отключено для Telegram, 35 доступно.
+> 55 enabled в CLI (0 disabled в `hermes skills list`); **20 отключено для Telegram**
+> через `skills.platform_disabled.telegram`; категории сжаты через `compact_categories` (9 категорий).
+> Доступно для Telegram — 35 skill-команд.
 >
-> Источник: hermes skills list + skills.platform_disabled.telegram в /mnt/ai-ssd/hermes/config.yaml.
+> Источник: `hermes skills list` + `skills.platform_disabled.telegram` в `/mnt/ai-ssd/hermes/config.yaml`.
 >
 > Обоснование отключения — DEC-040: оптимизация промпта Telegram, overhead ~101 KB → ~52 KB (−48%).
 > Детали: docs/PROMPT-OPTIMIZATION-CP037.md
+>
+> Отключённые для Telegram (20): airtable, ascii-video, box, claude-code, claude-design,
+> codex, computer-use, google-workspace, humanizer, inspecting-hermes-desktop-dom, manim-video,
+> maps, meeting-action-items, notion, opencode, popular-web-designs, songwriting-and-ai-music,
+> teams-meeting-pipeline, weekly-review-planning, xurl
 
 ### 4.1. Доступные (35)
 
@@ -608,7 +615,7 @@ Project: hermes-titan (p_7464919e)
 ### 11.1. Проверка
 
     hermes kanban list
-    hermes kanban boards list
+    hermes kanban boards                  # список бордов (не 'board list'!)
     hermes kanban assignees               # → default
     hermes project list                   # → hermes-titan
 
@@ -804,7 +811,12 @@ Top-level секции:
 - model — api_key, base_url, default auto, provider custom
 - platforms — telegram (enabled, home_channel chat_id 170690883)
 - web — backend searxng, search_backend searxng, searxng_url
-- plugins — enabled: [progressive-skill]
+- plugins — enabled: [progressive-skill]; всего 60 плагинов, ключевые:
+  - `a2a-platform` — A2A (Agent-to-Agent): a2a_discover, a2a_call, a2a_list, a2a_history, a2a_orchestrate
+  - dashboard auth: `basic`, `drain`, `nous`, `self-hosted`
+  - image-gen: `fal`, `krea`, `openai`, `openrouter`, `xai`, `deepinfra`, `meta-ai-image-gen`
+  - platform-адаптеры: discord, email, irc, line, matrix, homeassistant, google_chat, feishu, dingtalk, buzz
+  - `not enabled`: `chronos`, `disk-cleanup`, `google_meet`, `langfuse`
 - toolsets — [hermes-cli, kanban]
 - skills — platform_disabled.telegram (20 скиллов)
 - tools — compact_schemas true, tool_search.defer (18 инструментов)
@@ -984,7 +996,7 @@ IMPLEMENTATION_STATUS.md (устарело):
 | Сменить модель | /model freellmapi:auto | — |
 | Исследовать | исследуй <тема> | python3 scripts/research_runner.py --topic '<тема>' |
 | Написать код | напиши код для <задача> | python3 scripts/aider_runner.py <project> '<task>' |
-| Kanban | /kanban | hermes kanban list |
+| Kanban | /kanban | hermes kanban list / hermes kanban boards |
 | Откат | /rollback | git reset --hard CP-XXX |
 | Память | /memory | hermes memory status |
 | Скиллы | /skills | hermes skills list |
