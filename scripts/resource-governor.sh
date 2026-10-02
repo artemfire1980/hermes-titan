@@ -27,7 +27,7 @@ case "${1:-}" in
     TASK="${2:?Укажите имя задачи}"
     [[ "$TASK" != *:* ]] || { echo "✗ Имя задачи не должно содержать ':'" >&2; exit 1; }
     exec 9>"$FLOCK_FILE"
-    flock 9
+    flock -w 30 9 || { echo "✗ Таймаут ожидания lock (30s)" >&2; exit 1; }
 
     if [ -f "$LOCK_FILE" ]; then
       COUNT=$(wc -l < "$LOCK_FILE")
@@ -50,7 +50,7 @@ case "${1:-}" in
     TASK="${2:?Укажите имя задачи}"
     [[ "$TASK" != *:* ]] || { echo "✗ Имя задачи не должно содержать ':'" >&2; exit 1; }
     exec 9>"$FLOCK_FILE"
-    flock 9
+    flock -w 30 9 || { echo "✗ Таймаут ожидания lock (30s)" >&2; exit 1; }
 
     if [ -f "$LOCK_FILE" ]; then
       awk -F: -v t="$TASK" '$1 != t' "$LOCK_FILE" > "$LOCK_FILE.tmp" && mv "$LOCK_FILE.tmp" "$LOCK_FILE"
