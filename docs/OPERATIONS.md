@@ -1011,14 +1011,29 @@ IMPLEMENTATION_STATUS.md (устарело):
 ## 23. Статус документа
 
 **Создан:** 2026-10-03
-**Версия:** черновик 1
-**Проверено:** частично
-**Известные вопросы:**
-- Раздел 4.1: /simplify-code — уточнить (не дубликат ли)
-- Разделы 9-12: проверить ссылки на DEC
-- Возможно упущены команды, отключённые пользователем (нужен полный audit)
+**Версия:** 1.0 (валидирован 2026-10-03)
+**Проверено:** бесплатные команды — да; дорогие сценарии (Aider, Research, send) — нет
+
+**Валидация 2026-10-03 (бесплатные команды):**
+- `hermes status --all`, `gateway status`, `cron list`, `cron status`
+- `hermes skills list` (55 enabled, 0 disabled), `plugins list` (60)
+- `hermes kanban boards` (default, hermes-titan), `memory status` (holographic active)
+- `docker ps`, `tailscale status`, `df`, `free`, `hermes --version`
+- **Исправлено:** `hermes kanban boards` (было `board list`), 20 skills Telegram,
+  60 плагинов + A2A, шпаргалка
+
+**Не валидировано (требует запуска с затратами):**
+- Research Engine (`scripts/research_runner.py`) — тратит FreeLLMAPI
+- Aider (`scripts/aider_runner.py`) — тратит NVIDIA NIM
+- `send_to_telegram.py` — отправит сообщение в Telegram
+- Kanban full cycle (create → dispatch → Aider → complete)
+
+**Известные вопросы (низкий приоритет):**
+- Раздел 4.1: `/simplify-code` — уточнить (не дубликат ли)
+- Возможно упущены команды, отключённые пользователем
 
 **План:**
-1. Проверить на реальных сценариях
-2. Уточнить расхождения в README/IMPLEMENTATION_STATUS
-3. Убрать пометку «черновик 1» после полной валидации
+1. ✅ Валидация бесплатных команд — выполнена 2026-10-03
+2. ✅ Расхождения README/IMPLEMENTATION_STATUS — исправлены (`f7d8dce`)
+3. ✅ Пометка «черновик» снята 2026-10-03
+4. ⏳ Валидация дорогих сценариев — по мере необходимости
