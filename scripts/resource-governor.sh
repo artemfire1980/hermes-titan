@@ -25,6 +25,7 @@ EOF
 case "${1:-}" in
   acquire)
     TASK="${2:?Укажите имя задачи}"
+    [[ "$TASK" != *:* ]] || { echo "✗ Имя задачи не должно содержать ':'" >&2; exit 1; }
     exec 9>"$FLOCK_FILE"
     flock 9
 
@@ -47,11 +48,12 @@ case "${1:-}" in
 
   release)
     TASK="${2:?Укажите имя задачи}"
+    [[ "$TASK" != *:* ]] || { echo "✗ Имя задачи не должно содержать ':'" >&2; exit 1; }
     exec 9>"$FLOCK_FILE"
     flock 9
 
     if [ -f "$LOCK_FILE" ]; then
-      sed -i "/^${TASK}:/d" "$LOCK_FILE"
+      awk -F: -v t="$TASK" '$1 != t' "$LOCK_FILE" > "$LOCK_FILE.tmp" && mv "$LOCK_FILE.tmp" "$LOCK_FILE"
       echo "✓ Освобождено '$TASK'"
     fi
     exec 9>&-
