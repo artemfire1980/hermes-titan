@@ -37,6 +37,9 @@ if not AIDER_BIN.exists():
     found = _sh.which("aider")
     if found:
         AIDER_BIN = Path(found)
+
+# Conventions для Aider (автозагрузка через --read)
+CONVENTIONS_PATH = Path.home() / "ai-system" / "docs" / "CONVENTIONS.md"
 ENV_FILE = Path("/mnt/ai-ssd/hermes/.env")
 LOG_DIR = HOME / "ai-system" / "logs" / "aider"
 LOCK_FILE = HOME / "ai-system" / "runtime" / "locks" / "aider.lock"
@@ -336,6 +339,8 @@ def main():
             "--auto-commits",
             "--no-show-model-warnings",
         ]
+        if CONVENTIONS_PATH.exists():
+            cmd.extend(["--read", str(CONVENTIONS_PATH)])
         if args.allow_dirty:
             cmd.append("--dirty-commits")
 
