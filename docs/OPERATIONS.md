@@ -879,7 +879,6 @@ Top-level секции:
 |--------|------------|
 | aider_runner.py | Hermes → Aider (изоляция, ledger) |
 | auto-modularize.sh | Автомодуляризация кода |
-| backup-projects.sh | Бэкап проектов |
 | backup.sh | Бэкап наших данных (~236 KB) |
 | check-freellm-quotas.sh | Квоты FreeLLMAPI |
 | check-memory-peak.sh | Пик памяти |
