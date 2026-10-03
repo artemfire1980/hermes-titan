@@ -15,7 +15,7 @@ if echo "$TOPIC" | grep -qE '[`$;|&]'; then
     exit 1
 fi
 
-VENV_PYTHON=~/.hermes/hermes-agent/venv/bin/python
+VENV_PYTHON=/mnt/ai-ssd/hermes/hermes-agent/venv/bin/python
 SCRIPTS_DIR=~/ai-system/scripts
 REPORTS_DIR=~/research/reports
 TIMEOUT_MIN=60
@@ -29,7 +29,7 @@ echo ""
 BEFORE_FILES=$(ls -1 "$REPORTS_DIR"/*.md 2>/dev/null | sort)
 
 # Запустить runner с таймаутом
-timeout $((TIMEOUT_MIN * 60)) $VENV_PYTHON ~/bin/research_runner.py \
+timeout $((TIMEOUT_MIN * 60)) "$VENV_PYTHON" "$SCRIPTS_DIR/research_runner.py" \
     --topic "$TOPIC" --depth "$DEPTH" > /tmp/research.log 2>&1
 RC=$?
 
