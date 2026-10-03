@@ -1,6 +1,7 @@
 #!/bin/bash
 set -euo pipefail
-source ~/ai-system/.env
+# HERMES_HOME — реальный .env (DEC-047)
+source /mnt/ai-ssd/hermes/.env
 curl -s http://127.0.0.1:3001/v1/quota-forecast \
   -H "Authorization: Bearer $OPENAI_API_KEY" \
   | python3 -c "
