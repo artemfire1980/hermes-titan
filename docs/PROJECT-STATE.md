@@ -36,6 +36,13 @@
 
 - Нет.
 
+## Episodic memory
+
+- **`state.db`** — FTS5 (`messages_fts` + `messages_fts_trigram`).
+- **Toolset** `session_search` — enabled.
+- **Использование:** поиск по прошлым сессиям (731 messages в 15 sessions на 2026-10-03).
+- **Не дублировать** эпизоды в `MEMORY.md` — они уже индексируются.
+
 ## Known warnings
 
 - DEC-036 противоречит DEC-038 (`ensure-hrr-numpy` удалён, но DEC-036 описывает старое состояние). Не критично.
