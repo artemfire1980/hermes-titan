@@ -15,6 +15,8 @@
 
 ### Добавлено
 - Web: `extract_backend: exa` — семантическое извлечение контента (DEC-049). `search_backend` остаётся SearXNG. Exa работает keyless (без API-ключа, rate-limited).
+- STT: локальный `faster-whisper 1.2.1` + `av 18.1.0`, модель `base`, язык `ru` (DEC-052).
+- Runtime venv Hermes: правильная установка extras через `pm.sync_venv` (DEC-052).
 
 ## [0.30.0] - 2026-09-30
 

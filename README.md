@@ -31,7 +31,7 @@
 - **`docs/MAINTENANCE.md`** — как поддерживать документацию, память и CI
 - **`docs/WORKFLOW.md`** — workflow автономного внедрения (Telegram → Hermes → Aider → git)
 - **`docs/STRUCTURE.md`** — карта проекта: пути, носители, компоненты
-- **`DECISIONS.md`** — 50 архитектурных решений (DEC-001…DEC-050)
+- **`DECISIONS.md`** — 52 архитектурных решений (DEC-001…DEC-052)
 - **`ARCHITECTURE.md`** — общая архитектура
 - **`docs/RECOVERY.md`** — три уровня восстановления
 

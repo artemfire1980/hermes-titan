@@ -904,3 +904,102 @@ hermes config set kanban.max_in_progress 4
 # или
 hermes config unset kanban.max_in_progress   # вернуть memory-derived
 ```
+
+## DEC-051: Локальный STT (faster-whisper)
+
+**Дата:** 2026-10-03
+**Статус:** принято
+
+**Контекст:** нужно распознавать голосовые сообщения в Telegram локально,
+без облачных API.
+
+**Решение:** использовать `faster-whisper` (CTranslate2-based, локальный):
+
+- **Config:**
+  ```yaml
+  stt:
+    enabled: true
+    provider: local
+    language: ru
+    local:
+      model: base
+  ```
+- **Модель:** `base` (~150 МБ, скачивается при первом использовании в `~/.cache/huggingface/`).
+- **Toolset:** `stt` enabled для Telegram.
+- **Бесплатно**, работает на CPU ARM64.
+
+**Проверено:** 2026-10-03, голосовое в Telegram — распознано на русском
+«Какие скилы у тебя есть?».
+
+**Зависит от:** DEC-052 (runtime venv — где ставить `faster-whisper`).
+
+## DEC-052: Runtime venv Hermes — где ставить Python-пакеты
+
+**Дата:** 2026-10-03
+**Статус:** принято
+**Контекст:** STT (faster-whisper) не работал, потому что мы ставили пакеты
+не в тот venv.
+
+### Открытие
+
+Hermes использует **runtime venv** в:
+
+```
+/mnt/ai-ssd/hermes/installs/<install-hash>/environments/<env-hash>/venv/
+```
+
+Это **НЕ**:
+- `tools/python-3.14.7.../` — PM-инструменты (ffmpeg, node, ripgrep).
+- `hermes-agent/venv/` — CLI-venv.
+
+**Bootstrap переопределяет `sys.path`** на этот venv. Пакеты из
+`tools/python...` и `hermes-agent/venv` **не видны** gateway.
+
+**Важно:** `<env-hash>` может **меняться** — при `pm.sync_venv` PM создаёт
+**новый** venv (с полным набором extras). Bootstrap сам переключается.
+
+### Правильная установка extras
+
+```bash
+python3 -I -c "
+import os, sys
+os.environ.pop('PYTHONHOME', None)
+os.environ.pop('PYTHONPATH', None)
+sys.path.insert(0, '/mnt/ai-ssd/hermes/hermes-agent')
+os.environ['HERMES_HOME'] = '/mnt/ai-ssd/hermes'
+import hermes_bootstrap
+import pm
+pm.sync_venv(['voice'], explicit=True)
+"
+```
+
+**НЕ** ставить `pip install` вручную в `hermes-agent/venv` или
+`tools/python-...` — не видны в gateway.
+
+### STT (DEC-051)
+
+Настройка:
+
+```yaml
+stt:
+  enabled: true
+  provider: local
+  language: ru
+  local:
+    model: base
+```
+
+- **Пакеты:** `faster-whisper 1.2.1` + `av 18.1.0` (PM поставил сам).
+- **Модель:** `base` (~150 МБ, скачивается при первом использовании).
+- **Runtime:** runtime venv (bootstrap), не CLI-venv.
+
+### Проверено
+
+2026-10-03: голосовое в Telegram — транскрипция на русском «Какие скилы
+у тебя есть?» — успешно.
+
+### Побочное
+
+Установлены через PM: `sounddevice`, `numpy`, `faster-whisper`, `av`.
+Изолированный `pip` в runtime venv **отсутствует** (PM-managed) —
+использовать `pm.sync_venv` или `uv pip install --python <venv>`.
