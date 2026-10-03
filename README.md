@@ -26,6 +26,8 @@
 
 - **`docs/OPERATIONS.md`** — полный справочник: команды, скрипты, диагностика
 - **`docs/USER-GUIDE.md`** — руководство пользователя: подключение, Telegram, сценарии, диагностика
+- **`docs/PROJECT-MAP.md`** — навигация по canonical sources
+- **`docs/PROJECT-STATE.md`** — текущее состояние проекта
 - **`docs/STRUCTURE.md`** — карта проекта: пути, носители, компоненты
 - **`DECISIONS.md`** — 49 архитектурных решений (DEC-001…DEC-049)
 - **`ARCHITECTURE.md`** — общая архитектура
