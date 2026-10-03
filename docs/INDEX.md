@@ -1,7 +1,7 @@
 # DEC Index
 
 > Автогенерируется `scripts/checks/check_dec_index.py`.
-> Источник: `DECISIONS.md` (49 записей).
+> Источник: `DECISIONS.md` (50 записей).
 > **Не редактировать вручную.**
 
 | ID | Заголовок |
@@ -55,3 +55,4 @@
 | [DEC-047](DECISIONS.md#dec-047) | Единый парсер .env — scripts/env_utils.py |
 | [DEC-048](DECISIONS.md#dec-048) | Аудит 2026-10-02 — урок про .pyc-сироты |
 | [DEC-049](DECISIONS.md#dec-049) | Web — SearXNG (search) + Exa (extract) |
+| [DEC-050](DECISIONS.md#dec-050) | kanban.max_in_progress — пересмотр 8 → 2 |

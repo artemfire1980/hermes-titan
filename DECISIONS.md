@@ -751,6 +751,8 @@ scripts/research_runner.py → thin CLI (~40 строк).
 
 ## DEC-042: kanban.max_in_progress — оставить по умолчанию
 
+> **Пересмотрено DEC-050** (2026-10-03): установлено явно `max_in_progress: 2`.
+
 **Найдено:** в логах gateway при старте. Параметр `kanban.max_in_progress` существует, не задан, Hermes использует memory-derived default = 8.
 
 **Решение:** оставить по умолчанию. 8 процессов ≈ 8 GB RAM, соответствует VIM4.
@@ -843,3 +845,62 @@ MCP-сервер не нужен — Exa встроена как нативны�
 
 **Проверено:** 2026-10-03. Smoke-тест — 14 tool calls, 52 сек, результат: структурированная
 сводка по Exa (Scorer, Reranker, Diversity, Content Retrieval).
+
+## DEC-050: kanban.max_in_progress — пересмотр 8 → 2
+
+**Дата:** 2026-10-03
+**Статус:** принято
+**Контекст:** пересмотр DEC-042.
+
+### Проблема
+
+DEC-042 утверждал: «default=8, соответствует VIM4». Проверка кода Hermes
+(`hermes_cli/kanban_db_dispatch.py`) показала:
+
+- Реальный default — **`unset (unlimited)`**.
+- При unset Hermes применяет memory-derived формулу:
+  `clamp(MemTotal_MB / 512, FLOOR=2, CEILING=8)`.
+- Для VIM4 (MemTotal 7 990 956 KiB ≈ 7802 МБ): `7802 // 512 = 15` → clamp → **8**.
+
+То есть 8 — **потолок** (CEILING), а не «соответствует VIM4». Формально влезает:
+8 × 512 МБ = 4 ГБ при 8 ГБ RAM. Но реально занято:
+
+- gateway: ~1.6–2 ГБ.
+- FreeLLMAPI (Docker): ~200 МБ.
+- SearXNG (Docker): ~300 МБ.
+- система: ~1 ГБ.
+
+Свободно под воркеров: ~4.5 ГБ. 8 воркеров × 512 МБ = 4 ГБ **впритык**.
+Плюс Aider внутри воркера потребляет дополнительно (Python + модели).
+**Риск OOM** реален.
+
+### Решение
+
+Установить явно:
+
+```bash
+hermes config set kanban.max_in_progress 2
+```
+
+Обоснование выбора 2:
+
+1. `FLOOR = 2` — сам Hermes считает 2 безопасным минимумом.
+2. Документация Hermes: «useful for slow workers (local LLMs, resource-constrained hosts)» — VIM4 именно такой.
+3. 2 воркера × 512 МБ = 1 ГБ — с запасом.
+4. При необходимости kanban-параллелизма — можно поднять до 4.
+
+### Проверено
+
+- `hermes config get kanban.max_in_progress` → 2.
+- `resolve_max_in_progress(configured)` → 2 (не derive).
+- Gateway перезапущен, работает.
+
+### Откат
+
+Если 2 окажется мало для реальных нагрузок:
+
+```bash
+hermes config set kanban.max_in_progress 4
+# или
+hermes config unset kanban.max_in_progress   # вернуть memory-derived
+```

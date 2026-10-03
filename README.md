@@ -29,7 +29,7 @@
 - **`docs/PROJECT-MAP.md`** — навигация по canonical sources
 - **`docs/PROJECT-STATE.md`** — текущее состояние проекта
 - **`docs/STRUCTURE.md`** — карта проекта: пути, носители, компоненты
-- **`DECISIONS.md`** — 49 архитектурных решений (DEC-001…DEC-049)
+- **`DECISIONS.md`** — 50 архитектурных решений (DEC-001…DEC-050)
 - **`ARCHITECTURE.md`** — общая архитектура
 - **`docs/RECOVERY.md`** — три уровня восстановления
 
