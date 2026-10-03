@@ -29,6 +29,7 @@
 - **`docs/PROJECT-MAP.md`** — навигация по canonical sources
 - **`docs/PROJECT-STATE.md`** — текущее состояние проекта
 - **`docs/MAINTENANCE.md`** — как поддерживать документацию, память и CI
+- **`docs/WORKFLOW.md`** — workflow автономного внедрения (Telegram → Hermes → Aider → git)
 - **`docs/STRUCTURE.md`** — карта проекта: пути, носители, компоненты
 - **`DECISIONS.md`** — 50 архитектурных решений (DEC-001…DEC-050)
 - **`ARCHITECTURE.md`** — общая архитектура
