@@ -30,6 +30,19 @@ jobs:
           pip install ruff
           ruff check .
 
+  consistency:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Consistency check
+        run: bash scripts/check_consistency.sh
+
   gitleaks:
     runs-on: ubuntu-latest
     steps:

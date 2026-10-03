@@ -97,10 +97,19 @@ fi
 # ── 8. Smoke test: drop_total инициализирован ──────────────────
 echo ""
 echo "🔍 === Smoke: self.drop_total инициализирован ==="
-if grep -q "self\.drop_total\s*=\s*0" scripts/research_runner.py; then
+if grep -q "self\.drop_total\s*=\s*0" scripts/research/runner.py; then
     echo "✅ self.drop_total инициализирован"
 else
     echo "❌ self.drop_total не инициализирован"; exit 1
+fi
+
+# ── 9. Consistency check ───────────────────────────────────────
+echo ""
+echo "🔍 === Consistency ==="
+# check_consistency.sh печатает свой итог (✅ Consistency OK / ❌ ...)
+if ! bash "$(dirname "$0")/check_consistency.sh"; then
+    echo "⚠️ Consistency: есть drift (см. выше)"
+    # Не exit 1 — drift не блокирует коммит (предупреждение)
 fi
 
 echo ""
