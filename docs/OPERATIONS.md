@@ -810,7 +810,7 @@ Top-level секции:
 - memory — provider: holographic
 - model — api_key, base_url, default auto, provider custom
 - platforms — telegram (enabled, home_channel chat_id 170690883)
-- web — backend searxng, search_backend searxng, searxng_url
+- web — backend searxng, search_backend searxng, extract_backend exa, searxng_url
 - plugins — enabled: [progressive-skill]; всего 60 плагинов, ключевые:
   - `a2a-platform` — A2A (Agent-to-Agent): a2a_discover, a2a_call, a2a_list, a2a_history, a2a_orchestrate
   - dashboard auth: `basic`, `drain`, `nous`, `self-hosted`

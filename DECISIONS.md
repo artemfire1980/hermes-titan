@@ -819,3 +819,27 @@ scripts/research_runner.py → thin CLI (~40 строк).
 запушены в `origin/main`. Подробности — `CHANGELOG.md` секция `[Unreleased]`.
 
 **Проверено:** 2026-10-02.
+
+## DEC-049: Web — SearXNG (search) + Exa (extract)
+
+**Контекст:** нужно искать сайты (keyword search) и семантически извлекать контент
+со страниц (deep extract). SearXNG — метапоиск, Exa — semantic search API.
+
+**Решение:** разделить бэкенды по назначению:
+
+```yaml
+web:
+  backend: searxng              # общий fallback
+  search_backend: searxng       # web_search → SearXNG
+  extract_backend: exa          # web_extract → Exa
+  searxng_url: http://127.0.0.1:8888
+```
+
+Настройка: `hermes config set web.extract_backend exa`.
+
+**Exa keyless:** работает без API-ключа через бесплатный пул (rate-limited).
+При необходимости — зарегистрировать `EXA_API_KEY` (free tier: ~1000 searches/month).
+MCP-сервер не нужен — Exa встроена как нативный extract-бэкенд Hermes.
+
+**Проверено:** 2026-10-03. Smoke-тест — 14 tool calls, 52 сек, результат: структурированная
+сводка по Exa (Scorer, Reranker, Diversity, Content Retrieval).

@@ -13,6 +13,9 @@
 - `.gitignore`: добавлен `.ruff_cache/`.
 - Удалены `.pyc`-сироты монолита `research-runner.py` (причина галлюцинаций аудита).
 
+### Добавлено
+- Web: `extract_backend: exa` — семантическое извлечение контента (DEC-049). `search_backend` остаётся SearXNG. Exa работает keyless (без API-ключа, rate-limited).
+
 ## [0.30.0] - 2026-09-30
 
 ### Добавлено

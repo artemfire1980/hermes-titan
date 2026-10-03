@@ -14,7 +14,7 @@
 - **Ядро:** Hermes Agent `v0.21.5+4925.gb4c9def` (`/mnt/ai-ssd/hermes/`)
 - **Модель:** FreeLLMAPI `v0.13.2` (Docker `127.0.0.1:3001`, `auto`, 1M контекст)
 - **Aider:** `nvidia_nim/nvidia/nemotron-3-ultra-550b-a55b`
-- **Поиск:** SearXNG (Docker, 10 движков)
+- **Поиск:** SearXNG (Docker, 10 движков) + Exa (`extract_backend`, semantic extract)
 - **Telegram:** whitelist + home channel + уведомления
 - **Kanban:** board `hermes-titan` + native tools + dispatcher
 - **Память:** Holographic (patch v2) + built-in + memory tool
