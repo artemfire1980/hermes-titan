@@ -1,7 +1,7 @@
 # DEC Index
 
 > Автогенерируется `scripts/checks/check_dec_index.py`.
-> Источник: `DECISIONS.md` (56 записей).
+> Источник: `DECISIONS.md` (57 записей).
 > **Не редактировать вручную.**
 
 | ID | Заголовок |
@@ -62,3 +62,4 @@
 | [DEC-054](DECISIONS.md#dec-054) | rubit-mcp-mail — почта Mail.ru |
 | [DEC-055](DECISIONS.md#dec-055) | МойСклад MCP — ОТЛОЖЕНО |
 | [DEC-056](DECISIONS.md#dec-056) | МойСклад — официальный MCP |
+| [DEC-057](DECISIONS.md#dec-057) | Правила безопасности MCP |

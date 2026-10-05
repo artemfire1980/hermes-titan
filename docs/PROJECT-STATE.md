@@ -21,6 +21,7 @@
 - 2026-10-05: rubit-mcp-mail (5 read-tool) — почта Mail.ru (DEC-054)
 - 2026-10-05: МойСклад — официальный MCP, 4 read-only tools (DEC-056)
 - 2026-10-05: docs/INTEGRATIONS.md, KILN.md, MAIL.md, MOYSKLAD.md, PRINTER-CONFIG.md
+- 2026-10-05: DEC-057 — правила безопасности MCP, docs/SECURITY.md
 
 - STT (faster-whisper + av 18.1.0) — DEC-052
 

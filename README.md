@@ -35,8 +35,9 @@
 - **`docs/MAIL.md`** — почта Mail.ru (read-only)
 - **`docs/MOYSKLAD.md`** — CRM (отложено)
 - **`docs/PRINTER-CONFIG.md`** — конфиг принтера ZAV
+- **`docs/SECURITY.md`** — правила безопасности MCP
 - **`docs/STRUCTURE.md`** — карта проекта: пути, носители, компоненты
-- **`DECISIONS.md`** — 56 архитектурных решений (DEC-001…DEC-056)
+- **`DECISIONS.md`** — 57 архитектурных решений (DEC-001…DEC-057)
 - **`ARCHITECTURE.md`** — общая архитектура
 - **`docs/RECOVERY.md`** — три уровня восстановления
 
