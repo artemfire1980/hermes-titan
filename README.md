@@ -33,13 +33,23 @@
 - **`docs/INTEGRATIONS.md`** — внешние интеграции (MCP: почта, CRM, 3D-принтер)
 - **`docs/KILN.md`** — 3D-принтер через Kiln MCP (71 read-tool)
 - **`docs/MAIL.md`** — почта Mail.ru (read-only)
-- **`docs/MOYSKLAD.md`** — CRM (отложено)
+- **`docs/MOYSKLAD.md`** — CRM (МойСклад, read-only, DEC-056)
 - **`docs/PRINTER-CONFIG.md`** — конфиг принтера ZAV
 - **`docs/SECURITY.md`** — правила безопасности MCP
 - **`docs/STRUCTURE.md`** — карта проекта: пути, носители, компоненты
-- **`DECISIONS.md`** — 57 архитектурных решений (DEC-001…DEC-057)
+- **`DECISIONS.md`** — 58 архитектурных решений (DEC-001…DEC-058)
 - **`ARCHITECTURE.md`** — общая архитектура
 - **`docs/RECOVERY.md`** — три уровня восстановления
+- **`CHANGELOG.md`** — история версий
+- **`IMPLEMENTATION_STATUS.md`** — статус внедрения
+- **`IMPLEMENTATION_NOTES.md`** — Executive Summary pipeline
+- **`docs/HERMES-CAPABILITY-MATRIX.md`** — аудит возможностей ядра (CP-003)
+- **`docs/CODE_EDITING_RULES.md`** — правила работы с кодом
+- **`docs/PERSONALIZATION.md`** — настройка env
+- **`docs/CHECKLIST.md`** — чек-лист всех CP
+- **`docs/TASK-LEDGER-DECISION.md`** — решение по трекеру задач
+- **`docs/MEMORY-BENCHMARK.md`** — бенчмарк памяти (CP-008)
+- **`docs/CP-008-BASELINE.md`** — baseline CP-008
 
 ## Тесты
 
@@ -52,21 +62,6 @@
 - `test_summary_generator.py` (13 тестов)
 - `test_llm_gateway.py` (6 тестов, respx)
 - `test_async_fetcher.py` (8 тестов, respx)
-
-## Документация
-
-- `ARCHITECTURE.md` — общая архитектура
-- `CHANGELOG.md` — история версий
-- `IMPLEMENTATION_STATUS.md` — статус внедрения
-- `IMPLEMENTATION_NOTES.md` — Executive Summary pipeline
-- `docs/HERMES-CAPABILITY-MATRIX.md` — аудит возможностей ядра (CP-003)
-- `docs/CODE_EDITING_RULES.md` — правила работы с кодом
-- `docs/PERSONALIZATION.md` — настройка env
-- `docs/RECOVERY.md` — восстановление (3 уровня)
-- `docs/CHECKLIST.md` — чек-лист всех CP
-- `docs/TASK-LEDGER-DECISION.md` — решение по трекеру задач
-- `docs/MEMORY-BENCHMARK.md` — бенчмарк памяти (CP-008)
-- `docs/CP-008-BASELINE.md` — baseline CP-008
 
 ## Принципы (12)
 
