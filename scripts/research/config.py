@@ -25,6 +25,11 @@ def _load_dotenv():
     _load_env(default_candidates(), log=logger)
 
 
+# P1-fix: загружаем .env ДО чтения констант (иначе OPENAI_API_KEY
+# может быть пустой, если не экспортирован родителем)
+_load_dotenv()
+
+
 # === CONSTANTS (moved from research_runner.py, CP-036, step 12a) ===
 
 FREELLM_URL = os.environ.get("FREELLM_URL", "http://127.0.0.1:3001")
