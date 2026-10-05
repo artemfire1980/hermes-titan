@@ -1,7 +1,7 @@
 # DEC Index
 
 > Автогенерируется `scripts/checks/check_dec_index.py`.
-> Источник: `DECISIONS.md` (57 записей).
+> Источник: `DECISIONS.md` (58 записей).
 > **Не редактировать вручную.**
 
 | ID | Заголовок |
@@ -63,3 +63,4 @@
 | [DEC-055](../DECISIONS.md#dec-055-мойсклад-mcp-отложено) | МойСклад MCP — ОТЛОЖЕНО |
 | [DEC-056](../DECISIONS.md#dec-056-мойсклад-официальный-mcp) | МойСклад — официальный MCP |
 | [DEC-057](../DECISIONS.md#dec-057-правила-безопасности-mcp) | Правила безопасности MCP |
+| [DEC-058](../DECISIONS.md#dec-058-emergency-stop-исключение-для-аварий-human-only) | `emergency_stop` — исключение для аварий (human-only) |
