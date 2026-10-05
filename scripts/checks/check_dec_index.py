@@ -18,6 +18,16 @@ def parse_decs(dec_src: str) -> list[tuple[str, str]]:
     return result
 
 
+def github_anchor(text: str) -> str:
+    """GitHub-style anchor из заголовка."""
+    s = text.lower()
+    s = re.sub(r"[^\w\s\-]", "", s, flags=re.UNICODE)
+    s = re.sub(r"[\s_]+", "-", s)
+    s = re.sub(r"-+", "-", s)
+    s = s.strip("-")
+    return s
+
+
 def generate(dec_file: Path) -> str:
     src = dec_file.read_text(encoding="utf-8")
     decs = parse_decs(src)
@@ -33,8 +43,10 @@ def generate(dec_file: Path) -> str:
         "|----|-----------|",
     ]
     for dec_id, title in sorted(decs, key=lambda x: int(x[0].split("-")[1])):
-        anchor = dec_id.lower()  # GitHub anchor
-        lines.append(f"| [{dec_id}](DECISIONS.md#{anchor}) | {title} |")
+        # GitHub anchor: полный заголовок "DEC-001: Title" -> "dec-001-title"
+        anchor = github_anchor(f"{dec_id}: {title}")
+        # Путь: INDEX.md в docs/, DECISIONS.md в корне -> ../DECISIONS.md
+        lines.append(f"| [{dec_id}](../DECISIONS.md#{anchor}) | {title} |")
     lines.append("")
     return "\n".join(lines)
 
