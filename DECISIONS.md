@@ -1079,6 +1079,8 @@ stt:
 
 ## DEC-055: МойСклад MCP — ОТЛОЖЕНО
 
+> **Пересмотрено DEC-056** (2026-10-05): подключён официальный MCP.
+
 **Дата:** 2026-10-05
 **Статус:** отложено
 
@@ -1097,4 +1099,53 @@ stt:
 **Whitelist (готов):** 20 read-tools `ms_*` (см. `docs/MOYSKLAD.md`).
 
 ### Ссылки
+- `docs/MOYSKLAD.md`
+
+## DEC-056: МойСклад — официальный MCP
+
+**Дата:** 2026-10-05
+**Статус:** принято
+**Контекст:** пересмотр DEC-055 (alpha-баг `ilyautov/moysklad-mcp-ru`).
+
+**Решение:** использовать **официальный MCP** МойСклад.
+
+### Параметры
+
+- **URL:** `https://mcp.moysklad.ru/tools/main`
+- **Transport:** HTTP (JSON-RPC over POST)
+- **ProtocolVersion:** `2024-11-05`
+- **Server:** `moysklad-mcp v1.29.0`
+- **Auth:** `Authorization: Bearer ${MOYSKLAD_TOKEN}`
+- **Токен:** `MOYSKLAD_TOKEN` в `/mnt/ai-ssd/hermes/.env`
+- **Tools:** **4 generic** — `get_catalog`, `get_schema`, `get_resources`, `get_child_resources`
+
+### Read-only by construction
+
+**Write-инструментов нет.** Только `get_*`.
+
+### Инструкция от сервера (официальная)
+
+1. **Единственный канал** — MCP tools. Прямые HTTP/API **запрещены**.
+2. **Порядок:** `get_catalog` → `get_schema` → `get_resources` (с `fields`!).
+3. **`fields` обязателен** — только нужные поля.
+4. **Только точные** ключи из схемы.
+5. **Минимизировать** вызовы.
+
+### Преимущества
+
+| Критерий | Официальный | ilyautov |
+|---|---|---|
+| Unicode-баг | нет | есть |
+| Версия | 1.29.0 | 0.2.0 alpha |
+| Transport | HTTP | stdio |
+| Зависимости | 0 | uvx + Python |
+| Write | нет | есть (за гейтами) |
+| Токен | `.env` | `cabinets.json` |
+
+### Проверено
+
+2026-10-05: `hermes chat -q "Покажи список товаров"` → 14 tool calls, 50 сек, **реальные данные** (112+ товаров).
+
+### Ссылки
+
 - `docs/MOYSKLAD.md`

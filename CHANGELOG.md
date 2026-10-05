@@ -19,7 +19,8 @@
 - Runtime venv Hermes: правильная установка extras через `pm.sync_venv` (DEC-052).
 - Kiln MCP (kiln3d 1.4.1.1) — 3D-принтер ZAV, 71 read-only tool (DEC-053).
 - rubit-mcp-mail 1.0.0 — почта Mail.ru, 5 read-only tool (DEC-054).
-- МойСклад MCP — отложено (Unicode-баг alpha) (DEC-055).
+- МойСклад — **официальный MCP** (`mcp.moysklad.ru`), 4 generic read-only tools (DEC-056).
+- МойСклад MCP alpha — отложено (DEC-055, пересмотрено DEC-056).
 - Документация: `docs/INTEGRATIONS.md`, `docs/KILN.md`, `docs/MAIL.md`, `docs/MOYSKLAD.md`, `docs/PRINTER-CONFIG.md`.
 
 ## [0.30.0] - 2026-09-30

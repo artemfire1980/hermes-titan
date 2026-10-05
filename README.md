@@ -36,7 +36,7 @@
 - **`docs/MOYSKLAD.md`** — CRM (отложено)
 - **`docs/PRINTER-CONFIG.md`** — конфиг принтера ZAV
 - **`docs/STRUCTURE.md`** — карта проекта: пути, носители, компоненты
-- **`DECISIONS.md`** — 55 архитектурных решений (DEC-001…DEC-055)
+- **`DECISIONS.md`** — 56 архитектурных решений (DEC-001…DEC-056)
 - **`ARCHITECTURE.md`** — общая архитектура
 - **`docs/RECOVERY.md`** — три уровня восстановления
 
