@@ -17,6 +17,11 @@
 
 ## Last completed
 
+- 2026-10-05: Kiln MCP (71 read-tool) — 3D-принтер ZAV (DEC-053)
+- 2026-10-05: rubit-mcp-mail (5 read-tool) — почта Mail.ru (DEC-054)
+- 2026-10-05: МойСклад MCP — отложено (DEC-055)
+- 2026-10-05: docs/INTEGRATIONS.md, KILN.md, MAIL.md, MOYSKLAD.md, PRINTER-CONFIG.md
+
 - STT (faster-whisper + av 18.1.0) — DEC-052
 
 - CP-037 (оптимизация промпта Telegram)

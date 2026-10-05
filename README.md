@@ -30,8 +30,13 @@
 - **`docs/PROJECT-STATE.md`** — текущее состояние проекта
 - **`docs/MAINTENANCE.md`** — как поддерживать документацию, память и CI
 - **`docs/WORKFLOW.md`** — workflow автономного внедрения (Telegram → Hermes → Aider → git)
+- **`docs/INTEGRATIONS.md`** — внешние интеграции (MCP: почта, CRM, 3D-принтер)
+- **`docs/KILN.md`** — 3D-принтер через Kiln MCP (71 read-tool)
+- **`docs/MAIL.md`** — почта Mail.ru (read-only)
+- **`docs/MOYSKLAD.md`** — CRM (отложено)
+- **`docs/PRINTER-CONFIG.md`** — конфиг принтера ZAV
 - **`docs/STRUCTURE.md`** — карта проекта: пути, носители, компоненты
-- **`DECISIONS.md`** — 52 архитектурных решений (DEC-001…DEC-052)
+- **`DECISIONS.md`** — 55 архитектурных решений (DEC-001…DEC-055)
 - **`ARCHITECTURE.md`** — общая архитектура
 - **`docs/RECOVERY.md`** — три уровня восстановления
 

@@ -1003,3 +1003,98 @@ stt:
 Установлены через PM: `sounddevice`, `numpy`, `faster-whisper`, `av`.
 Изолированный `pip` в runtime venv **отсутствует** (PM-managed) —
 использовать `pm.sync_venv` или `uv pip install --python <venv>`.
+
+## DEC-053: Kiln MCP — 3D-принтер ZAV
+
+**Дата:** 2026-10-05
+**Статус:** принято
+
+**Контекст:** управление 3D-принтером ZAV (самосбор, ZAV v3 Pro, H-Bot)
+через агента.
+
+**Решение:** подключить **Kiln (kiln3d 1.4.1.1)** как MCP-сервер.
+
+### Параметры
+- **Command:** `/home/khadas/.cache/uv/archive-v0/vZuWT9b7EakyQtIV/bin/kiln3d`
+- **Args:** `serve`
+- **Env:** `KILN_NO_UPDATE_CHECK=1`, `KILN_LOG_LEVEL=ERROR`
+- **Connect timeout:** 180 сек (Kiln стартует 70 сек)
+- **Tools whitelist:** 71 read-only
+
+### Что исключено (обязательно)
+- **8 EXECUTE:** `start_print`, `cancel_print`, `pause_print`, `resume_print`,
+  `set_temperature`, `set_fan`, `slice_and_print`, `multi_material_print`.
+- **60 WRITE:** `delete_*`, `generate_*`, `update_firmware`, `register_*`,
+  `set_autonomy_level`, `emergency_stop`, `trim_serve_processes`,
+  `upgrade_kiln`, `signin`, `pair`, ...
+- **~330 неклассифицированных.**
+
+### Ключевые правила
+1. **`--args` — последним** в `hermes mcp add` (`nargs=REMAINDER`).
+2. **`connect_timeout`** — только через config (python-патч), не через CLI.
+3. **Whitelist** — только read. Write/execute — не включать **никогда**.
+4. **`kiln3d install-mcp`** — не запускать (конфликт с config Hermes).
+
+### Проверено
+- `printer_status` — работает.
+- `monitor_print` — работает.
+- `printer_snapshot` — **камера не подключена** (TODO).
+
+### Ссылки
+- `docs/KILN.md`
+- `docs/PRINTER-CONFIG.md`
+
+## DEC-054: rubit-mcp-mail — почта Mail.ru
+
+**Дата:** 2026-10-05
+**Статус:** принято
+
+**Контекст:** чтение почты Mail.ru через агента (read-only).
+
+**Решение:** **`rubit-mcp-mail==1.0.0`** как MCP-сервер.
+
+### Параметры
+- **Command:** `uvx`
+- **Args:** `rubit-mcp-mail==1.0.0 serve`
+- **Config:** `~/.config/rubit-mcp-mail/config.toml`
+- **Secrets:** `~/.config/rubit-mcp-mail/secrets.json` (600)
+- **Tools whitelist:** 5 read-only
+
+### Whitelist
+`list_accounts`, `list_folders`, `list_messages`, `search_messages`, `read_message`.
+
+### Исключено
+- **`get_attachment`** — скачивание вложений на диск.
+
+### Ключевые правила
+1. **Read-only by construction** — `EXAMINE` + `BODY.PEEK`, нет write.
+2. **Пароль Mail.ru** — только **«Только чтение и удаление писем»** (IMAP, без SMTP).
+3. **Пароль** — **только** в `secrets.json`. Никогда в чат.
+
+### Проверено
+- `list_folders` — работает: INBOX (8201), Отправленные (8559), ...
+
+### Ссылки
+- `docs/MAIL.md`
+
+## DEC-055: МойСклад MCP — ОТЛОЖЕНО
+
+**Дата:** 2026-10-05
+**Статус:** отложено
+
+**Контекст:** интеграция CRM МойСклад (read-only) через `ilyautov/moysklad-mcp-ru`.
+
+**Проблема:** **UnicodeEncodeError** — сервер падает при обработке ответа
+`api.moysklad.ru` (кириллица). Баг в **alpha-версии** сервера, не наш.
+
+**Решение:** отложить до одного из:
+1. **Фикс** Unicode-бага в `ilyautov/moysklad-mcp-ru` (issue на GitHub).
+2. **Официальный MCP** МойСклад: `https://mcp.moysklad.ru/tools/main`.
+3. **Свой минимальный MCP** (~200 строк FastMCP, read-only).
+
+**Токен:** отозвать (попал в чат при отладке). Создать новый при разблокировке.
+
+**Whitelist (готов):** 20 read-tools `ms_*` (см. `docs/MOYSKLAD.md`).
+
+### Ссылки
+- `docs/MOYSKLAD.md`

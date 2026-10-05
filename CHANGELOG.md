@@ -17,6 +17,10 @@
 - Web: `extract_backend: exa` — семантическое извлечение контента (DEC-049). `search_backend` остаётся SearXNG. Exa работает keyless (без API-ключа, rate-limited).
 - STT: локальный `faster-whisper 1.2.1` + `av 18.1.0`, модель `base`, язык `ru` (DEC-052).
 - Runtime venv Hermes: правильная установка extras через `pm.sync_venv` (DEC-052).
+- Kiln MCP (kiln3d 1.4.1.1) — 3D-принтер ZAV, 71 read-only tool (DEC-053).
+- rubit-mcp-mail 1.0.0 — почта Mail.ru, 5 read-only tool (DEC-054).
+- МойСклад MCP — отложено (Unicode-баг alpha) (DEC-055).
+- Документация: `docs/INTEGRATIONS.md`, `docs/KILN.md`, `docs/MAIL.md`, `docs/MOYSKLAD.md`, `docs/PRINTER-CONFIG.md`.
 
 ## [0.30.0] - 2026-09-30
 

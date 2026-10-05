@@ -1,7 +1,7 @@
 # DEC Index
 
 > Автогенерируется `scripts/checks/check_dec_index.py`.
-> Источник: `DECISIONS.md` (52 записей).
+> Источник: `DECISIONS.md` (55 записей).
 > **Не редактировать вручную.**
 
 | ID | Заголовок |
@@ -58,3 +58,6 @@
 | [DEC-050](DECISIONS.md#dec-050) | kanban.max_in_progress — пересмотр 8 → 2 |
 | [DEC-051](DECISIONS.md#dec-051) | Локальный STT (faster-whisper) |
 | [DEC-052](DECISIONS.md#dec-052) | Runtime venv Hermes — где ставить Python-пакеты |
+| [DEC-053](DECISIONS.md#dec-053) | Kiln MCP — 3D-принтер ZAV |
+| [DEC-054](DECISIONS.md#dec-054) | rubit-mcp-mail — почта Mail.ru |
+| [DEC-055](DECISIONS.md#dec-055) | МойСклад MCP — ОТЛОЖЕНО |
