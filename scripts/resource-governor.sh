@@ -6,6 +6,8 @@ LOCK_DIR="$HOME/ai-system/runtime/locks"
 LOCK_FILE="$LOCK_DIR/heavy.lock"
 FLOCK_FILE="$LOCK_DIR/heavy.flock"
 MAX_HEAVY="${MAX_HEAVY:-1}"
+# P1-fix: TTL для записей в lock-файле (часы). Старше — удаляются.
+LOCK_TTL_HOURS="${LOCK_TTL_HOURS:-24}"
 
 mkdir -p "$LOCK_DIR"
 
@@ -30,6 +32,19 @@ case "${1:-}" in
     flock -w 30 9 || { echo "✗ Таймаут ожидания lock (30s)" >&2; exit 1; }
 
     if [ -f "$LOCK_FILE" ]; then
+      # P1-fix: TTL-очистка — удаляем записи старше LOCK_TTL_HOURS.
+      _ttl_seconds=$(( LOCK_TTL_HOURS * 3600 ))
+      _now=$(date +%s)
+      _cleaned="$LOCK_FILE.clean"
+      : > "$_cleaned"
+      while IFS=: read -r _task _pid _ts; do
+        [ -z "$_ts" ] && continue
+        _epoch=$(date -d "$_ts" +%s 2>/dev/null || echo 0)
+        if [ "$_epoch" -eq 0 ] || [ $(( _now - _epoch )) -le "$_ttl_seconds" ]; then
+          echo "$_task:$_pid:$_ts" >> "$_cleaned"
+        fi
+      done < "$LOCK_FILE"
+      mv "$_cleaned" "$LOCK_FILE"
       COUNT=$(wc -l < "$LOCK_FILE")
     else
       COUNT=0
