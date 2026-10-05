@@ -38,8 +38,8 @@ SECRETS_PATTERN='(api[_-]?key|secret|password|token|private[_-]?key)[[:space:]]*
 for file in $(git diff --cached --name-only | grep -v '\.gitignore$'); do
     if grep -Eiq "$SECRETS_PATTERN" "$file" 2>/dev/null; then
         echo "❌ BLOCKED: возможный секрет в файле: $file"
-        echo "   Найденные строки:"
-        grep -Ein "$SECRETS_PATTERN" "$file" 2>/dev/null | head -3
+        echo "   Найдено совпадений (строки не печатаются — могли бы утечь в лог):"
+        grep -Eic "$SECRETS_PATTERN" "$file" 2>/dev/null
         echo "   Файл будет исключён из коммита."
         git reset HEAD "$file" 2>/dev/null || true
         SECRETS_FOUND=1
