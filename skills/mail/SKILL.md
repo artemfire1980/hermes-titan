@@ -1,7 +1,7 @@
 ---
 name: mail
 query: "почта, письма, mail, rubit"
-description: Read-only доступ к почте Mail.ru (artem_s@chocoladovo.by) через MCP rubit-mcp-mail. 5 инструментов чтения. Без отправки, удаления, скачивания вложений.
+description: Read-only доступ к почте Mail.ru (<mailbox>) через MCP rubit-mcp-mail. 5 инструментов чтения. Без отправки, удаления, скачивания вложений.
 version: 1.0.0
 author: hermes
 license: MIT

@@ -57,7 +57,7 @@ download_dir = "~/Downloads/rubit-mcp-mail"
 
 [accounts.mailru]
 provider = "generic"
-email    = "artem_s@chocoladovo.by"
+email    = "<mailbox>"
 host     = "imap.mail.ru"
 ~/.config/rubit-mcp-mail/secrets.json — пароль (создан через auth mailru, права 600).
 
@@ -122,7 +122,7 @@ Hermes не сохраняет два --env — но для rubit env не ну�
 Дополнительный барьер: iptables / ufw — блок исходящего smtp.mail.ru:465 для процесса. TODO (не реализовано).
 
 Реальные данные (2026-10-05)
-Аккаунт: artem_s@chocoladovo.by
+Аккаунт: <mailbox>
 
 IMAP: imap.mail.ru:993
 
