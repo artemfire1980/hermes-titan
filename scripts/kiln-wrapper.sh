@@ -1,3 +1,5 @@
+# NOTE: не используется Hermes (Hermes -> прямой путь к kiln3d).
+# Оставлен как пример wrapper-подхода.
 #!/bin/bash
 # Kiln MCP wrapper — прогревает Kiln перед подачей на stdin.
 set -euo pipefail

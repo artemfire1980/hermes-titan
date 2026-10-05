@@ -8,7 +8,7 @@
 | Сервис | MCP-сервер | Инструментов | Статус |
 |---|---|---|---|
 | **Почта Mail.ru** | `rubit-mcp-mail==1.0.0` | 5 read | ✅ работает |
-| **CRM МойСклад** | `ilyautov/moysklad-mcp-ru` | — | ⏸️ отложен (Unicode-баг alpha) |
+| **CRM МойСклад** | официальный `mcp.moysklad.ru` | 4 read | ✅ работает (DEC-056) |
 | **3D-принтер ZAV** | `Kiln (kiln3d) 1.4.1.1` | 71 read | ✅ работает |
 
 ## Принципы безопасности
@@ -84,6 +84,6 @@ docs/KILN.md — 3D-принтер Kiln.
 
 docs/MAIL.md — почта Mail.ru.
 
-docs/MOYSKLAD.md — CRM (отложен).
+docs/MOYSKLAD.md — CRM (DEC-055 отложено, DEC-056 официальный MCP).
 
 docs/PRINTER-CONFIG.md — конфиг принтера ZAV.
