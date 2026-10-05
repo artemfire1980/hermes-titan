@@ -100,8 +100,9 @@ if $VENV_PYTHON "$SCRIPTS_DIR/md2docx.py" "$NEW_MD" "$NEW_DOCX" 2>&1; then
 $SUMMARY
 
 📎 Полный отчёт в прикреплённом DOCX"
-        $VENV_PYTHON "$SCRIPTS_DIR/send_to_telegram.py" "$NEW_DOCX" \
-            --caption "$CAPTION" --message "$MSG" 2>/dev/null || true
+        # --message-only: только текст, без повторной отправки DOCX
+        $VENV_PYTHON "$SCRIPTS_DIR/send_to_telegram.py" --message-only \
+            --message "$MSG" || true
     fi
 else
     echo "⚠️ Не удалось сконвертировать в DOCX"

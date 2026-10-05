@@ -23,10 +23,7 @@ if not BOT_TOKEN or not CHAT_ID:
 
 def send_document(file_path: Path, caption: str = ""):
     """Отправляет документ в Telegram"""
-    import json
-    import mimetypes
-    import urllib.parse
-    import urllib.request
+    import mimetypes  # только для guess_type (остальное — top-level)
 
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendDocument"
 
@@ -95,10 +92,30 @@ def send_message(text: str):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("file", help="Путь к файлу для отправки")
+    ap.add_argument("file", nargs="?", help="Путь к файлу для отправки (не нужен с --message-only)")
     ap.add_argument("--caption", "-c", default="", help="Подпись к файлу")
     ap.add_argument("--message", "-m", help="Дополнительное текстовое сообщение")
+    ap.add_argument(
+        "--message-only",
+        action="store_true",
+        help="Отправить только --message, без файла. file не требуется.",
+    )
     args = ap.parse_args()
+
+    # Режим "только сообщение" (без файла).
+    if args.message_only:
+        if not args.message:
+            print("❌ --message-only требует --message", file=sys.stderr)
+            sys.exit(1)
+        if send_message(args.message):
+            sys.exit(0)
+        else:
+            sys.exit(1)
+
+    # Обычный режим: файл обязателен.
+    if not args.file:
+        print("❌ Укажите файл (или используйте --message-only)", file=sys.stderr)
+        sys.exit(1)
 
     file_path = Path(args.file)
     if not file_path.exists():
