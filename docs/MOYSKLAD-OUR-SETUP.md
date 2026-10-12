@@ -649,3 +649,162 @@ for order in orders:
 - **MCP-сервер:** https://mcp.moysklad.ru/tools/main
 - **MCP tools (4):** `get_catalog`, `get_schema`, `get_resources`, `get_child_resources`
 - **Аудит-файлы:** `/mnt/ai-ssd/hermes/cache/moysklad-audit/`
+
+## 11. MCP-сервер МойСклад
+
+### Характеристики
+
+- **URL:** `https://mcp.moysklad.ru/tools/main`
+- **Версия:** `moysklad-mcp 1.29.0`
+- **Transport:** HTTP (JSON-RPC over POST)
+- **ProtocolVersion:** `2024-11-05`
+- **Зависимости:** нулевые (облако)
+- **Токен:** `MOYSKLAD_TOKEN` в `/mnt/ai-ssd/hermes/.env`
+- **Headers:** `Authorization: Bearer ${MOYSKLAD_TOKEN}`
+
+### 4 инструмента (read-only by construction)
+
+| Tool | Что делает |
+|---|---|
+| `get_catalog` | Каталог ресурсов: справочники (dictionary), документы (document), отчёты (report) |
+| `get_schema` | Схема resource: fields, parameters, child_key, filter_operator_groups |
+| `get_resources` | Список объектов с реальными данными (**требует `fields`!**) |
+| `get_child_resources` | Дочерние объекты для конкретного родителя (требует `entityId` + `child_key`) |
+
+**Write-инструментов в MCP нет.** Только `get_*`. Безопасность by construction.
+
+**Важно:** MCP — read-only, **но прямой HTTP API МойСклад — работает** (используется для аудита). Заголовки: `Authorization: Bearer $MOYSKLAD_TOKEN`, `Accept: application/json;charset=utf-8`, `Accept-Encoding: gzip`.
+
+### Порядок работы (MCP)
+
+1. `get_catalog` — выбрать ресурс.
+2. `get_schema` — узнать поля.
+3. `get_resources` — запросить данные (с `fields`!).
+4. `get_child_resources` — дочерние (например, позиции заказа).
+
+### Конфигурация Hermes
+
+```yaml
+mcp_servers:
+  moysklad:
+    url: https://mcp.moysklad.ru/tools/main
+    headers:
+      Authorization: "Bearer ${MOYSKLAD_TOKEN}"
+    connect_timeout: 60
+    enabled: true
+    tools:
+      include:
+        - get_catalog
+        - get_schema
+        - get_resources
+        - get_child_resources
+      resources: false
+      prompts: false
+### Создание токена
+1. Веб-интерфейс МойСклад: Настройки → Пользователи → Токены доступа.
+2. Создать → скопировать (показывается один раз).
+3. Вставить в /mnt/ai-ssd/hermes/.env: MOYSKLAD_TOKEN=<токен>.
+4. Права токена: просмотр (без редактирования/удаления).
+
+### Сравнение с ilyautov/moysklad-mcp-ru
+| Критерий | Официальный | ilyautov |
+|---|---|---|
+| Unicode-баг | нет | есть |
+| Версия | 1.29.0 | 0.2.0 alpha |
+| Transport | HTTP (облако) | stdio (локально) |
+| Зависимости | 0 | uvx + Python |
+| Write | нет | есть (за гейтами) |
+| Токен | `.env` | `cabinets.json` |
+Вывод: используем официальный MCP — нет Unicode-бага, без локальных зависимостей.
+
+### Проверено
+- 2026-10-05: hermes chat -q "Покажи список товаров" → 14 tool calls, 50 сек, реальные данные (112+ товаров).
+- 2026-10-09: полный аудит через HTTP API — 2694 контрагента, 1851 заказ, 764 товара.
+
+## 12. Полный каталог ресурсов (81)
+
+Из официального MCP (`get_catalog`, 2026-10-09).
+
+### Общая структура
+
+- **31 dictionary** — справочники
+- **37 document** — документы
+- **13 report** — отчёты
+
+### Ключевые справочники (dictionary)
+
+| key | Что | Связка |
+|---|---|---|
+| `counterparty` | Клиенты и поставщики | email → почта, id → заказы |
+| `organization` | Свои юрлица | |
+| `product` | Номенклатура | |
+| `service` | Услуги | |
+| `variant` | Модификации | |
+| `bundle` | Комплекты | |
+| `productfolder` | Группы товаров | |
+| `store` | Склады | |
+| `retailstore` | Точки продаж | |
+| `employee` | Сотрудники | owner контрагента |
+| `group` | Отделы | group контрагента |
+| `contract` | Договоры | agent → counterparty |
+| `project` | Проекты | |
+| `saleschannel` | Каналы продаж | |
+| `saleplatform` | Площадки продаж | маркетплейсы |
+| `currency` | Валюты | |
+| `uom` | Единицы измерения | |
+| `taxrate` | Ставки НДС | |
+| `expenseitem` | Статьи расходов | |
+| `country` | Страны | |
+| `region` | Регионы | |
+| `discount` | Скидки | |
+| `bonusprogram` | Бонусные программы | |
+| `consignment` | Серии | партии товаров |
+| `task` | Задачи CRM | |
+
+### Ключевые документы (document)
+
+| key | Что | child_key |
+|---|---|---|
+| `customerorder` | Заказ покупателя | customerorder_position |
+| `demand` | Отгрузка | demandposition |
+| `supply` | Приёмка | supply_position |
+| `enter` | Оприходование | enter_position |
+| `move` | Перемещение | move_position |
+| `inventory` | Инвентаризация | inventory_position |
+| `salesreturn` | Возврат покупателя | salesreturn_position |
+| `purchasereturn` | Возврат поставщику | purchasereturn_position |
+| `invoiceout` | Счёт покупателю | invoiceout_position |
+| `invoicein` | Счёт поставщика | invoicein_position |
+| `purchaseorder` | Заказ поставщику | purchaseorder_position |
+| `paymentin` | Входящий платёж | — |
+| `paymentout` | Исходящий платёж | — |
+| `cashin` | Приходный ордер | — |
+| `cashout` | Расходный ордер | — |
+| `pricelist` | Прайс-лист | pricelist_position |
+| `prepayment` | Предоплата | prepayment_position |
+| `retaildemand` | Розничная продажа | retaildemand_position |
+
+### Ключевые отчёты (report)
+
+| key | Что |
+|---|---|
+| `report_counterparty_metrics` | Метрики клиентов (CRM) |
+| `report_orders` | Показатели заказов |
+| `report_sales` | Показатели продаж |
+| `profit_bycounterparty` | Прибыль по клиентам |
+| `profit_byproduct` | Прибыльность по товарам |
+| `profit_byvariant` | Прибыльность по модификациям |
+| `profit_byemployee` | Прибыльность по сотрудникам |
+| `profit_bysaleschannel` | Прибыльность по каналам |
+| `stock_all` | Остатки по товарам (подробный) |
+| `stock_bystore` | Остатки по складам |
+| `stock_all_current` | Остатки (краткий) |
+| `stock_bystore_current` | Остатки по складам (краткий) |
+| `assortment` | Ассортимент |
+
+### Устаревшее / неверное в старых документах
+
+- ❌ `pricetype` — **нет** в реальном каталоге МойСклад (2026-10-09).
+- ❌ «НЕТ в схеме customerorder: state» — **неверно**, `state` **есть** (17 статусов).
+- ❌ «customerorder.agent — Ref(counterparty, organization)» — только **counterparty**.
+- ❌ `company_summary.json` (204 компании) — устарело (сейчас 356 доменов, 2309 писем).
