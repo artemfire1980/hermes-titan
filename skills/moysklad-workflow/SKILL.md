@@ -9,7 +9,22 @@ license: MIT
 
 # Moysklad Workflow — Справочник полей и взаимосвязей
 
+## Наша специфика (HERMES-TITAN)
+
+- **Теги — основная сегментация.** `status` и `state` у контрагентов не используются (0%).
+- **Менеджеры** — поле `owner` (99.9% заполнено): 22 сотрудника. Дублируются в тегах.
+- **Email** — два источника: `counterparty.email` (34.9%) + `contactpersons[].email` (ещё 28.2%). **Общий охват 63.1% (1699 контрагентов), 2369 уникальных email.**
+- **ХОЛДИНГ** — кастомное поле (17.1%, 461 контрагент): X5 (65), Магнит (45), ОЗОН (6) и др.
+- **Кастомные поля counterparty:** Сайт (30.8%), ХОЛДИНГ (17.1%), Маркировка (10.5%), GLN (1.9%), Схема проезда (1.1%).
+- **Архивные товары продаются** — проверять `archived` (340 архивных из 764).
+- **Планы заказов** — статус `ПЛАНЫ` (35 заказов, 0.42 млрд) — исключать из реальных продаж.
+- **Заказы почти все ОТГРУЖЕН** (96.6%) — это документооборот, не CRM.
+- **Размеры (2026-10-09):** 2694 контрагента, 1851 заказ, 764 товара, 1283 отгрузки, 1338 счетов, 1490 платежей.
+- **Полная документация:** `docs/MOYSKLAD-OUR-SETUP.md` в репо `hermes-titan`.
+
+
 ## Путь работы с данными
+
 
 1. `get_catalog()` — список всех resource (dictionary / document / report)
 2. `get_schema(key=<resource>)` — поля, типы, фильтры, child_key
@@ -33,7 +48,6 @@ license: MIT
 | employee | Сотрудник | Сотрудники |
 | group | Отдел | Группы сотрудников |
 | contract | Договор | Договоры с контрагентами |
-| pricetype | Тип цен | Типы цен номенклатуры |
 | currency | Валюта | Валюты |
 | uom | Единица измерения | Ед. изм. |
 | taxrate | Ставка НДС | Ставки НДС |
@@ -145,6 +159,20 @@ license: MIT
 | created | Момент создания | DateTime | date | |
 | updated | Момент обновления | DateTime | date | |
 | id | ID | UUID | eq_neq | |
+| owner | Владелец | Ref(employee) | eq_neq | Ответственный сотрудник |
+| group | Отдел | Ref(group) | eq_neq | Группа |
+| shared | Общий доступ | Boolean | eq_neq | |
+| ogrn | ОГРН | String | text | Для юрлиц |
+| ogrnip | ОГРНИП | String | text | Для ИП |
+| legalFirstName | Имя | String | text | Для ИП/физлиц |
+| legalLastName | Фамилия | String | text | Для ИП/физлиц |
+| legalMiddleName | Отчество | String | text | Для ИП/физлиц |
+| actualAddressFull | Факт. адрес (структура) | Object | нет | |
+| accounts | Банковские счета | Array | нет | Только expand |
+| contactpersons | Контактные лица | Array | нет | Только expand, email здесь! |
+| state | Статус | Ref(state) | eq_neq | Не используется (0%) |
+| files | Файлы | Array | нет | |
+| notes | Заметки | Array | нет | |
 
 ### organization (Юрлицо)
 | field | label | type | filterable | назначение |
@@ -452,13 +480,6 @@ child_key: retaildemand_position
 | updated | Момент обновления | DateTime | date | |
 | id | ID | UUID | eq_neq | |
 
-### pricetype (Тип цен)
-| field | label | type | filterable | назначение |
-|-------|-------|------|-----------|------------|
-| name | Наименование | String | text | |
-| externalCode | Внешний код | String | text | |
-| id | ID | UUID | eq_neq | |
-
 ### currency (Валюта)
 | field | label | type | filterable | назначение |
 |-------|-------|------|-----------|------------|
@@ -631,3 +652,8 @@ retaildemand (розничная продажа)
 - 1000-объектный лимит на get_resources — нет пагинации; при =1000 результатов общее число больше
 - archived=true/false — фильтр для скрытых объектов
 - applicable=true — только проведённые документы
+- **`expand` работает только до `limit=100`.** На 200+ вложенные объекты (contactpersons, positions.assortment) молча пропадают.
+- **API требует `Accept-Encoding: gzip`** — без него HTTP 415.
+- **`id` возвращается**, если явно указать его в `fields`. Без `fields` — пустой массив.
+- **`contactpersons`** — только через `expand`, отдельного ресурса нет (404).
+- **`ПЛАНЫ`** в customerorder.state — планирование, не реальные продажи.
