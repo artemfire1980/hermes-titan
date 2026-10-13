@@ -1227,3 +1227,36 @@ kiln3d emergency-stop --printer zav
 **Ссылки:**
 - `DECISIONS.md` — DEC-057 (read-only whitelist MCP).
 - `docs/SECURITY.md` — раздел «Предложение write-операций».
+
+## DEC-059: Аудит МойСклад 2026-10-09 — единый документ + чистка skills
+
+**Факт:** полный аудит МойСклад через HTTP API (`api.moysklad.ru/api/remap/1.2`).
+- 2694 контрагента, 1851 заказ, 764 товара, 1283 отгрузки, 1338 счетов, 1490 платежей.
+- Файлы аудита: `/mnt/ai-ssd/hermes/cache/moysklad-audit/` (615 MB).
+
+**Единый документ:** `docs/MOYSKLAD-OUR-SETUP.md` (810 строк, 13 разделов) — рабочие страницы, сущности, связи, теги, холдинги, соглашения, сценарии, ограничения, файлы, MCP, каталог ресурсов.
+
+**Обновлены skills:**
+- `moysklad-workflow` — наша специфика, поля counterparty, expand=100, убран pricetype.
+- `moysklad-query` — убрана ложь про id, обновлены цифры (теги, email), counterpartymetrics → report_counterparty_metrics.
+- `data-integration` — исправлена ложь про id, обновлены цифры email.
+
+**Удалены (ложные/устаревшие):**
+- `moysklad-client-analysis` (skill) — 100-кратное завышение сумм, ложь про id, синтаксическая ошибка.
+- `email-mcp-integration` (skill) — дублировал data-integration, ложь про id.
+- `docs/MOYSKLAD.md` — устарел, влит в единый документ.
+- `docs/MOYSLAD-DATA-MAP.md` — устарел, влит в единый документ.
+
+**Ключевые находки:**
+- **`id` возвращается**, если указать в `fields`. Старые skills врали, что нет.
+- **Email — 63.1%** (не 34%): `counterparty.email` + `contactpersons[].email`.
+- **`expand` работает только до `limit=100`** (на 200+ молча отключается).
+- **MCP-схема неполная** (нет `owner`, `group`, `contactpersons`, `state`).
+- **Воронка контрагентов — через теги**, не `status`/`state` (0%).
+- **ХОЛДИНГ — кастомное поле** (461 контрагент: X5, Магнит, ОЗОН).
+- **Архивные товары продаются** (340 из 764).
+- **Планы заказов** — статус `ПЛАНЫ` (0.42 млрд, исключать из реальных продаж).
+
+**Коммиты:** `08d26b1`, `190138b`, `2131b08`, `2afaac8`, `f56b573`, `cf31dd4`.
+
+**Проверено:** 2026-10-09…12. HTTP API + MCP.
