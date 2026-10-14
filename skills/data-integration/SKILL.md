@@ -1,6 +1,5 @@
 ---
 name: data-integration
-query: "интеграция данных связка источников"
 description: Связка внешних источников с МойСклад. Маппинг.
 version: 1.0.0
 author: Hermes Agent
