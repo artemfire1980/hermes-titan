@@ -1299,7 +1299,7 @@ kiln3d emergency-stop --printer zav
 - `titan-v0.22.0-20261016` — правки pyproject для v0.22.0.
 
 **Что осталось:**
-- PR #129521 — закрыть (superseded community plugin).
+- PR #129521 — оставить открытым (fine-grained PAT не имеет API-доступа к NousResearch). Superseded community plugin, reviewer закроет сам.
 - `holographic-patch.timer` — **не нужен** в v0.22.0 (патч в ядре отсутствует). **Удалить** или **оставить отключённым**.
 - `post-merge hook` — **не нужен** в v0.22.0 (Holographic — external). **Проверить**.
 
