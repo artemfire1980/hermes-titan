@@ -104,3 +104,17 @@ license: MIT
 - `docs/KILN.md` — инструкция MCP.
 - `docs/PRINTER-CONFIG.md` — конфиг принтера.
 - `docs/SECURITY.md` — общие правила безопасности MCP.
+
+## Память (Holographic) — перед ответом
+
+При вопросах про **Kiln / 3D-принтер** — **сначала** recall:
+
+1. `recall("Kiln")` — общее (Klipper CB1, Moonraker btt-cb1:7125).
+2. `recall("Kiln [тема]")` — конкретика:
+   - `recall("Kiln статус")` — printer_status, температуры.
+   - `recall("Kiln safety")` — правила (что можно, что нельзя).
+   - `recall("Kiln анализ")` — конфиг, klippy.log, input shaper.
+
+**Важно:** печать — **ТОЛЬКО** человек через Fluidd/Mainsail. Агент — **только** мониторинг и калибровка.
+
+**Подробности:** skill `kiln-printer`, `kiln-safety`, `kiln-analyze`.
