@@ -75,28 +75,6 @@ For the body of a specific release, replace the placeholder with a real tag:
 
 Completion criterion: latest tag, release date, and changelog body retrieved. Compare tag to the current version.
 
-### Phase 3 — Compare with local stack
-
-Our components live in three places. Check all of them, do not assume a component is gone:
-
-- Local skills: `$HERMES_HOME/skills/<category>/<name>/SKILL.md`
-- Our scripts (git repo): `~/ai-system/scripts/`
-- Skills in git repo: `~/ai-system/skills/`
-
-For each component, run `search_files` first, then judge. A file that exists in this repo exists — never report "already removed" without an explicit not-found result.
-
-| Component | Where to look | May be replaced by | Caveat |
-|---|---|---|---|
-| voice-transcription | `$HERMES_HOME/skills/media/` | `stt.streaming` (v0.21.6+) | streaming is CLI/TUI only; Telegram still needs the skill |
-| task_ledger.py | `~/ai-system/scripts/` | Kanban (DEC-043) | partial migration only |
-| send_to_telegram.py | `~/ai-system/scripts/` | `hermes send` | verified replacement on v0.21.5 |
-| resource-governor.sh | `~/ai-system/scripts/` | `hermes pause` | NOT a replacement — pause is global emergency stop, governor is MAX_HEAVY throttle |
-| progressive-skill | `$HERMES_HOME/plugins/` | `plugins.isolation: host` (v0.21.6+) | verify after update |
-| rubit-mcp-mail | `hermes mcp list` | built-in mail MCP | not shipped in v0.21.6 |
-
-Completion criterion: every row has a factual finding (path found / not found) and a recommendation (keep / replace / defer).
-
-
 ### Phase 3 — Compare with OUR-STACK
 
 **Читай** `~/ai-system/docs/OUR-STACK.md` — инвентарь наших решений.
