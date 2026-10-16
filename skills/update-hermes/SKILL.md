@@ -1,5 +1,6 @@
 ---
 name: update-hermes
+query: "Hermes update, обновление Hermes, hermes update, версия Hermes, v0.22.0, upgrade"
 description: Check and apply Hermes Agent updates safely.
 version: 0.1.0
 author: Artem (artemfire1980), Hermes Agent
@@ -19,6 +20,26 @@ Check for Hermes Agent updates, report what changed, and apply them only after e
 - User says "обнови гермес", "проверь обновления", "update hermes", "is there a new version?".
 - Periodically (e.g. weekly) to catch upstream releases.
 - Do NOT use for updating FreeLLMAPI, SearXNG, MCP servers, or Python packages — that is a separate concern.
+
+## Память (Holographic) — перед ответом
+
+При вопросах про **обновление Hermes** — **сначала** recall:
+
+1. `recall("Hermes update")` — процедура, блокеры, ветки.
+2. `recall("Hermes [тема]")` — конкретика:
+   - `recall("Hermes v0.22.0")` — текущая версия, Holographic community.
+   - `recall("Hermes pyproject")` — browser-harness/nemo-relay, android.
+   - `recall("Hermes CDN")` — 403, обход.
+
+**Процедура (Phase 5 в этом skill):**
+1. Бэкап-ветка + push.
+2. Правка pyproject.toml.
+3. `git fetch --tags && git checkout vX.Y.Z`.
+4. `uv lock && hermes pm install`.
+5. `hermes plugins install holographic --force --yes-deps --enable`.
+6. `hermes gateway restart`.
+
+**Документация:** DEC-060 в `DECISIONS.md`.
 
 ## Prerequisites
 
