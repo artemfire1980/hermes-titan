@@ -134,3 +134,19 @@ Run each; a failing item must be reported, not silently skipped.
 - The Telegram report from Phase 4 was delivered.
 - hermes gateway status shows the gateway running.
 - hermes mcp list shows all three MCP servers with unchanged tool counts.
+
+### Phase 5 — Apply (v0.22.0+, проверено 2026-10-16)
+
+Процедура:
+1. Бэкап: `git checkout -b titan-pre-update-$(date +%Y%m%d)`, commit, push.
+2. Правка pyproject.toml: browser-harness/nemo-relay закомментировать, environments исключить android.
+3. `git fetch origin --tags && git checkout v0.22.0`
+4. `uv lock && hermes pm install` — должно быть ✓ venv.
+5. `hermes plugins install holographic --force --yes-deps --enable`
+6. `hermes gateway restart`
+
+Post-update:
+- `hermes --version` → vX.Y.Z stable.
+- `hermes plugins list | grep holographic` → enabled 0.13.0+.
+- `hermes doctor` → memory provider active.
+- `hermes send -t telegram:170690883 "test"` → sent.
