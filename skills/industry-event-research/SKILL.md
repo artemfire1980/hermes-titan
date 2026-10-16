@@ -1,5 +1,6 @@
 ---
 name: industry-event-research
+query: "отраслевое исследование, industry event, новости отрасли, рынок, конкуренты"
 description: Find industry exhibitions and trade fairs by sector, date — with B2B assessment and priority classification.
 category: research
 version: 2.0.0
@@ -25,6 +26,15 @@ Use when the user needs to find industry exhibitions, trade fairs, or conference
 Returns structured results with period, name, topic, country, priority classification, and commercial assessment.
 
 **Prerequisite:** Verify search engines are working before starting. If SearXNG returns no results and web_search is empty, the search infrastructure may be broken (DuckDuckGo CAPTCHA, disabled engines). Report this upfront rather than looping.
+
+## Память (Holographic) — перед ответом
+
+При вопросах про **отраслевое исследование** — recall:
+
+1. `recall("отраслевое исследование")` — общее.
+2. `recall("отраслевое исследование [тема]")` — конкретика.
+
+**Детали** — в этом skill + Holographic.
 
 ## Procedure
 
