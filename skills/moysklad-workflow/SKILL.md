@@ -698,6 +698,23 @@ GET /entity/counterparty?expand=contactpersons&limit=100
 
 **НЕ отвечай "12 из 348"** — это только counterparty.email. Реальная цифра — 63.1%.
 
+## Алгоритм: клиенты с email (готовый путь)
+
+**НЕ пиши** свои скрипты. **НЕ дебажь MCP** — contactpersons там нет.
+
+**Готовый путь:**
+1. `email_base.json` — уже есть 1699 контрагентов с email.
+2. Отфильтровать по owner (например, "Самсонов А. О.") или по tags.
+3. **Если нужно свежее** — API: `GET /entity/counterparty?expand=contactpersons&limit=100&offset=N`.
+4. Собрать `counterparty.email` + `contactpersons[].email`.
+
+**Пример: сколько клиентов Самсонова с email:**
+- Открыть `/mnt/ai-ssd/hermes/cache/moysklad-audit/email_base.json`.
+- Фильтр: `owner == "Самсонов А. О."`.
+- Результат: ~272.
+
+**Занимает 10 секунд.** Не 12 минут. Не пиши debug-скрипты.
+
 ## Память (Holographic) — обязательно перед ответом
 
 При вопросах про **МойСклад** — **сначала** вызови recall:
