@@ -1308,3 +1308,24 @@ kiln3d emergency-stop --printer zav
 - `1ddba58` (hermes-titan) — skill update-hermes Phase 5.
 
 **Проверено:** 2026-10-16. Telegram `sent`, MCP enabled, memory active.
+
+### DEC-060 (дополнение): OUR-STACK + Phase 3 (сравнение с инвентарём)
+
+**Создан `docs/OUR-STACK.md`** — инвентарь сторонних решений поверх Hermes (MCP, skills, скрипты, плагины, патчи, timer, memory).
+
+**Обновлён `update-hermes` skill** — Phase 3 «Compare with OUR-STACK»:
+- Читает `docs/OUR-STACK.md`.
+- Для каждого пункта — проверяет changelog.
+- Формирует отчёт: **убрать / остаётся / проверить / breaking / новые**.
+
+**Цикл обновления (полный):**
+1. Новая версия Hermes.
+2. Phase 1 — текущее состояние.
+3. Phase 2 — changelog (GitHub Releases).
+4. **Phase 3 — сравнение с OUR-STACK.md.**
+5. Phase 4 — отчёт в Telegram.
+6. User: confirm.
+7. Phase 5 — Apply.
+8. Post-update — обновить OUR-STACK.md.
+
+**Коммиты:** `da5f08c` (OUR-STACK), `11f7e7f` (Phase 3), `f9b188d` (убрана старая Phase 3).
