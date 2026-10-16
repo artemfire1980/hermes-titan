@@ -96,6 +96,49 @@ For each component, run `search_files` first, then judge. A file that exists in 
 
 Completion criterion: every row has a factual finding (path found / not found) and a recommendation (keep / replace / defer).
 
+
+### Phase 3 — Compare with OUR-STACK
+
+**Читай** `~/ai-system/docs/OUR-STACK.md` — инвентарь наших решений.
+**Для** каждого пункта — **проверь** changelog новой версии (Phase 2) и реши:
+
+| Метка | Что значит |
+|---|---|
+| ✅ **Заменяется** | Hermes добавил нативное — наше можно **убрать** |
+| ⚠️ **Проверить** | Не очевидно — нужен ручной review |
+| ❌ **Остаётся** | Нет замены — оставить наше |
+
+**Сформируй отчёт:**
+
+Что можно убрать (заменено встроенным)
+[наше решение] → [встроенное Hermes, версия]
+...
+
+Что остаётся нашим
+kiln MCP (74 tools) — самодельный
+
+moysklad MCP (4 tools) — официальный
+
+update-hermes skill
+...
+
+Что проверить вручную
+voice-transcription → stt.streaming (есть ли в нашей версии?)
+
+progressive-skill → upstream skills system
+
+backup.sh → hermes backup
+
+Breaking changes
+...
+
+Новые фичи Hermes (из changelog)
+...
+
+**Completion criterion:** отчёт содержит 5 секций (убрать / остаётся / проверить / breaking / новые).
+
+**После Phase 5** (apply) — **обнови `OUR-STACK.md`**: перенеси убранное в «удалено», добавь новое.
+
 ### Phase 4 — Report
 
 Send a summary to Telegram. No system changes yet. Use the explicit chat_id — home-channel resolution is slow and times out on this host.
