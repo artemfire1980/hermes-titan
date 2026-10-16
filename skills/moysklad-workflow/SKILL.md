@@ -678,6 +678,26 @@ GET /entity/counterparty?expand=contactpersons&limit=100
 
 **НЕ отвечай 12 из 348** — это только counterparty.email. Реальная цифра — 63.1%.
 
+## Email: где искать (важно)
+
+**MCP НЕ возвращает contactpersons.** В MCP доступно только `counterparty.email` (34.9%).
+
+**Контактные лица** (contactpersons) — только через **прямой API**:
+GET /entity/counterparty?expand=contactpersons&limit=100
+
+Общий охват email:
+- `counterparty.email` — 34.9% (940)
+- `contactpersons[].email` — ещё 28.2% (759)
+- **ХОТЬ ГДЕ-ТО — 63.1% (1699 из 2694)**
+- Уникальных email — 2369
+
+**Файлы:**
+- `email_base.json` (1699 контрагентов с email)
+- `email_base.txt` (2369 адресов)
+- `/mnt/ai-ssd/hermes/cache/moysklad-audit/`
+
+**НЕ отвечай "12 из 348"** — это только counterparty.email. Реальная цифра — 63.1%.
+
 ## Память (Holographic) — обязательно перед ответом
 
 При вопросах про **МойСклад** — **сначала** вызови recall:
