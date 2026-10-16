@@ -3,7 +3,7 @@ name: email-correspondence-analyzer
 query: "почта корреспонденция анализ"
 description: Анализ почтовой корреспонденции: группировка по компаниям, восстановление истории, присвоение статусов.
 version: 1.0.0
-author: hermes-titan
+author: hermes
 license: MIT
 ---
 
@@ -17,6 +17,25 @@ license: MIT
 4. Group by company domain, excluding public mail services
 5. Assign statuses per rules
 6. Generate report
+
+## Память (Holographic) — перед ответом
+
+При вопросах про **почту / письма** — **сначала** recall:
+
+1. `recall("Почта")` — общее (аккаунт, IMAP, MCP rubit-mail).
+2. `recall("Почта [тема]")` — конкретика:
+   - `recall("Почта инструменты")` — 5 MCP tools.
+   - `recall("Почта лимиты")` — list_messages без limit зависает.
+   - `recall("Почта папки")` — INBOX, Sent, Drafts, Trash, Junk.
+   - `recall("Почта аудит")` — 2309 писем, 204 компании.
+
+**Важно:** `list_messages` **всегда** с `folder` + `limit ≤ 200`. Без limit — **зависает**.
+
+**Read-only:** нет отправки, удаления, вложений.
+
+**Документация:** `docs/EMAIL-ANALYSIS-2026-10-06.md`.
+
+**Skills:** `mail`, `email-correspondence-analyzer`.
 
 ## Company Detection Rules
 
@@ -33,10 +52,30 @@ license: MIT
 4. Завершено — был интерес, переписка закрылась естественно
 5. Не определено — частное лицо, рассылка, спам
 
+## Current Analysis (2026-10-06)
+
+Mailbox: artem_s@chocoladovo.by
+Period: 2026-01-29 – 2026-10-06
+Total emails processed: ~972 (filtered)
+Companies identified: 82
+
+Status distribution:
+- Действующий: 15
+- Требует внимания: 2
+- Не определено: 60
+- Срочно требует внимания: 0
+- Завершено: 0
+
+Top companies:
+1. cvk-trade.ru — 250 писем, Королькова Елена, ВК (заказы, документы, отгрузка)
+2. pub_mail.ru — 127 писем, AZNUR MMC, Artem Fireglow (таджик, договоры, документы)
+3. chocoladovo.by — 114 писем, внутренние (Volha, Production, Елена Чернышова)
+4. vkonditery.ru — 57 писем, Галина Смирнова (документы, отгрузка, сверки)
+5. pub_gmail.com — 44 писем, Kaplinski, Sattorov (спецификации, каталоги)
 
 ## Notes
 
 - `answered` flag unreliable — mostly false even for replied threads
 - Filter out service emails: security@, mailer-daemon@, no-reply@
-- Personal contacts on public domains should be excluded (<personal-contact>, etc.)
+- Personal contacts on public domains should be excluded (aleksandr150572@gmail.com, etc.)
 - Processing is incremental — continue from last offset when more batches needed

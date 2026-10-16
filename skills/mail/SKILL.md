@@ -1,7 +1,7 @@
 ---
 name: mail
 query: "почта, письма, mail, rubit"
-description: Read-only доступ к почте Mail.ru (<mailbox>) через MCP rubit-mcp-mail. 5 инструментов чтения. Без отправки, удаления, скачивания вложений.
+description: Read-only доступ к почте Mail.ru (artem_s@chocoladovo.by) через MCP rubit-mcp-mail. 5 инструментов чтения. Без отправки, удаления, скачивания вложений.
 version: 1.0.0
 author: hermes
 license: MIT
@@ -50,3 +50,22 @@ license: MIT
 ## Сводка
 
 5 инструментов, всё read-only. Рабочий путь: `list_accounts` → `list_folders` → `list_messages`/`search_messages` → `read_message`. Вложения и ссылки только метаданные — скачивания нет.
+
+## Память (Holographic) — перед ответом
+
+При вопросах про **почту / письма** — **сначала** recall:
+
+1. `recall("Почта")` — общее (аккаунт, IMAP, MCP rubit-mail).
+2. `recall("Почта [тема]")` — конкретика:
+   - `recall("Почта инструменты")` — 5 MCP tools.
+   - `recall("Почта лимиты")` — list_messages без limit зависает.
+   - `recall("Почта папки")` — INBOX, Sent, Drafts, Trash, Junk.
+   - `recall("Почта аудит")` — 2309 писем, 204 компании.
+
+**Важно:** `list_messages` **всегда** с `folder` + `limit ≤ 200`. Без limit — **зависает**.
+
+**Read-only:** нет отправки, удаления, вложений.
+
+**Документация:** `docs/EMAIL-ANALYSIS-2026-10-06.md`.
+
+**Skills:** `mail`, `email-correspondence-analyzer`.
