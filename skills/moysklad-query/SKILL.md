@@ -15,6 +15,29 @@ Query Moysklad (МойСклад) account data through the `mcp__moysklad__*` MC
 
 Use when the user asks about Moysklad data: client counts, supplier lists, product catalogs, order statuses, warehouse stock, or any other resource in their Moysklad account. Also use when you need to discover what data is available in a Moysklad account via the MCP interface.
 
+## Память (Holographic) — обязательно перед ответом
+
+При вопросах про **МойСклад** — **сначала** вызови recall:
+
+1. `recall("МойСклад")` — общие факты (2694 контрагента, 1851 заказ, email 63.1%).
+2. `recall("МойСклад [тема]")` — конкретика:
+   - `recall("МойСклад менеджеры")` — 22 менеджера (самсонов 348, ...).
+   - `recall("МойСклад теги")` — глазури 1335, кондитерка 962.
+   - `recall("МойСклад ХОЛДИНГ")` — X5, Магнит, ОЗОН.
+   - `recall("МойСклад email")` — 2369 адресов.
+3. Если данных нет или они **старше 30 дней** — см. «Обновление данных».
+
+**Полная документация:** `~/ai-system/docs/MOYSKLAD-OUR-SETUP.md`.
+
+**Файлы аудита:** `/mnt/ai-ssd/hermes/cache/moysklad-audit/`.
+
+## Обновление данных
+
+Свежий аудит (2026-10-09): `counterparty_full.json`, `customerorder_v2.json`, `all_items_map.json`.
+
+**Обновить** — через HTTP API МойСклад (токен в `.env`, `MOYSKLAD_TOKEN`).
+Скрипты: `/tmp/moysklad-audit/collect_counterparty_full.py` и др.
+
 ## Workflow
 
 1. **Discover resources** — call `mcp__moysklad__get_catalog()` to see available `dictionary`, `document`, and `report` resources with their keys and labels.
