@@ -1,5 +1,6 @@
 ---
 name: data-integration
+query: "МойСклад, интеграция, связка, маппинг, email"
 description: Связка внешних источников с МойСклад. Маппинг.
 version: 1.0.0
 author: Hermes Agent

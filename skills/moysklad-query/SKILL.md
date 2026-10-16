@@ -1,5 +1,6 @@
 ---
 name: moysklad-query
+query: "МойСклад, контрагент, заказ, отгрузка, счёт, запрос MCP"
 description: Query Moysklad via MCP tools with 1000-object limit.
 version: 1.0.0
 author: hermes
