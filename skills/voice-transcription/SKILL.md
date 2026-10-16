@@ -1,5 +1,6 @@
 ---
 name: voice-transcription
+query: "голос, voice, транскрипт, аудио, opus, ogg, whisper, распознавание"
 description: "Transcribe Telegram voice messages on Khadas VIM4."
 version: 1.0.0
 author: user
@@ -21,6 +22,17 @@ Transcribe Telegram voice messages and other audio files to text using faster-wh
 
 - A voice message arrives that Hermes cannot auto-transcribe (common on Telegram).
 - Any audio file needs transcription: .ogg, .opus, .mp3, .m4a, .wav.
+
+## Память (Holographic) — перед ответом
+
+При вопросах про **голос / voice / транскрипт** — recall:
+
+1. `recall("Voice")` — общее (faster-whisper, Telegram Ogg Opus).
+2. `recall("Voice [тема]")` — конкретика:
+   - `recall("Voice модель")` — base, ru.
+   - `recall("Voice конверт")` — ffmpeg → WAV 16kHz mono.
+
+**Провайдер:** local (faster-whisper base), `av 18.1.0`. STT встроен в Hermes.
 
 ## Prerequisites
 
