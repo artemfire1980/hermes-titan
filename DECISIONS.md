@@ -1260,3 +1260,51 @@ kiln3d emergency-stop --printer zav
 **Коммиты:** `08d26b1`, `190138b`, `2131b08`, `2afaac8`, `f56b573`, `cf31dd4`.
 
 **Проверено:** 2026-10-09…12. HTTP API + MCP.
+
+## DEC-060: Обновление до v0.22.0 + миграция Holographic в community plugin
+
+**Дата:** 2026-10-16.
+
+**Факт:** Hermes обновлён v0.21.5 → **v0.22.0 stable**. Процедура заняла 2 дня (14–16 Oct).
+
+**Ключевое изменение:** Holographic memory **вынесен из ядра** в **community plugin**:
+- `itpartypattaya/hermes-plugin-holographic`, версия **0.13.0**.
+- Установка: `hermes plugins install holographic --force --yes-deps --enable`.
+- `memory_store.db` — **совместим** (additive schema).
+- **Русский встроен** — наш PR #129521 (Cyrillic patch) **больше не нужен**.
+
+**Блокеры и обходы:**
+- **CDN Nous 403** (DEC-013) → `--branch main` или `git checkout` напрямую.
+- **`browser-harness` wheel битый** (`Invalid Wheel-Version`) → закомментирован в `pyproject.toml`.
+- **`nemo-relay`** → закомментирован.
+- **`tool.uv.environments`** → `sys_platform != 'android'` (playwright не имеет wheel для android).
+
+**Процедура (в `update-hermes` skill, Phase 5):**
+1. Бэкап: ветка `titan-pre-update-YYYYMMDD` + push в форк.
+2. Правка `pyproject.toml` (browser-harness, nemo-relay, android).
+3. `git fetch --tags && git checkout v0.22.0`.
+4. `uv lock && hermes pm install` → `✓ venv`.
+5. `hermes plugins install holographic --force --yes-deps --enable`.
+6. `hermes gateway restart`.
+
+**Состояние после обновления:**
+- Hermes **v0.22.0 stable**.
+- Holographic **0.13.0** (community) активен.
+- Holographic memory: **40 facts, 13 entities** (наполнены из MEMORY.md).
+- Русский recall работает.
+- MCP (3), Telegram, gateway — работают.
+
+**Ветки патчей:**
+- `titan-patches-auto-20261015` — патчи v0.21.5.
+- `titan-v0.22.0-20261016` — правки pyproject для v0.22.0.
+
+**Что осталось:**
+- PR #129521 — закрыть (superseded community plugin).
+- `holographic-patch.timer` — **не нужен** в v0.22.0 (патч в ядре отсутствует). **Удалить** или **оставить отключённым**.
+- `post-merge hook` — **не нужен** в v0.22.0 (Holographic — external). **Проверить**.
+
+**Коммиты:**
+- `494038cef6` (fork) — titan: v0.22.0.
+- `1ddba58` (hermes-titan) — skill update-hermes Phase 5.
+
+**Проверено:** 2026-10-16. Telegram `sent`, MCP enabled, memory active.
