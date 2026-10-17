@@ -71,3 +71,22 @@
 - При добавлении нового решения — добавить в таблицу.
 - При обновлении Hermes — проверить «Может быть заменено».
 - При удалении нашего решения — удалить из таблицы.
+
+## 9. Cron jobs (Hermes)
+
+| Job | Schedule | Script | Mode |
+|---|---|---|---|
+| `moysklad-refresh-weekly` | `0 6 * * 1` (Пн 6:00) | `moysklad_refresh.py` | `--no-agent`, deliver telegram |
+| `mail-check-daily` | `0 9 * * *` (каждый день) | `mail_check.py` | `--no-agent`, deliver telegram |
+
+Скрипты:
+- `~/ai-system/scripts/moysklad_refresh.py` (git) → `HERMES_HOME/scripts/` (копия).
+- `~/ai-system/scripts/mail_check.py` (git) → `HERMES_HOME/scripts/` (копия).
+
+Синхронизация: `~/ai-system/scripts/sync-cron-scripts.sh`.
+
+## 10. Что удалено (cleanup 2026-10-17)
+
+- `holographic-patch.sh` — не нужен в v0.22.0 (Holographic external).
+- `holographic-patch.service` / `.timer` — systemd units удалены.
+- `.titan-backup` файлы — очищены.
