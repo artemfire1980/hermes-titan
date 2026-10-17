@@ -35,20 +35,9 @@ Phases 1–4 read-only. Phase 5 changes the system and requires explicit `/updat
 
 Run via `terminal`:
 
-    # FreeLLMAPI: локальный digest + registry digest (оба — для сравнения)
-    docker inspect freellmapi --format '{{.Image}}'
-    # Registry digest — только arm64 (наш случай)
-    docker manifest inspect ghcr.io/tashfeenahmed/freellmapi:latest 2>&1 | python3 -c "
-import sys, json
-d = json.load(sys.stdin)
-if 'manifests' in d:
-    for m in d['manifests']:
-        if m.get('platform', {}).get('architecture') == 'arm64':
-            print(m['digest'])
-            break
-else:
-    print(d.get('config', {}).get('digest'))
-"
+    # FreeLLMAPI: текущий тег образа (из docker-compose.yml) + версия из GitHub Releases
+    grep -E "image:" /mnt/ai-ssd/freellmapi/docker-compose.yml
+    curl -s --max-time 10 "https://api.github.com/repos/tashfeenahmed/freellmapi/releases/latest" | python3 -c "import sys,json; print('latest tag:', json.load(sys.stdin).get('tag_name'))"
     # Плагины
     hermes plugins list --json 2>&1 | python3 -c "import sys,json; [print(p['name'],p.get('version'),p.get('update_available',False)) for p in json.load(sys.stdin) if p.get('name') in ('holographic','progressive-skill')]"
     # MCP
