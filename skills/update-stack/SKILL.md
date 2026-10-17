@@ -12,22 +12,22 @@ metadata:
 
 # Update Stack
 
-Check for updates of the **infrastructure layer** (not Hermes itself — see skill `update-hermes`): FreeLLMAPI Docker image, Hermes plugins, MCP servers. Show what changed. Apply only on explicit confirmation.
+Проверка обновлений **инфраструктуры** (not Hermes itself — see skill `update-hermes`): FreeLLMAPI Docker image, Hermes plugins, MCP servers. Показать что нового. Применять только по явному подтверждению.
 
-## When to Use
+## Когда использовать
 
 - User says "обнови стек", "проверь обновления FreeLLMAPI", "update stack", "check plugins updates".
 - Weekly, to catch new FreeLLMAPI releases.
 - Do NOT use for updating Hermes itself — use skill `update-hermes`.
 
-## Prerequisites
+## Требования
 
 - `docker` + `docker compose` on PATH.
 - `hermes` CLI.
 - `HERMES_HOME=/mnt/ai-ssd/hermes`.
 - `GITHUB_TOKEN` in `/mnt/ai-ssd/hermes/.env` (for releases API).
 
-## Phases
+## Фазы
 
 Phases 1–4 read-only. Phase 5 changes the system and requires explicit `/update-stack confirm`.
 
@@ -74,13 +74,53 @@ Read `~/ai-system/docs/OUR-STACK.md`. For each component:
 
 Completion criterion: written list per component (обновить / актуально / пропустить).
 
-### Phase 4 — Report
+### Phase 4 — Отчёт в Telegram (на русском)
 
-Send a summary to Telegram. No system changes yet.
+Собери отчёт **по-русски** и отправь в Telegram. Никаких изменений в системе.
 
-    hermes send -t telegram:170690883 "Stack update check: FreeLLMAPI <текущий> → <последний>, плагины: <список>, MCP: <список>. Reply /update-stack confirm to apply."
+**Формат отчёта:**
+🔄 Проверка обновлений стека (дата)
 
-Completion criterion: message delivered; no files changed.
+📦 FreeLLMAPI
+
+· Текущая: v0.15.0 (тег в docker-compose.yml)
+· Последняя: v0.15.0 (GitHub Releases)
+· Статус: ✅ актуально / ⚠️ есть обновление
+
+🧩 Плагины
+
+· holographic 0.13.0 — ✅ актуально / ⚠️ обновить
+· progressive-skill 3.2.0 — ✅ / ⚠️
+
+🔌 MCP
+
+· rubit-mail 1.0.0 — ✅ / ⚠️
+· kiln (74 инструментов) — ✅
+· moysklad (4) — ✅
+
+📰 Что нового (если есть обновление)
+
+· [из changelog: новые фичи, провайдеры, фиксы]
+
+Ответь /update-stack confirm — применю обновления.
+
+**Команда:**
+
+    hermes send -t telegram:170690883 "$(cat <<'EOF'
+🔄 Проверка обновлений стека
+
+📦 FreeLLMAPI: <текущая> → <последняя>
+🧩 Плагины: <список>
+🔌 MCP: <список>
+
+📰 Что нового:
+<changelog>
+
+Ответь /update-stack confirm — применю.
+EOF
+)"
+
+Completion criterion: сообщение доставлено в Telegram, на русском языке, с версиями и changelog.
 
 ### Phase 5 — Apply (only on /update-stack confirm)
 
@@ -106,7 +146,7 @@ Completion criterion: message delivered; no files changed.
 
 Completion criterion: digest изменился (если было обновление), `hermes plugins list` показывает новые версии, MCP работает.
 
-## Post-update checklist
+## Чек-лист после обновления
 
 - FreeLLMAPI: `docker ps` — `Up`, `healthy`.
 - FreeLLMAPI: `curl -H "Authorization: Bearer $HERMES_CUSTOM_127_0_0_1_3001_API_KEY" http://127.0.0.1:3001/v1/models` — 262+ моделей.
@@ -114,7 +154,7 @@ Completion criterion: digest изменился (если было обновл�
 - Telegram: `hermes send -t telegram:170690883 "test"` — sent.
 - Обновить `docs/OUR-STACK.md` — новые версии.
 
-## Pitfalls
+## Подводные камни
 
 - **`hermes plugins update` для community-плагинов** — падает (no .git). Только `--force` переустановка.
 - **FreeLLMAPI `:latest`** — плавающий тег. `docker compose pull` тянет новый digest. **Проверять digest**, а не тег.
@@ -123,14 +163,14 @@ Completion criterion: digest изменился (если было обновл�
 - **`/v1/models` требует API key** — брать из `.env`: `HERMES_CUSTOM_127_0_0_1_3001_API_KEY`.
 - **`--deliver` в cron** — не использовать (баг). Скрипты сами шлют через `hermes send`.
 
-## Verification
+## Проверка
 
 - FreeLLMAPI: `docker inspect freellmapi --format '{{.Image}}'` — новый digest.
 - `hermes plugins list` — версии актуальны.
 - `hermes gateway status` — running.
 - Telegram — сообщение доставлено.
 
-## Quick Reference
+## Быстрая справка
 
 | Goal | Command |
 |---|---|
