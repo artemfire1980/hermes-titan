@@ -35,11 +35,26 @@ Phases 1–4 read-only. Phase 5 changes the system and requires explicit `/updat
 
 Run via `terminal`:
 
-    docker inspect freellmapi --format '{{.Config.Image}} {{.Image}}'
+    # FreeLLMAPI: локальный digest + registry digest (оба — для сравнения)
+    docker inspect freellmapi --format '{{.Image}}'
+    # Registry digest — только arm64 (наш случай)
+    docker manifest inspect ghcr.io/tashfeenahmed/freellmapi:latest 2>&1 | python3 -c "
+import sys, json
+d = json.load(sys.stdin)
+if 'manifests' in d:
+    for m in d['manifests']:
+        if m.get('platform', {}).get('architecture') == 'arm64':
+            print(m['digest'])
+            break
+else:
+    print(d.get('config', {}).get('digest'))
+"
+    # Плагины
     hermes plugins list --json 2>&1 | python3 -c "import sys,json; [print(p['name'],p.get('version'),p.get('update_available',False)) for p in json.load(sys.stdin) if p.get('name') in ('holographic','progressive-skill')]"
+    # MCP
     hermes mcp list 2>&1 | tail -10
 
-Completion criterion: current image digest, plugin versions, MCP list.
+Completion criterion: **два** digest для FreeLLMAPI (локальный + registry). Если они **совпадают** — FreeLLMAPI актуален, **даже если** changelog говорит о новой версии. Если **разные** — есть обновление.
 
 ### Phase 2 — Latest upstream
 
