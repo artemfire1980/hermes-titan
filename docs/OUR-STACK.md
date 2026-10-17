@@ -90,3 +90,27 @@
 - `holographic-patch.sh` — не нужен в v0.22.0 (Holographic external).
 - `holographic-patch.service` / `.timer` — systemd units удалены.
 - `.titan-backup` файлы — очищены.
+
+## 11. FreeLLMAPI
+
+| Параметр | Значение |
+|---|---|
+| Версия | v0.15.0 (фиксированный тег) |
+| Образ | `ghcr.io/tashfeenahmed/freellmapi:v0.15.0` |
+| Порт | `127.0.0.1:3001` |
+| Стратегия | **reliable** (Самый надёжный) |
+| Context Handoff | `on_model_switch` |
+| Модель (auto) | DeepSeek V4 Flash (`routeway/deepseek-v4-flash:free`) |
+| ENCRYPTION_KEY | в `.env` (не менять!) |
+| Volume | `freellmapi-data` (не удалять!) |
+
+**Обновление:**
+1. `docker compose pull`
+2. `docker compose up -d --force-recreate`
+3. Проверить `X-Routed-Via` тестовым запросом.
+
+**Что нового в v0.15.0:**
+- Parallel (бесплатный поиск без ключа).
+- Auray (новый провайдер).
+- MCP: provider_list, quota_outlook, clear_cache.
+- Автоочистка БД.
