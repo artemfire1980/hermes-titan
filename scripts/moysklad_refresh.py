@@ -6,6 +6,7 @@
 
 import gzip
 import json
+import subprocess
 import sys
 import time
 import urllib.parse
@@ -106,9 +107,9 @@ def main():
         OUT_DIR.mkdir(parents=True, exist_ok=True)
         OUT_FILE.write_text(json.dumps(items, ensure_ascii=False, indent=2), encoding="utf-8")
         log(f"OK: {len(items)} контрагентов с email -> {OUT_FILE}")
-        print(
-            f"📊 МойСклад: email_base.json обновлён — {len(items)} контрагентов с email (из {total})"
-        )
+        msg = f"📊 МойСклад: email_base.json обновлён — {len(items)} контрагентов с email (из {total})"
+        print(msg)
+        subprocess.run(["hermes", "send", "-t", "telegram:170690883", msg], timeout=30, check=False)
         return 0
     except Exception as e:
         log(f"ERROR: {e}")

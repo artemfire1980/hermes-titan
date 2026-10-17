@@ -7,6 +7,7 @@
 
 import imaplib
 import json
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -49,7 +50,11 @@ def main():
 
         log(f"Unread: {unread}")
         if unread > 0:
-            print(f"📬 Почта: {unread} непрочитанных в INBOX")
+            msg = f"📬 Почта: {unread} непрочитанных в INBOX"
+            print(msg)
+            subprocess.run(
+                ["hermes", "send", "-t", "telegram:170690883", msg], timeout=30, check=False
+            )
         return 0
     except Exception as e:
         log(f"ERROR: {e}")
