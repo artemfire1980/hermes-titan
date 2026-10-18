@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Анализ: кому из МойСклад давно не писал. Матчинг по домену + email + имени."""
 
+import argparse
 import json
 import re
 from datetime import datetime
@@ -189,3 +190,22 @@ for r in result[:30]:
     mt = r["match_type"] or "—"
     emails = ", ".join(r["emails"][:2])
     print(f"  {name:40s} | {owner:20s} | {last} | {days} дн | {mt:6s} | {emails}")
+
+# === argparse + фильтр по owner (универсальный отчёт) ===
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Анализ email — кому давно не писал")
+    parser.add_argument("--owner", help="Фильтр по owner (например, 'Самсонов А. О.')")
+    args = parser.parse_args()
+
+    if args.owner:
+        filtered = [r for r in result if r.get("owner") == args.owner]
+        print(f"\n=== Фильтр по owner: {args.owner} → {len(filtered)} ===")
+        # Перезаписать файл отфильтрованным
+        OUT.write_text(json.dumps(filtered, ensure_ascii=False, indent=2), encoding="utf-8")
+        never = sum(1 for r in filtered if r["last_email"] is None)
+        d90_180 = sum(1 for r in filtered if r["days_ago"] and 90 < r["days_ago"] <= 180)
+        d180 = sum(1 for r in filtered if r["days_ago"] and r["days_ago"] > 180)
+        print(f"  никогда: {never}")
+        print(f"  90-180:  {d90_180}")
+        print(f"  >180:    {d180}")
+        print(f"  всего:   {len(filtered)}")
