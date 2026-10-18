@@ -79,3 +79,21 @@ Top companies:
 - Filter out service emails: security@, mailer-daemon@, no-reply@
 - Personal contacts on public domains should be excluded (aleksandr150572@gmail.com, etc.)
 - Processing is incremental — continue from last offset when more batches needed
+
+## Анализ: кому давно не писал
+
+**Готовый файл:** `/mnt/ai-ssd/hermes/cache/moysklad-audit/emails_all.json` — 18932 письма (INBOX + Sent, from/to/date).
+
+**Готовый отчёт:** `docs/EMAIL-OVERDUE-2026-10-18.md`.
+
+**Порядок:**
+1. `email_base.json` — 1702 контрагента (email, owner, tags).
+2. `emails_all.json` — 18932 письма (from/to/date).
+3. `analyze_emails_v2.py` — матчинг: email → domain (только корпоративные) → last_seen.
+4. Фильтр: >90 дней → «давно», >180 → «очень давно», нет писем → «никогда».
+
+**НЕ ХОДИ в MCP** для email — там только `counterparty.email` (12 из 348).
+
+**Скрипты:**
+- `collect_emails.py` — сбор (IMAP, батчи 200, ~25 мин для 19K писем).
+- `analyze_emails_v2.py` — анализ (1–2 сек).
