@@ -678,6 +678,23 @@ GET /entity/counterparty?expand=contactpersons&limit=100
 
 **НЕ отвечай 12 из 348** — это только counterparty.email. Реальная цифра — 63.1%.
 
+## Алгоритм: клиенты с email (ОБЯЗАТЕЛЬНО)
+
+**ЗАПРЕЩЕНО** идти в MCP для подсчёта email — там только `counterparty.email` (12 из 348).
+
+**Готовый файл:** `/mnt/ai-ssd/hermes/cache/moysklad-audit/email_base.json` — **1702** контрагента с email, owner, tags, emails[].
+
+**Порядок:**
+1. **Прочитай** `email_base.json` (**read_file**, не MCP).
+2. **Фильтруй** по `owner` / `tags` / `name`.
+3. **Ответ** — из файла. **Не** ходи в MCP.
+
+**Пример:**
+- «Сколько клиентов Самсонова с email?» → `email_base.json`, фильтр `owner == "Самсонов А. О."` → **272**.
+- «Кому давно не писал?» → `email_base.json` + `email_db_filtered.json` (даты писем).
+
+**Если файла нет** — только тогда MCP / API (`expand=contactpersons`).
+
 ## Email: где искать (важно)
 
 **MCP НЕ возвращает contactpersons.** В MCP доступно только `counterparty.email` (34.9%).
