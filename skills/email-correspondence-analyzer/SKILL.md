@@ -9,6 +9,31 @@ license: MIT
 
 # Email Correspondence Analyzer
 
+## ВАЖНО: готовые данные (не спрашивай «где история»)
+
+История переписки **уже собрана** в файле:
+`/mnt/ai-ssd/hermes/cache/moysklad-audit/analysis_overdue_v2.json` (1041 контрагент).
+
+**Поля:**
+- `name` — контрагент.
+- `owner` — менеджер (например, «Самсонов А. О.»).
+- `tags` — теги (например, `["кондитерка", "самсонов"]`).
+- `emails` — список email.
+- `last_email` — дата последнего письма (ISO) или `null`.
+- `days_ago` — сколько дней назад (число) или `null`.
+- `match_type` — `email` / `domain`.
+
+**НЕ читай** `email_base.json` для задачи «кому давно не писал» — там НЕТ `last_email` и `days_ago`.
+
+**НЕ спрашивай** «где история переписки» — она в этом файле.
+
+**НЕ используй** `execute_code` / `python3 -c` — только `jq`, `grep`, `cat`.
+
+**Пример jq для «Самсонов + кондитерка + >365 дней»:**
+jq -c '.[] | select(.owner == "Самсонов А. О." and (.tags | index("кондитерка")) and (.last_email == null or .days_ago > 365)) | {name, emails, last_email, days_ago}' /mnt/ai-ssd/hermes/cache/moysklad-audit/analysis_overdue_v2.json
+
+
+
 ## Workflow
 
 1. Connect to mail MCP (rubit-mail): `list_accounts` → `list_folders`
@@ -111,6 +136,10 @@ Top companies:
 | «никогда не писал» | `last_email == null` |
 | «email / письма» | `emails_all.json` / `email_base.json` |
 
-**Файл:** `/mnt/ai-ssd/hermes/cache/moysklad-audit/analysis_overdue_v2.json` — 1041 контрагент (name, owner, tags, emails, last_email, days_ago).
+**Файл (ОБЯЗАТЕЛЬНО):** `/mnt/ai-ssd/hermes/cache/moysklad-audit/analysis_overdue_v2.json` — 1041 контрагент.
+
+**Поля:** `name`, `owner`, `tags`, `emails`, `last_email`, `days_ago`, `match_type`.
+
+**ВНИМАНИЕ:** `email_base.json` — **только** `emails`, `owner`, `tags` (**БЕЗ** `last_email`, `days_ago`). **Для** «**кому** **давно** **не** **писал**» — **только** `analysis_overdue_v2.json`.
 
 **НЕ ХОДИ в MCP** — данные в готовом файле.
