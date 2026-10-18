@@ -97,3 +97,20 @@ Top companies:
 **Скрипты:**
 - `collect_emails.py` — сбор (IMAP, батчи 200, ~25 мин для 19K писем).
 - `analyze_emails_v2.py` — анализ (1–2 сек).
+
+## Простой язык → фильтр
+
+При задаче **простыми словами** — переводи:
+
+| Простой язык | Фильтр |
+|---|---|
+| «менеджер самсонов» | `owner == "Самсонов А. О."` |
+| «группа кондитерка» | `'кондитерка' in tags` |
+| «больше года» | `days_ago > 365` |
+| «давно не писал» | `last_email != null and days_ago > 180` |
+| «никогда не писал» | `last_email == null` |
+| «email / письма» | `emails_all.json` / `email_base.json` |
+
+**Файл:** `/mnt/ai-ssd/hermes/cache/moysklad-audit/analysis_overdue_v2.json` — 1041 контрагент (name, owner, tags, emails, last_email, days_ago).
+
+**НЕ ХОДИ в MCP** — данные в готовом файле.

@@ -778,3 +778,21 @@ GET /entity/counterparty?expand=contactpersons&limit=100
 
 **Обновить** — через HTTP API МойСклад (токен в `.env`, `MOYSKLAD_TOKEN`).
 Скрипты: `/tmp/moysklad-audit/collect_counterparty_full.py` и др.
+
+## Простой язык → поля МойСклад
+
+| Простой язык | Поле |
+|---|---|
+| «менеджер X» | `owner` (99.9%) |
+| «группа X» / «категория X» | `tags` |
+| «клиент X» | `name` |
+| «email X» | `counterparty.email` + `contactpersons[].email` |
+| «холдинг X» | `ХОЛДИНГ` (кастомное) |
+| «тип X» | `companyType` (legal/entrepreneur/individual) |
+
+**Готовые файлы:**
+- `email_base.json` — 1702 контрагента (email, owner, tags).
+- `counterparty_full.json` — 2694 контрагента (все поля).
+- `analysis_overdue_v2.json` — 1041 контрагент (кому давно не писал).
+
+**НЕ ХОДИ в MCP** для email — только `counterparty.email` (12 из 348).
