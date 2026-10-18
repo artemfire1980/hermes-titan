@@ -6,6 +6,42 @@ import re
 from datetime import datetime
 from pathlib import Path
 
+PUBLIC_DOMAINS = frozenset(
+    {
+        # RU
+        "mail.ru",
+        "bk.ru",
+        "list.ru",
+        "inbox.ru",
+        "internet.ru",
+        "mail.by",
+        "yandex.ru",
+        "yandex.com",
+        "ya.ru",
+        "narod.ru",
+        "rambler.ru",
+        "tut.by",
+        "onliner.by",
+        # Global
+        "gmail.com",
+        "googlemail.com",
+        "outlook.com",
+        "hotmail.com",
+        "live.com",
+        "msn.com",
+        "icloud.com",
+        "me.com",
+        "mac.com",
+        "yahoo.com",
+        "aol.com",
+        "protonmail.com",
+        "proton.me",
+        # Corporate-but-shared
+        "yandex-team.ru",
+        "sberbank.ru",
+    }
+)
+
 AUDIT = Path("/mnt/ai-ssd/hermes/cache/moysklad-audit")
 EMAILS = AUDIT / "emails_all.json"
 EMAIL_BASE = AUDIT / "email_base.json"
@@ -85,16 +121,18 @@ for cp in email_base:
         if dt and (last is None or dt > last):
             last = dt
             match_type = "email"
-    # по домену
+    # по домену — только корпоративные (PUBLIC_DOMAINS → только точный email)
     if last is None:
         for el in cp_emails:
             if "@" not in el:
                 continue
             domain = el.split("@", 1)[1]
+            if domain in PUBLIC_DOMAINS:
+                continue  # публичный — только точный email, не domain
             dt = last_seen_domain.get(domain)
             if dt and (last is None or dt > last):
                 last = dt
-                match_type = "domain"
+                match_type = "domain_corporate"
 
     if last is None:
         result.append(
@@ -132,7 +170,8 @@ never = sum(1 for r in result if r["last_email"] is None)
 d90_180 = sum(1 for r in result if r["days_ago"] and 90 < r["days_ago"] <= 180)
 d180 = sum(1 for r in result if r["days_ago"] and r["days_ago"] > 180)
 by_email = sum(1 for r in result if r["match_type"] == "email")
-by_domain = sum(1 for r in result if r["match_type"] == "domain")
+by_domain = sum(1 for r in result if r["match_type"] == "domain_corporate")
+by_domain_public = sum(1 for r in result if r["match_type"] == "domain")  # старые
 
 print(f"Всего контрагентов: {len(email_base)}")
 print(f"В отчёте: {len(result)}")
