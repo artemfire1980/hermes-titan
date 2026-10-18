@@ -29,6 +29,16 @@ license: MIT
 
 **НЕ используй** `execute_code` / `python3 -c` — только `jq`, `grep`, `cat`.
 
+**СТРОГО ЗАПРЕЩЕНО:**
+- Писать свои python-скрипты (`/tmp/*.py`, `python3 /tmp/*.py`) — данные уже готовы.
+- Читать `email_base.json` для этой задачи — там нет `last_email` / `days_ago`.
+- Спрашивать «где история» — она в `analysis_overdue_v2.json`.
+
+**ЕДИНСТВЕННЫЙ ПРАВИЛЬНЫЙ ПУТЬ:**
+1. `jq` по `analysis_overdue_v2.json` с фильтром (см. пример выше).
+2. Вывести результат.
+3. Всё.
+
 **Пример jq для «Самсонов + кондитерка + >365 дней»:**
 jq -c '.[] | select(.owner == "Самсонов А. О." and (.tags | index("кондитерка")) and (.last_email == null or .days_ago > 365)) | {name, emails, last_email, days_ago}' /mnt/ai-ssd/hermes/cache/moysklad-audit/analysis_overdue_v2.json
 
