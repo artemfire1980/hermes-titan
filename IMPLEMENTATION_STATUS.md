@@ -27,6 +27,11 @@
 | Upstream PR #129521 (entity extraction) | ⏳ open | CP-035 |
 | Python underscore renaming | ✅ | CP-022 |
 | Аудит кодовой базы (2026-10-02) | ✅ 9 правок | сверхплановый |
+| DEC-059: аудит МойСклад (2026-10-09) | ✅ | сверхплановый |
+| DEC-060: Hermes v0.22.0 + Holographic community | ✅ | сверхплановый |
+| Cron: moysklad-refresh, mail-check, update-stack | ✅ 3 jobs | сверхплановый |
+| Email-анализ по owner (--owner) | ✅ | сверхплановый |
+| Skills: session-search-ru, update-stack, update-hermes | ✅ | сверхплановый |
 
 ## Аудит 2026-10-02
 
