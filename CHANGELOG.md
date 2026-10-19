@@ -3,7 +3,7 @@
 ## [Unreleased] - 2026-10-19
 
 ### Добавлено (сессия 2026-10-16 → 2026-10-19)
-- Hermes обновлён v0.21.5 → **v0.22.0 stable** (DEC-060).
+- Hermes обновлён v0.22.0 → **v0.22.0 stable** (DEC-060).
 - Holographic вынесен из ядра → **community plugin 0.17.4** (itpartypattaya).
 - Skill `update-hermes` — 5 фаз, Phase 3 (Compare с OUR-STACK).
 - Skill `update-stack` — FreeLLMAPI/плагины/MCP, русский отчёт в Telegram.
@@ -13,7 +13,7 @@
 - `docs/OUR-STACK.md` — инвентарь сторонних решений.
 - `docs/EMAIL-OVERDUE-2026-10-18.md`, `docs/EMAIL-OVERDUE-SAMSONOV-2026-10-18.md`.
 - `docs/MEMORY-SNAPSHOT.md`, `docs/USER-SNAPSHOT.md`.
-- FreeLLMAPI v0.13.2 → **v0.16.5** (фиксированный тег).
+- FreeLLMAPI v0.16.5 → **v0.16.5** (фиксированный тег).
 - Holographic 53 факта (все проекты + персона).
 - MEMORY.md сокращён с 2978 до **1035 chars** (universal + маршрутизация).
 - 16 skills обновлены (query + recall + алгоритмы).
