@@ -42,7 +42,7 @@
 
 | Плагин | Версия | Источник | Может быть заменено |
 |---|---|---|---|
-| progressive-skill | 3.2.0 | git | upstream skills system — проверить |
+| progressive-skill | 3.2.1 | git | upstream skills system — проверить |
 
 ## 5. Патчи pyproject.toml
 
@@ -63,7 +63,7 @@
 
 | Компонент | Версия | Может быть заменено |
 |---|---|---|
-| Holographic memory | community 0.13.0 | — |
+| Holographic memory | community 0.17.4 | — |
 | MEMORY.md | universal | — |
 
 ## 8. Как обновлять этот файл
@@ -78,6 +78,7 @@
 |---|---|---|---|
 | `moysklad-refresh-weekly` | `0 6 * * 1` (Пн 6:00) | `moysklad_refresh.py` | `--no-agent`, deliver telegram |
 | `mail-check-daily` | `0 9 * * *` (каждый день) | `mail_check.py` | `--no-agent`, deliver telegram |
+| `update-stack-weekly` | `0 10 * * 1` (Пн 10:00) | skill `update-stack` | deliver telegram |
 
 Скрипты:
 - `~/ai-system/scripts/moysklad_refresh.py` (git) → `HERMES_HOME/scripts/` (копия).
@@ -95,8 +96,8 @@
 
 | Параметр | Значение |
 |---|---|
-| Версия | v0.15.0 (фиксированный тег) |
-| Образ | `ghcr.io/tashfeenahmed/freellmapi:v0.15.0` |
+| Версия | v0.16.4 (фиксированный тег, авто-обновление) |
+| Образ | `ghcr.io/tashfeenahmed/freellmapi:v0.16.4` |
 | Порт | `127.0.0.1:3001` |
 | Стратегия | **reliable** (Самый надёжный) |
 | Context Handoff | `on_model_switch` |
@@ -109,7 +110,7 @@
 2. `docker compose up -d --force-recreate`
 3. Проверить `X-Routed-Via` тестовым запросом.
 
-**Что нового в v0.15.0:**
+**Что нового в v0.16.4:**
 - Parallel (бесплатный поиск без ключа).
 - Auray (новый провайдер).
 - MCP: provider_list, quota_outlook, clear_cache.
