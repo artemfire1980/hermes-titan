@@ -1,5 +1,34 @@
 # История изменений
 
+## [Unreleased] - 2026-10-19
+
+### Добавлено (сессия 2026-10-16 → 2026-10-19)
+- Hermes обновлён v0.21.5 → **v0.22.0 stable** (DEC-060).
+- Holographic вынесен из ядра → **community plugin 0.17.4** (itpartypattaya).
+- Skill `update-hermes` — 5 фаз, Phase 3 (Compare с OUR-STACK).
+- Skill `update-stack` — FreeLLMAPI/плагины/MCP, русский отчёт в Telegram.
+- Skill `session-search-ru` — trigram FTS для кириллицы.
+- Cron jobs (3): `moysklad-refresh-weekly`, `mail-check-daily`, `update-stack-weekly`.
+- Скрипты: `moysklad_refresh.py`, `mail_check.py`, `session_search_ru.py`, `sync-cron-scripts.sh`.
+- `docs/OUR-STACK.md` — инвентарь сторонних решений.
+- `docs/EMAIL-OVERDUE-2026-10-18.md`, `docs/EMAIL-OVERDUE-SAMSONOV-2026-10-18.md`.
+- `docs/MEMORY-SNAPSHOT.md`, `docs/USER-SNAPSHOT.md`.
+- FreeLLMAPI v0.13.2 → **v0.16.5** (фиксированный тег).
+- Holographic 53 факта (все проекты + персона).
+- MEMORY.md сокращён с 2978 до **1035 chars** (universal + маршрутизация).
+- 16 skills обновлены (query + recall + алгоритмы).
+
+### Исправлено
+- Email-анализ: `PUBLIC_DOMAINS` — ложные domain-матчи убраны (108 → 59 корпоративных).
+- Email-анализ: `--owner` — универсальный отчёт по фамилии менеджера.
+- `moysklad_refresh.py`: `expand=owner` — owner сразу в email_base.json (1701/1702).
+- `session_search`: кириллица через trigram FTS (обход unicode61).
+- `agent.reasoning_effort: low` — применён.
+
+### Удалено
+- `holographic-patch.sh` (не нужен в v0.22.0).
+- `holographic-patch.service`, `holographic-patch.timer` (systemd).
+
 ## [Unreleased] - 2026-10-02
 
 ### Исправлено (аудит кодовой базы)
