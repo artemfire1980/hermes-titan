@@ -51,6 +51,40 @@ Run via `terminal`:
 
 **НЕ использовать** `docker manifest inspect` — слишком сложно, arm64 vs manifest list путает. **Только теги.**
 
+### Phase 1.5 — Обновление документации (всегда)
+
+**Когда:** **всегда** (даже если обновлений нет — docs могут быть устаревшими).
+
+**Что делать:**
+
+    cd ~/ai-system
+    git status --short
+    python3 scripts/update_docs.py
+
+**Дополнительно (LLM-анализ):**
+После `update_docs.py` — прочитай `git log --oneline -20` (с момента последнего обновления docs). Если есть новые фичи/skills/cron/DEC, которых нет в README/CHANGELOG — добавь их:
+
+1. `git log --oneline -20` — что нового.
+2. Сравни с `README.md` (секции `## Автоматизация`, `## Skills`).
+3. Сравни с `CHANGELOG.md` (последний `[Unreleased]`).
+4. Добавь пропущенное (точечно, не переписывая).
+5. Коммит: `docs: авто-заполнение (update-stack) — <что добавлено>`.
+6. Пуш.
+
+Скрипт `update_docs.py`:
+- Собирает факты: `hermes --version`, тег FreeLLMAPI из `docker-compose.yml`, версия Holographic из `hermes plugins list --json`.
+- Заменяет старые версии на новые в `README.md`, `IMPLEMENTATION_STATUS.md`, `docs/OUR-STACK.md`, `ARCHITECTURE.md`.
+- **НЕ трогает `CHANGELOG.md`** — там исторические записи.
+- Коммитит + пушит.
+- Выводит `Changed: [...]`.
+
+**Отчёт в Telegram:**
+
+    hermes send -t telegram:170690883 "📚 Документация актуализирована: <файлы>. Факты: Hermes <>, FreeLLMAPI <>, Holographic <>."
+
+**Безопасность:** если `git status --short` **не пуст** до запуска — **пропустить** docs, сообщить «⚠️ docs не обновлены — незакоммиченные изменения».
+
+
 ### Phase 2 — Latest upstream
 
 FreeLLMAPI releases (GitHub API):
@@ -201,39 +235,6 @@ Completion criterion: сообщение доставлено в Telegram, на 
 
 Completion criterion: digest изменился (если было обновление), `hermes plugins list` показывает новые версии, MCP работает, **пост-чек выполнен и включён в отчёт**.
 
-
-### Phase 5.2 — Обновление документации
-
-**Когда:** **всегда** (даже если обновлений нет — docs могут быть устаревшими).
-
-**Что делать:**
-
-    cd ~/ai-system
-    git status --short
-    python3 scripts/update_docs.py
-
-**Дополнительно (LLM-анализ):**
-После `update_docs.py` — прочитай `git log --oneline -20` (с момента последнего обновления docs). Если есть новые фичи/skills/cron/DEC, которых нет в README/CHANGELOG — добавь их:
-
-1. `git log --oneline -20` — что нового.
-2. Сравни с `README.md` (секции `## Автоматизация`, `## Skills`).
-3. Сравни с `CHANGELOG.md` (последний `[Unreleased]`).
-4. Добавь пропущенное (точечно, не переписывая).
-5. Коммит: `docs: авто-заполнение (update-stack) — <что добавлено>`.
-6. Пуш.
-
-Скрипт `update_docs.py`:
-- Собирает факты: `hermes --version`, тег FreeLLMAPI из `docker-compose.yml`, версия Holographic из `hermes plugins list --json`.
-- Заменяет старые версии на новые в `README.md`, `IMPLEMENTATION_STATUS.md`, `docs/OUR-STACK.md`, `ARCHITECTURE.md`.
-- **НЕ трогает `CHANGELOG.md`** — там исторические записи.
-- Коммитит + пушит.
-- Выводит `Changed: [...]`.
-
-**Отчёт в Telegram:**
-
-    hermes send -t telegram:170690883 "📚 Документация актуализирована: <файлы>. Факты: Hermes <>, FreeLLMAPI <>, Holographic <>."
-
-**Безопасность:** если `git status --short` **не пуст** до запуска — **пропустить** docs, сообщить «⚠️ docs не обновлены — незакоммиченные изменения».
 
 ## Чек-лист после обновления
 
