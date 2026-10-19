@@ -74,7 +74,7 @@ def main():
                 {
                     "limit": BATCH,
                     "offset": offset,
-                    "expand": "contactpersons",
+                    "expand": "contactpersons,owner",
                 },
             )
             rows = data.get("rows", [])
