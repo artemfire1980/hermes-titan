@@ -38,6 +38,16 @@ Run via `terminal`:
     # FreeLLMAPI: текущий тег образа (из docker-compose.yml) + версия из GitHub Releases
     grep -E "image:" /mnt/ai-ssd/freellmapi/docker-compose.yml
     curl -s --max-time 10 "https://api.github.com/repos/tashfeenahmed/freellmapi/releases/latest" | python3 -c "import sys,json; print('latest tag:', json.load(sys.stdin).get('tag_name'))"
+    # FreeLLMAPI: локальный digest (running container) + registry digest (по тегу) — сравнить их
+    docker inspect freellmapi --format '{{.Image}}'
+    # Registry digest: GHCR — токен + OCI index Accept-заголовок (см. pitfall ниже)
+    TOKEN=$(curl -s --max-time 10 "https://ghcr.io/token?scope=repository:tashfeenahmed/freellmapi:pull" | python3 -c "import sys,json; print(json.load(sys.stdin).get('token',''))")
+    curl -s --max-time 15 "https://ghcr.io/v2/tashfeenahmed/freellmapi/manifests/<TAG>" -H "Accept: application/vnd.oci.image.index.v1+json" -H "Authorization: Bearer $TOKEN" | python3 -c "
+import sys,json
+for m in json.load(sys.stdin).get('manifests',[]):
+    p=m.get('platform',{})
+    if p.get('architecture')=='arm64': print('registry arm64:', m.get('digest'))
+"
     # Плагины
     hermes plugins list --json 2>&1 | python3 -c "import sys,json; [print(p['name'],p.get('version'),p.get('update_available',False)) for p in json.load(sys.stdin) if p.get('name') in ('holographic','progressive-skill')]"
     # MCP
@@ -183,6 +193,7 @@ Completion criterion: digest изменился (если было обновл�
 
 - **`hermes plugins update` для community-плагинов** — падает (no .git). Только `--force` переустановка.
 - **FreeLLMAPI `:latest`** — плавающий тег. `docker compose pull` тянет новый digest. **Проверять digest**, а не тег.
+- **GHCR manifest API** — без токена ответ 401, с токеном без подходящего `Accept` вернёт «OCI index found, but Accept header does not support OCI indexes». Бирь токен из `https://ghcr.io/token?scope=repository:tashfeenahmed/freellmapi:pull`, запрашивай `application/vnd.oci.image.index.v1+json` и фильтруй манифесты по `platform.architecture=arm64` (VIM4 — arm64).
 - **`ENCRYPTION_KEY` в `.env`** — не менять (провайдерские ключи зашифрованы).
 - **Volume `freellmapi-data`** — не удалять.
 - **`/v1/models` требует API key** — брать из `.env`: `HERMES_CUSTOM_127_0_0_1_3001_API_KEY`.
@@ -201,6 +212,7 @@ Completion criterion: digest изменился (если было обновл�
 |---|---|
 | FreeLLMAPI digest | `docker inspect freellmapi --format '{{.Image}}'` |
 | FreeLLMAPI latest | `curl -s api.github.com/repos/tashfeenahmed/freellmapi/releases/latest` |
+| FreeLLMAPI registry digest | `curl ghcr.io/.../manifests/<TAG>` + `Accept: application/vnd.oci.image.index.v1+json` + bearer token, фильтр arm64 |
 | Plugin updates | `hermes plugins list --json` |
 | Update git plugin | `hermes plugins update <name>` |
 | Reinstall community plugin | `hermes plugins install <name> --force --yes-deps --enable` |
