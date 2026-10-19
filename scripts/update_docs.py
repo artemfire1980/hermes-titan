@@ -97,7 +97,6 @@ def main():
         REPO / "README.md",
         REPO / "IMPLEMENTATION_STATUS.md",
         REPO / "docs" / "OUR-STACK.md",
-        REPO / "CHANGELOG.md",
         REPO / "ARCHITECTURE.md",
     ]
 
