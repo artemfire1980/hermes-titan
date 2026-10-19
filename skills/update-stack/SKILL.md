@@ -1,6 +1,7 @@
 ---
 name: update-stack
 description: Check and apply updates for FreeLLMAPI, Hermes plugins, and MCP servers.
+query: "обнови FreeLLMAPI, обнови фриллм, обнови фриллмапи, обнови стек, примени обновление, примени апдейт, сделай всё сам, update stack, update freellmapi, check plugins updates"
 version: 0.1.0
 author: Artem (artemfire1980), Hermes Agent
 license: MIT
@@ -16,7 +17,7 @@ metadata:
 
 ## Когда использовать
 
-- User says "обнови стек", "проверь обновления FreeLLMAPI", "update stack", "check plugins updates".
+- User says "обнови стек", "обнови FreeLLMAPI", "обнови фриллм", "примени обновление", "сделай всё сам", "проверь обновления FreeLLMAPI", "update stack", "update freellmapi", "check plugins updates".
 - Weekly, to catch new FreeLLMAPI releases.
 - Do NOT use for updating Hermes itself — use skill `update-hermes`.
 
