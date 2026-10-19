@@ -136,13 +136,28 @@ EOF
 
 Completion criterion: сообщение доставлено в Telegram, на русском языке, с версиями и changelog.
 
-### Phase 5 — Apply (only on /update-stack confirm)
+### Phase 5 — Apply
+
+**Два режима:**
+- **`/update-stack confirm`** — пошагово: применить только то, что выявлено в Phase 4, и отчитаться.
+- **`/update-stack apply`** — **сразу весь цикл** (compose tag → pull → up → Phase 5.1 → docs → отчёт), без дополнительного подтверждения. Используй, когда пользователь пишет «обнови стек», «примени обновление», «сделай всё сам».
+
 
 **FreeLLMAPI:**
 
-    cd /mnt/ai-ssd/freellmapi
-    docker compose pull
-    docker compose up -d
+0. **Определи new tag** из Phase 1/2 (например, `v0.16.5`). Если обновления нет — пропусти блок.
+1. **Бэкап + обнови тег в `docker-compose.yml`** (иначе `pull` тянет latest, но файл остаётся старым):
+       cd /mnt/ai-ssd/freellmapi
+       cp -a docker-compose.yml "docker-compose.yml.bak.$(date +%Y%m%d-%H%M%S)"
+       sed -i "s|freellmapi:v[0-9.]*|freellmapi:<NEW_TAG>|" docker-compose.yml
+       grep -n "image:" docker-compose.yml
+2. **Pull + up:**
+       docker compose pull
+       docker compose up -d
+3. **Обнови `docs/OUR-STACK.md`** (автоматически, через скрипт):
+       python3 ~/ai-system/scripts/update-ourstack.py --freellmapi <NEW_TAG>
+   — если обновлялись плагины, добавь `--holographic <v>` / `--progressive <v>`.
+4. **Сразу переходи к Phase 5.1 (пост-чек).**
 
 Проверка: `docker inspect freellmapi --format '{{.Image}}'` (digest должен измениться), `curl /v1/models` (модели на месте).
 
@@ -178,6 +193,15 @@ Completion criterion: сообщение доставлено в Telegram, на 
     · Ошибки в логах: <нет / список>
 
 **Если что-то не так** (не healthy, 0 моделей, ошибки) — **сразу откат**: `docker compose down && docker compose up -d <предыдущий тег>` и сообщи в Telegram.
+
+**После успешного пост-чека отправь в Telegram итог:**
+
+    ✅ Обновление выполнено
+    · FreeLLMAPI: <old> → <new> (healthy, N моделей)
+    · compose: тег обновлён
+    · docs/OUR-STACK.md: обновлён (update-ourstack.py)
+    · пост-чек: OK
+
 
 Completion criterion: digest изменился (если было обновление), `hermes plugins list` показывает новые версии, MCP работает, **пост-чек выполнен и включён в отчёт**.
 
