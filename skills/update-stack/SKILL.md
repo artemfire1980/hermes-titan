@@ -32,29 +32,24 @@ metadata:
 
 Phases 1–4 read-only. Phase 5 changes the system and requires explicit `/update-stack confirm`.
 
-### Phase 1 — Current versions
+### Phase 1 — Current versions (упрощено)
+
+**Сравниваем только теги, не digest.**
 
 Run via `terminal`:
 
-    # FreeLLMAPI: текущий тег образа (из docker-compose.yml) + версия из GitHub Releases
-    grep -E "image:" /mnt/ai-ssd/freellmapi/docker-compose.yml
-    curl -s --max-time 10 "https://api.github.com/repos/tashfeenahmed/freellmapi/releases/latest" | python3 -c "import sys,json; print('latest tag:', json.load(sys.stdin).get('tag_name'))"
-    # FreeLLMAPI: локальный digest (running container) + registry digest (по тегу) — сравнить их
-    docker inspect freellmapi --format '{{.Image}}'
-    # Registry digest: GHCR — токен + OCI index Accept-заголовок (см. pitfall ниже)
-    TOKEN=$(curl -s --max-time 10 "https://ghcr.io/token?scope=repository:tashfeenahmed/freellmapi:pull" | python3 -c "import sys,json; print(json.load(sys.stdin).get('token',''))")
-    curl -s --max-time 15 "https://ghcr.io/v2/tashfeenahmed/freellmapi/manifests/<TAG>" -H "Accept: application/vnd.oci.image.index.v1+json" -H "Authorization: Bearer $TOKEN" | python3 -c "
-import sys,json
-for m in json.load(sys.stdin).get('manifests',[]):
-    p=m.get('platform',{})
-    if p.get('architecture')=='arm64': print('registry arm64:', m.get('digest'))
-"
-    # Плагины
-    hermes plugins list --json 2>&1 | python3 -c "import sys,json; [print(p['name'],p.get('version'),p.get('update_available',False)) for p in json.load(sys.stdin) if p.get('name') in ('holographic','progressive-skill')]"
+    # FreeLLMAPI: тег в docker-compose.yml
+    grep "image:" /mnt/ai-ssd/freellmapi/docker-compose.yml | grep -oE 'v[0-9.]+'
+    # FreeLLMAPI: latest tag from GitHub
+    curl -s --max-time 10 "https://api.github.com/repos/tashfeenahmed/freellmapi/releases/latest" | python3 -c "import sys,json; print(json.load(sys.stdin).get('tag_name'))"
+    # Плагины: версии (без --json, чтобы не требовать подтверждения)
+    hermes plugins list 2>&1 | grep -E "holographic|progressive-skill"
     # MCP
     hermes mcp list 2>&1 | tail -10
 
-Completion criterion: **два** digest для FreeLLMAPI (локальный + registry). Если они **совпадают** — FreeLLMAPI актуален, **даже если** changelog говорит о новой версии. Если **разные** — есть обновление.
+**Completion criterion:** два тега для FreeLLMAPI (текущий из compose + latest из GitHub). Если совпадают — актуально. Если разные — обновить.
+
+**НЕ использовать** `docker manifest inspect` — слишком сложно, arm64 vs manifest list путает. **Только теги.**
 
 ### Phase 2 — Latest upstream
 
