@@ -22,6 +22,27 @@
 - **Executive Summary:** `scripts/summary_generator.py` (Pydantic + citations)
 - **Исполнитель кода:** `scripts/aider_runner.py` (изоляция через `/mnt/ai-ssd/ai-system/projects/`)
 
+## Автоматизация (cron)
+
+| Job | Schedule | Что |
+|---|---|---|
+| `moysklad-refresh-weekly` | Пн 6:00 | email_base.json из МойСклад (1701 контрагент с email) |
+| `mail-check-daily` | 9:00 | непрочитанные в INBOX Mail.ru → Telegram |
+| `update-stack-weekly` | Пн 10:00 | changelog FreeLLMAPI/плагины/MCP → Telegram (на русском) |
+
+**Скрипты:** `scripts/moysklad_refresh.py`, `scripts/mail_check.py`, `scripts/sync-cron-scripts.sh`.
+
+## Skills (15 local)
+
+- **МойСклад** (3): `moysklad-workflow`, `moysklad-query`, `data-integration`.
+- **Kiln** (3): `kiln-printer`, `kiln-analyze`, `kiln-safety`.
+- **Почта** (4): `mail`, `email-correspondence-analyzer`, `himalaya`, `email-inbox-triage`.
+- **Обновление** (2): `update-hermes`, `update-stack`.
+- **История** (1): `session-search-ru` (trigram FTS для кириллицы).
+- **Voice** (1): `voice-transcription`.
+- **Research** (2): `industry-event-research`, `competitor-news-monitor`.
+- **Персона** (1): `user-preferences-artem`.
+
 ## Документация
 
 - **`docs/OPERATIONS.md`** — полный справочник: команды, скрипты, диагностика
