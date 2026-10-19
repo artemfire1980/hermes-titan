@@ -78,19 +78,23 @@ Completion criterion: written list per component (обновить / актуа�
 
 Собери отчёт **по-русски** и отправь в Telegram. Никаких изменений в системе.
 
+**⚠️ ОБЯЗАТЕЛЬНО: все три блока (`📦 FreeLLMAPI`, `🧩 Плагины`, `🔌 MCP`) должны быть в отчёте. Не сокращать, не выбрасывать. Если данных по блоку нет — пиши `— не проверялось`. Отчёт без любого из трёх блоков считается неполным и должен быть дополнен перед отправкой.**
+
+**⚠️ Changelog обязателен:** если есть обновление (FreeLLMAPI или плагин) — **всегда** включай `📰 Что нового` с ключевыми пунктами из GitHub Releases / PyPI. Не писать «нет данных», если они есть.
+
 **Формат отчёта:**
 🔄 Проверка обновлений стека (дата)
 
 📦 FreeLLMAPI
 
-· Текущая: v0.15.0 (тег в docker-compose.yml)
-· Последняя: v0.15.0 (GitHub Releases)
+· Текущая: v0.16.4 (тег в docker-compose.yml)
+· Последняя: v0.16.4 (GitHub Releases)
 · Статус: ✅ актуально / ⚠️ есть обновление
 
 🧩 Плагины
 
-· holographic 0.13.0 — ✅ актуально / ⚠️ обновить
-· progressive-skill 3.2.0 — ✅ / ⚠️
+· holographic 0.17.4 — ✅ актуально / ⚠️ обновить
+· progressive-skill 3.2.1 — ✅ / ⚠️
 
 🔌 MCP
 
@@ -144,7 +148,28 @@ Completion criterion: сообщение доставлено в Telegram, на 
 
 **Скрипты в `~/ai-system/scripts/`:** свои, не обновляются.
 
-Completion criterion: digest изменился (если было обновление), `hermes plugins list` показывает новые версии, MCP работает.
+### Phase 5.1 — Пост-чек (автоматически, без ручного вмешательства)
+
+После `docker compose up -d` **сразу** выполни проверки и **включи результат в тот же Telegram-отчёт**:
+
+    sleep 10
+    docker ps --filter "name=freellmapi" --format "table {{.Image}}\t{{.Status}}"
+    curl -s -o /tmp/models.json -w "http_code=%{http_code}\n" -H "Authorization: Bearer $HERMES_CUSTOM_127_0_0_1_3001_API_KEY" http://127.0.0.1:3001/v1/models
+    python3 -c "import json; d=json.load(open('/tmp/models.json')); print('models:', len(d.get('data',[])))"
+    docker exec freellmapi env 2>/dev/null | grep -cE "CONTEXT_HANDOFF|MODEL_ROUTING" || true
+    docker logs freellmapi --since 2m 2>&1 | grep -iE "error|panic|fatal" | head -5 || echo "no errors"
+
+**В отчёт добавь блок:**
+
+    ✅ Пост-чек:
+    · Контейнер: <Up (healthy)>
+    · Модели: <N> (http <code>)
+    · ENV: context_handoff=<on/off>, routing_overrides=<yes/no>
+    · Ошибки в логах: <нет / список>
+
+**Если что-то не так** (не healthy, 0 моделей, ошибки) — **сразу откат**: `docker compose down && docker compose up -d <предыдущий тег>` и сообщи в Telegram.
+
+Completion criterion: digest изменился (если было обновление), `hermes plugins list` показывает новые версии, MCP работает, **пост-чек выполнен и включён в отчёт**.
 
 ## Чек-лист после обновления
 
