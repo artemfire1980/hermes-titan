@@ -47,13 +47,13 @@ Summary generated via NEW pipeline (source=llm, attempts=1)
 ✅ Reasoning leakage: <2% (vs 10-15% до)
 Использование
 # Через research_runner
-~/bin/research_runner.py --topic "Тема" --depth 2
+scripts/research_runner.py --topic "Тема" --depth 2
 
 # Через Telegram
 research-telegram.sh "Тема" 2
 Файлы
-~/bin/research_runner.py - основной runner (66 KB)
-~/bin/summary_generator.py - production-grade модуль (18 KB)
+scripts/research_runner.py - основной runner (66 KB)
+scripts/summary_generator.py - production-grade модуль (18 KB)
 scripts/research_runner.py - исходный код в git
 scripts/summary_generator.py - исходный код модуля в git
 tests/test_summary_generator.py - unit tests (13 тестов)

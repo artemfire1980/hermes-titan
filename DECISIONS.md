@@ -1329,3 +1329,41 @@ kiln3d emergency-stop --printer zav
 8. Post-update — обновить OUR-STACK.md.
 
 **Коммиты:** `da5f08c` (OUR-STACK), `11f7e7f` (Phase 3), `f9b188d` (убрана старая Phase 3).
+
+## DEC-061: session-search-ru — trigram FTS для кириллицы
+
+**Проблема:** встроенный `session_search` использует `messages_fts` (unicode61) — плохо ищет кириллицу. Наш тест: 5 результатов, но не те. `messages_fts_trigram` — точный.
+
+**Решение:** скрипт `session-search-ru` (`~/ai-system/scripts/session_search_ru.py`) — прямой SQL к `messages_fts_trigram` (FTS5 trigram). Skill `session-search-ru` (query: история сессий, предыдущий запрос). Факт в Holographic. Триггер в MEMORY.md.
+
+**Проверено:** 2026-10-18. «Что я спрашивал про Самсонова?» → нашёл сессию 20261018_172504_05e46a за 25s.
+
+## DEC-062: PUBLIC_DOMAINS в email-анализе
+
+**Проблема:** 38.3% (980/2561) email — публичные (mail.ru, yandex, gmail). 108 domain-матчей могли быть ложными (два контрагента с mail.ru → путаница).
+
+**Решение:** `PUBLIC_DOMAINS` (frozenset) в `analyze_emails_v2.py`. Domain-матч только для корпоративных. Публичные → только точный email.
+
+**Результат:** `email`: 195, `domain_corporate`: 59 (было 108), `None`: 1407 (было 738, +49 от ложных domain).
+
+**Проверено:** 2026-10-18.
+
+## DEC-063: Email-анализ по owner (`--owner`)
+
+**Проблема:** отчёт по всем owner'ам (1661), без фокуса.
+
+**Решение:** `analyze_emails_v2.py --owner "Фамилия И. О."` — фильтр по owner. Skill `email-correspondence-analyzer` обновлён (список 22 owner'ов, примеры).
+
+**Самсонов А. О.:** 418 всего, 273 с email, 233 >90 дней (162 >180, 7 90-180, 64 никогда), 40 ≤90.
+
+**Проверено:** 2026-10-19. «Сколько клиентов Самсонова давно не писали?» → 162 за 18s.
+
+## DEC-064: moysklad_refresh.py — expand=owner
+
+**Проблема:** `owner` в `email_base.json` добавлялся отдельно из `counterparty_full.json` (1698/1702).
+
+**Решение:** `expand: "contactpersons,owner"` в `moysklad_refresh.py`. `owner` сразу в `items.append`.
+
+**Результат:** 1701/1702 с owner (было 1698). 1 — в МойСклад не заполнен.
+
+**Проверено:** 2026-10-19.

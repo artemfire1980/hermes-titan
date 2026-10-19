@@ -1,17 +1,17 @@
 # Статус внедрения v7.2
 
-Версия: 0.37.0 · Контрольная точка: CP-037
+Версия: v0.22.0 · Контрольная точка: DEC-060
 
 ## Состояние компонентов
 
 | Компонент | Статус | Точка |
 |-----------|--------|-------|
 | Фундамент + защита | ✅ | CP-000 |
-| Ядро Hermes (v0.21.5+4925.gb4c9def) | ✅ | CP-001 |
+| Ядро Hermes (v0.22.0+1.g494038c) | ✅ | CP-001 |
 | Модель через FreeLLMAPI (auto, 1M ctx) | ✅ | CP-001.4 |
 | Telegram-бот | ✅ | CP-002 |
 | Аудит возможностей ядра | ✅ | CP-003 |
-| FreeLLMAPI (Docker, v0.13.2) | ✅ | CP-004 |
+| FreeLLMAPI (Docker, v0.16.5) | ✅ | CP-004 |
 | SearXNG (Docker, JSON API) | ✅ | CP-004 |
 | Tailscale Serve для Dashboard | ✅ | CP-004 |
 | Аудит старой системы (CP-005) | ✅ | CP-005 |
@@ -19,7 +19,7 @@
 | Kanban `hermes-titan` | ✅ | CP-007 |
 | Project `hermes-titan` (`p_7464919e`) | ✅ | CP-007 |
 | Интеграция Kanban→Hermes→Aider | ✅ (26s тест) | CP-007 |
-| Memory provider: Holographic | ✅ (recall 5/5) | CP-008 |
+| Memory provider: Holographic community 0.17.4 (53 факта) | ✅ | CP-008 |
 | Resource governor (CP-009) + kanban.max_in_progress | ✅ (default=8) | CP-009 |
 | Recovery (backup.sh + checkpoints) | ✅ тест 2026-10-02 | CP-010 |
 | Kanban toolset (native tools) | ✅ | CP-012 |
