@@ -12,7 +12,7 @@
 ## Архитектура
 
 - **Ядро:** Hermes Agent `v0.22.0+1.g494038c` (`/mnt/ai-ssd/hermes/`)
-- **Модель:** FreeLLMAPI `v0.16.5` (Docker `127.0.0.1:3001`, `auto`, 1M контекст)
+- **Модель:** FreeLLMAPI `v0.16.6` (Docker `127.0.0.1:3001`, `auto`, 1M контекст)
 - **Aider:** `nvidia_nim/nvidia/nemotron-3-ultra-550b-a55b`
 - **Поиск:** SearXNG (Docker, 10 движков) + Exa (`extract_backend`, semantic extract)
 - **Telegram:** whitelist + home channel + уведомления

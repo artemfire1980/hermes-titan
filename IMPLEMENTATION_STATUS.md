@@ -11,7 +11,7 @@
 | Модель через FreeLLMAPI (auto, 1M ctx) | ✅ | CP-001.4 |
 | Telegram-бот | ✅ | CP-002 |
 | Аудит возможностей ядра | ✅ | CP-003 |
-| FreeLLMAPI (Docker, v0.16.5) | ✅ | CP-004 |
+| FreeLLMAPI (Docker, v0.16.6) | ✅ | CP-004 |
 | SearXNG (Docker, JSON API) | ✅ | CP-004 |
 | Tailscale Serve для Dashboard | ✅ | CP-004 |
 | Аудит старой системы (CP-005) | ✅ | CP-005 |
