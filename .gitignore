@@ -53,3 +53,4 @@ scripts/*.py.bak-*
 # Ruff cache
 .ruff_cache/
 *.broken.bak
+.save
