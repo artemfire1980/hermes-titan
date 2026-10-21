@@ -200,8 +200,11 @@ if __name__ == "__main__":
     if args.owner:
         filtered = [r for r in result if r.get("owner") == args.owner]
         print(f"\n=== Фильтр по owner: {args.owner} → {len(filtered)} ===")
-        # Перезаписать файл отфильтрованным
-        OUT.write_text(json.dumps(filtered, ensure_ascii=False, indent=2), encoding="utf-8")
+        # TITAN: пишем в отдельный файл, не затираем общий OUT
+        slug = "".join(c if c.isalnum() else "_" for c in args.owner).strip("_")[:40]
+        owner_out = OUT.parent / f"analysis_overdue_v2_{slug}.json"
+        owner_out.write_text(json.dumps(filtered, ensure_ascii=False, indent=2), encoding="utf-8")
+        print(f"  → сохранено: {owner_out}")
         never = sum(1 for r in filtered if r["last_email"] is None)
         d90_180 = sum(1 for r in filtered if r["days_ago"] and 90 < r["days_ago"] <= 180)
         d180 = sum(1 for r in filtered if r["days_ago"] and r["days_ago"] > 180)
