@@ -111,7 +111,11 @@
 3. Проверить `X-Routed-Via` тестовым запросом.
 
 **Что нового в v0.16.7:**
-- Parallel (бесплатный поиск без ключа).
-- Auray (новый провайдер).
-- MCP: provider_list, quota_outlook, clear_cache.
-- Автоочистка БД.
+- **SerpSearch** — больше не посылает key-check запрос вообще (v0.16.6 остановил polling, но всё ещё делал пустой поиск при добавлении ключа).
+- **onomeo** — новый бесплатный OpenAI-compatible провайдер (30 calls/5h).
+- **Per-key monthly caps** — теперь enforce-ятся для rerank и moderation, и router checks их учитывает.
+- **`GET /v1/usage`** — spend per key + monthly cap.
+- **`GET /v1/models/:id`** — OpenAI `models.retrieve` из каталога.
+- Model discovery не маркирует платные модели как free.
+- Proxy fail-closed (opt-in, `PROXY_REQUIRED_PLATFORMS`).
+- Model probes (opt-in, `MODEL_PROBE_ENABLED=1`).
