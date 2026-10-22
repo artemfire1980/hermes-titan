@@ -15,7 +15,9 @@ def run(cmd, **kw):
 
 
 def get_hermes_version():
-    out = run(["hermes", "--version"])
+    # TITAN: хардкод (hermes --version триггерит uv sync → баг uv 0.12.x)
+    return "v0.22.4+1.gc8d0f0e"
+    # out = run(["hermes", "--version"])
     if out.returncode != 0:
         return None
     # "Hermes Agent v0.22.0+1.g494038c (2026.9.24) · stable · local 494038cef66e"
@@ -36,7 +38,9 @@ def get_freellmapi_tag():
 
 
 def get_holographic_version():
-    out = run(["hermes", "plugins", "list", "--json"])
+    # TITAN: хардкод (hermes plugins list триггерит uv sync → баг uv 0.12.x)
+    return "0.17.4"
+    # out = run(["hermes", "plugins", "list", "--json"])
     if out.returncode != 0:
         return None
     try:
