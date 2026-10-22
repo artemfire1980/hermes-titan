@@ -29,7 +29,7 @@ def get_freellmapi_tag():
 
 def get_holographic_version():
     # TITAN: хардкод (hermes plugins list триггерит uv sync → баг uv 0.12.x)
-    return "0.17.4"
+    return "0.17.7"
 
 
 def replace_versions_in_file(path: Path, replacements: dict) -> bool:
@@ -70,6 +70,8 @@ def main():
         "v0.15.0": facts["freellmapi"],
         "v0.16.4": facts["freellmapi"],
         "v0.16.5": facts["freellmapi"],
+        "v0.16.6": facts["freellmapi"],
+        "v0.16.7": facts["freellmapi"],
         # Holographic
         "0.13.0": facts["holographic"],
         "0.17.4": facts["holographic"],
