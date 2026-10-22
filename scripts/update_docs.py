@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Точечная актуализация docs в ~/ai-system по фактам из окружения."""
 
-import json
 import re
 import subprocess
 import sys
@@ -17,15 +16,6 @@ def run(cmd, **kw):
 def get_hermes_version():
     # TITAN: хардкод (hermes --version триггерит uv sync → баг uv 0.12.x)
     return "v0.22.4+1.gc8d0f0e"
-    # out = run(["hermes", "--version"])
-    if out.returncode != 0:
-        return None
-    # "Hermes Agent v0.22.0+1.g494038c (2026.9.24) · stable · local 494038cef66e"
-    m = re.search(r"(v[\d.]+\+\d+\.g[0-9a-f]+)", out.stdout)
-    if m:
-        return m.group(1)
-    m = re.search(r"(v[\d.]+)", out.stdout)
-    return m.group(1) if m else None
 
 
 def get_freellmapi_tag():
@@ -40,17 +30,6 @@ def get_freellmapi_tag():
 def get_holographic_version():
     # TITAN: хардкод (hermes plugins list триггерит uv sync → баг uv 0.12.x)
     return "0.17.4"
-    # out = run(["hermes", "plugins", "list", "--json"])
-    if out.returncode != 0:
-        return None
-    try:
-        data = json.loads(out.stdout)
-    except json.JSONDecodeError:
-        return None
-    for p in data:
-        if p.get("name") == "holographic":
-            return p.get("version")
-    return None
 
 
 def replace_versions_in_file(path: Path, replacements: dict) -> bool:
