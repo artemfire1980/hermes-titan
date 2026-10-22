@@ -9,7 +9,7 @@
 ## Ядро и стек (2026-10-19)
 
 - **Hermes Agent** — v0.22.0+1.g494038c (stable).
-- **FreeLLMAPI** — v0.16.6 (фиксированный тег, `127.0.0.1:3001`, `auto`, 1M ctx).
+- **FreeLLMAPI** — v0.16.7 (фиксированный тег, `127.0.0.1:3001`, `auto`, 1M ctx).
 - **SearXNG** — Docker, `127.0.0.1:8888` + Exa (semantic extract).
 - **Aider** — `nvidia_nim/nvidia/nemotron-3-ultra-550b-a55b`.
 - **Kanban** — board `hermes-titan`, dispatcher в gateway (60s).
@@ -18,7 +18,7 @@
 ## Память
 
 - **MEMORY.md** — 1035 chars (universal + маршрутизация).
-- **Holographic** — community 0.17.4, 53 факта, 29 entities.
+- **Holographic** — community 0.17.7, 53 факта, 29 entities.
 - **Skills** — 15 local (query + recall + алгоритмы).
 - **Docs** — OUR-STACK, MOYSKLAD-OUR-SETUP, EMAIL-OVERDUE, MEMORY-SNAPSHOT.
 

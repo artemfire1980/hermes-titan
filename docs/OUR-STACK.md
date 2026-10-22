@@ -63,7 +63,7 @@
 
 | Компонент | Версия | Может быть заменено |
 |---|---|---|
-| Holographic memory | community 0.17.4 | — |
+| Holographic memory | community 0.17.7 | — |
 | MEMORY.md | universal | — |
 
 ## 8. Как обновлять этот файл
@@ -96,8 +96,8 @@
 
 | Параметр | Значение |
 |---|---|
-| Версия | v0.16.6 (фиксированный тег, авто-обновление) |
-| Образ | `ghcr.io/tashfeenahmed/freellmapi:v0.16.6` |
+| Версия | v0.16.7 (фиксированный тег, авто-обновление) |
+| Образ | `ghcr.io/tashfeenahmed/freellmapi:v0.16.7` |
 | Порт | `127.0.0.1:3001` |
 | Стратегия | **reliable** (Самый надёжный) |
 | Context Handoff | `on_model_switch` |
@@ -110,7 +110,7 @@
 2. `docker compose up -d --force-recreate`
 3. Проверить `X-Routed-Via` тестовым запросом.
 
-**Что нового в v0.16.6:**
+**Что нового в v0.16.7:**
 - Parallel (бесплатный поиск без ключа).
 - Auray (новый провайдер).
 - MCP: provider_list, quota_outlook, clear_cache.
