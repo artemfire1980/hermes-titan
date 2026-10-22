@@ -111,7 +111,7 @@
 3. Проверить `X-Routed-Via` тестовым запросом.
 
 **Что нового в v0.16.7:**
-- **SerpSearch** — больше не посылает key-check запрос вообще (v0.16.6 остановил polling, но всё ещё делал пустой поиск при добавлении ключа).
+- **SerpSearch** — больше не посылает key-check запрос вообще (v0.16.7 остановил polling, но всё ещё делал пустой поиск при добавлении ключа).
 - **onomeo** — новый бесплатный OpenAI-compatible провайдер (30 calls/5h).
 - **Per-key monthly caps** — теперь enforce-ятся для rerank и moderation, и router checks их учитывает.
 - **`GET /v1/usage`** — spend per key + monthly cap.
