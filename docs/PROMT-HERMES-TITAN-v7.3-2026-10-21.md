@@ -7,8 +7,8 @@
 **Ключевые пути:**
 - `HERMES_HOME` = `/mnt/ai-ssd/hermes`
 - project = `~/ai-system` (симлинк `/mnt/ai-ssd/ai-system`)
-- GitHub = `github.com/artemfire1980/hermes-titan`, `origin/main` = **`3c5c611`**
-- **hermes-agent** = `/mnt/ai-ssd/hermes/hermes-agent`, ветка **`titan-v0.22.2-20261020`**, коммит **`d277cac39d`**
+- GitHub = `github.com/artemfire1980/hermes-titan`, `origin/main` = **`bbb85a2`**
+- **hermes-agent** = `/mnt/ai-ssd/hermes/hermes-agent`, ветка **`titan-v0.22.5-20261027`**, коммит **`bf0203a794a0`**
 - FreeLLMAPI: Docker, `127.0.0.1:3001`, **v0.16.10**
 - MCP: kiln (74), rubit-mail (5), moysklad (4)
 
@@ -24,18 +24,18 @@ cd ~/ai-system
 
 | Компонент | Версия | Источник |
 |---|---|---|
-| **Hermes Agent** | **v0.22.2** (2026.9.24) · stable · local `d923a5eb487a` | `hermes --version` |
-| **Hermes ветка** | **`titan-v0.22.2-20261020`**, коммит `d277cac39d` | `git branch --show-current` |
+| **Hermes Agent** | **v0.22.5** (2026.9.24) · stable · local `d923a5eb487a` | `hermes --version` |
+| **Hermes ветка** | **`titan-v0.22.5-20261027`**, коммит `bf0203a794a0` | `git branch --show-current` |
 | **FreeLLMAPI** | **v0.16.10** (тег `ghcr.io/tashfeenahmed/freellmapi:v0.16.10`) | `docker inspect` |
 | **Holographic** | **community plugin 0.19.2** (itpartypattaya, `catalog:community@a6d00931`) | `hermes plugins list` |
 | **progressive-skill** | **3.2.1** (git) | `hermes plugins list` |
 | **DEC** | **DEC-001…DEC-064** | `DECISIONS.md` |
-| **Holographic facts** | **60** (29 entities) | `memory_store.db` |
+| **Holographic facts** | **73** (29 entities) | `memory_store.db` |
 | **MEMORY.md** | **1134 chars** | `/mnt/ai-ssd/hermes/memories/MEMORY.md` |
 | **Skills (local)** | **15** | `hermes skills list` |
 | **Cron jobs** | **3** (moysklad, mail, update-stack) | `hermes cron list` |
 
-**Важно:** `origin/main` может быть впереди `3c5c611` — **всегда** `git fetch` + `git log --oneline -5 origin/main`.
+**Важно:** `origin/main` может быть впереди `bbb85a2` — **всегда** `git fetch` + `git log --oneline -5 origin/main`.
 
 ---
 
@@ -72,7 +72,7 @@ cd ~/ai-system
 4. `uv lock` → 322 пакета, удалены `browser-harness`, `cdp-use`, `fetch-use`, `nemo-relay`.
 5. `hermes pm install` → exit 0.
 6. `hermes gateway restart` → running, Telegram polling OK.
-7. Ветка `titan-v0.22.2-20261020`, коммит `d277cac39d` (+10/−96).
+7. Ветка `titan-v0.22.5-20261027`, коммит `bf0203a794a0` (+10/−96).
 8. Smoke: менеджер (пример) — **273/233 (162/7/64)/40** ✅.
 
 **Блокеры и обходы:**
@@ -145,7 +145,7 @@ cd ~/ai-system
 
 ### 2.9. Документация (актуализирована 2026-10-21)
 
-**Коммит `3c5c611`:** README.md, IMPLEMENTATION_STATUS.md, OUR-STACK.md, ARCHITECTURE.md — версии v0.22.2 / v0.16.10 / 0.19.2.
+**Коммит `bbb85a2`:** README.md, IMPLEMENTATION_STATUS.md, OUR-STACK.md, ARCHITECTURE.md — версии v0.22.2 / v0.16.10 / 0.19.2.
 
 | Файл | Строк |
 |---|---|
@@ -263,7 +263,7 @@ hermes cron list
 hermes mcp list
 ```
 
-**Ожидаем:** git status пусто, origin/main `3c5c611`+, Hermes **v0.22.2**, cron 3, MCP 3.
+**Ожидаем:** git status пусто, origin/main `bbb85a2`+, Hermes **v0.22.5**, cron 3, MCP 3.
 
 ```bash
 docker ps | grep freellmapi
@@ -274,7 +274,7 @@ python3 -c "print('MEMORY.md chars:', len(open('/mnt/ai-ssd/hermes/memories/MEMO
 hermes doctor 2>&1 | grep -i "MEMORY.md"
 ```
 
-**Ожидаем:** FreeLLMAPI **v0.16.10**, Holographic **60 facts / 29 entities**, MEMORY.md **~1134 chars**.
+**Ожидаем:** FreeLLMAPI **v0.16.10**, Holographic **73 facts / 29 entities**, MEMORY.md **~1134 chars**.
 
 ### 7.2. Тест Hermes — email-анализ
 
