@@ -1,4 +1,4 @@
-# Промт для новой сессии — HERMES-TITAN v7.3 (2026-10-21)
+# Промт для новой сессии — HERMES-TITAN v7.4 (2026-10-27)
 
 ## Контекст
 
@@ -9,7 +9,7 @@
 - project = `~/ai-system` (симлинк `/mnt/ai-ssd/ai-system`)
 - GitHub = `github.com/artemfire1980/hermes-titan`, `origin/main` = **`3c5c611`**
 - **hermes-agent** = `/mnt/ai-ssd/hermes/hermes-agent`, ветка **`titan-v0.22.2-20261020`**, коммит **`d277cac39d`**
-- FreeLLMAPI: Docker, `127.0.0.1:3001`, **v0.16.6**
+- FreeLLMAPI: Docker, `127.0.0.1:3001`, **v0.16.10**
 - MCP: kiln (74), rubit-mail (5), moysklad (4)
 
 **Активация:**
@@ -26,8 +26,8 @@ cd ~/ai-system
 |---|---|---|
 | **Hermes Agent** | **v0.22.2** (2026.9.24) · stable · local `d923a5eb487a` | `hermes --version` |
 | **Hermes ветка** | **`titan-v0.22.2-20261020`**, коммит `d277cac39d` | `git branch --show-current` |
-| **FreeLLMAPI** | **v0.16.6** (тег `ghcr.io/tashfeenahmed/freellmapi:v0.16.6`) | `docker inspect` |
-| **Holographic** | **community plugin 0.17.4** (itpartypattaya, `catalog:community@a6d00931`) | `hermes plugins list` |
+| **FreeLLMAPI** | **v0.16.10** (тег `ghcr.io/tashfeenahmed/freellmapi:v0.16.10`) | `docker inspect` |
+| **Holographic** | **community plugin 0.19.2** (itpartypattaya, `catalog:community@a6d00931`) | `hermes plugins list` |
 | **progressive-skill** | **3.2.1** (git) | `hermes plugins list` |
 | **DEC** | **DEC-001…DEC-064** | `DECISIONS.md` |
 | **Holographic facts** | **60** (29 entities) | `memory_store.db` |
@@ -46,7 +46,7 @@ cd ~/ai-system
 | Слой | Где | Что | Когда |
 |---|---|---|---|
 | **MEMORY.md** | `/mnt/ai-ssd/hermes/memories/MEMORY.md` (**~1134 chars**) | Universal: Platform, Hard constraints, Gotchas, Kiln safety, Запрещено, маршрутизация | **Всегда** в контексте |
-| **Holographic** | `memory_store.db` (**60 фактов**) | Детали проектов + алгоритмы | **Recall** по ключевым словам |
+| **Holographic** | `memory_store.db` (**73 факта**) | Детали проектов + алгоритмы | **Recall** по ключевым словам |
 | **Skills** | `HERMES_HOME/skills/` (**15 наших**) | Процедуры + алгоритмы | **Автотриггер** по `query:` |
 | **docs** | `~/ai-system/docs/` | Детальная документация | Читается по необходимости |
 
@@ -83,7 +83,7 @@ cd ~/ai-system
 - **Holographic — community plugin** `itpartypattaya/hermes-plugin-holographic`, `memory_store.db` совместим (additive schema).
 - **Русский встроен** — PR #129521 **закрыт** (2026-10-20).
 
-### 2.2. FreeLLMAPI обновлён v0.16.5 → v0.16.6 (2026-10-20)
+### 2.2. FreeLLMAPI обновлён v0.16.5 → v0.16.10 (2026-10-20)
 
 - Обновление через **Telegram `update-stack`** (интерактивный `/update-stack confirm` принимается из Telegram) + вручную (`sed` → `docker compose pull/up`).
 - Контейнер `healthy`, `/health` 200, `restarts=0`.
@@ -92,9 +92,9 @@ cd ~/ai-system
 
 ### 2.3. Holographic — 60 фактов
 
-**Покрытие:** Артём (persona), Hermes-TITAN (universal), Hermes update, Kiln, Запрещено, Navigation, МойСклад, Почта, Research, Voice, update-hermes, OUR-STACK, email owner, MEMORY структура, cron, Email-анализ, session_search, **Hermes v0.22.2**, **FreeLLMAPI v0.16.6**, **PR #129521 закрыт**, **Telegram update-stack**, **менеджеры (архив)**.
+**Покрытие:** Артём (persona), Hermes-TITAN (universal), Hermes update, Kiln, Запрещено, Navigation, МойСклад, Почта, Research, Voice, update-hermes, OUR-STACK, email owner, MEMORY структура, cron, Email-анализ, session_search, **Hermes v0.22.2**, **FreeLLMAPI v0.16.10**, **PR #129521 закрыт**, **Telegram update-stack**, **менеджеры (архив)**.
 
-**Ключевые факты:** #96 (session_search trigram), #97 (email-анализ менеджера), #98 (Hermes v0.22.2), #99 (FreeLLMAPI v0.16.6), #100 (PR #129521), #101 (Telegram update-stack), #102 (менеджеры — архив).
+**Ключевые факты:** #96 (session_search trigram), #97 (email-анализ менеджера), #98 (Hermes v0.22.2), #99 (FreeLLMAPI v0.16.10), #100 (PR #129521), #101 (Telegram update-stack), #102 (менеджеры — архив).
 
 ### 2.4. Skills — 15 local
 
@@ -145,7 +145,7 @@ cd ~/ai-system
 
 ### 2.9. Документация (актуализирована 2026-10-21)
 
-**Коммит `3c5c611`:** README.md, IMPLEMENTATION_STATUS.md, OUR-STACK.md, ARCHITECTURE.md — версии v0.22.2 / v0.16.6 / 0.17.4.
+**Коммит `3c5c611`:** README.md, IMPLEMENTATION_STATUS.md, OUR-STACK.md, ARCHITECTURE.md — версии v0.22.2 / v0.16.10 / 0.19.2.
 
 | Файл | Строк |
 |---|---|
@@ -274,7 +274,7 @@ python3 -c "print('MEMORY.md chars:', len(open('/mnt/ai-ssd/hermes/memories/MEMO
 hermes doctor 2>&1 | grep -i "MEMORY.md"
 ```
 
-**Ожидаем:** FreeLLMAPI **v0.16.6**, Holographic **60 facts / 29 entities**, MEMORY.md **~1134 chars**.
+**Ожидаем:** FreeLLMAPI **v0.16.10**, Holographic **60 facts / 29 entities**, MEMORY.md **~1134 chars**.
 
 ### 7.2. Тест Hermes — email-анализ
 
@@ -295,7 +295,7 @@ hermes chat -q "Что я спрашивал про менеджера в про
 ```bash
 hermes chat -q "Проверь обновления стека" 2>&1 | tail -20
 ```
-**Ожидаем:** отчёт на русском (FreeLLMAPI v0.16.6 — актуально).
+**Ожидаем:** отчёт на русском (FreeLLMAPI v0.16.10 — актуально).
 
 ### 7.5. Тест скриптов
 
@@ -354,7 +354,7 @@ wc -l ~/ai-system/README.md ~/ai-system/IMPLEMENTATION_STATUS.md ~/ai-system/DEC
 | `/mnt/ai-ssd/hermes/skills/devops/update-stack/SKILL.md` | Phase 1 (теги), Phase 1.5 (docs), Phase 2–5 |
 | `/mnt/ai-ssd/hermes/skills/devops/update-hermes/SKILL.md` | 5 фаз + Phase 3 (OUR-STACK) |
 | `/mnt/ai-ssd/hermes/config.yaml` | Конфиг Hermes (v0.22.2, reasoning_effort: low) |
-| `/mnt/ai-ssd/freellmapi/docker-compose.yml` | FreeLLMAPI v0.16.6 (фиксированный тег) |
+| `/mnt/ai-ssd/freellmapi/docker-compose.yml` | FreeLLMAPI v0.16.10 (фиксированный тег) |
 
 ---
 
@@ -366,7 +366,7 @@ wc -l ~/ai-system/README.md ~/ai-system/IMPLEMENTATION_STATUS.md ~/ai-system/DEC
 4. **Telegram** — сетевые проблемы (ConnectError), sticky IPv4 работает.
 5. **docker-compose.yml** — не git-репо, бэкап docker-compose.yml.bak.*.
 
-6. **FreeLLMAPI :latest** — не использовать, только фиксированный тег v0.16.6.
+6. **FreeLLMAPI :latest** — не использовать, только фиксированный тег v0.16.10.
 7. **hermes plugins update для community-плагинов** — падает (no .git). Только --force переустановка.
 8. **hermes plugins list в одиночном режиме** — может требовать подтверждения. Использовать grep без --json.
 9. **prompt-size** завышает skills index (54 vs 35) — не критично.
@@ -411,3 +411,22 @@ wc -l ~/ai-system/README.md ~/ai-system/IMPLEMENTATION_STATUS.md ~/ai-system/DEC
 ---
 
 **Начни с Части 7 (тесты).** Прогони всё, что работает, что сломано. Потом — спроси пользователя, какую задачу решаем. **Не перескакивать шаги.**
+
+## Часть 12. Скрипты импорта клиентов (2026-10-27)
+
+Созданы и запушены в git (коммит `bbb85a2`):
+- `scripts/final_importer.py` — умный импорт клиентов (поиск дублей + создание).
+- `scripts/check_duplicates_bulk.py` — проверка дублей без создания.
+- `scripts/create_clients.py` — создание одного клиента (с выбором менеджера).
+- `scripts/moysklad_mcp.py` — локальный MCP-сервер (не используется).
+
+**Правила:**
+- Названия транслитерируются в кириллицу (закон РФ).
+- Статус "в разработке" (ID: `21798e98-bca2-11e3-47b6-002590a28eca`).
+- Теги: `["глазури", "самсонов"]` или `["глазури", "хапанков"]`.
+- Владелец определяется токеном: `MOYSKLAD_TOKEN` (Самсонов) или `MOYSKLAD_TOKEN_HAPANKOV` (Хапанков).
+- Описание из колонки G записывается в заметку (событие).
+
+**Известные проблемы:**
+- Дубль Holographic в `hermes plugins list` (git + catalog) — косметический баг, игнорируем.
+- `pm install` может падать на баге `uv 0.12.x` (Invalid Wheel-Version) — обходим через `pip`.
