@@ -96,8 +96,8 @@
 
 | Параметр | Значение |
 |---|---|
-| Версия | v0.16.7 (фиксированный тег, авто-обновление) |
-| Образ | `ghcr.io/tashfeenahmed/freellmapi:v0.16.7` |
+| Версия | v0.16.10 (фиксированный тег, авто-обновление) |
+| Образ | `ghcr.io/tashfeenahmed/freellmapi:v0.16.10` |
 | Порт | `127.0.0.1:3001` |
 | Стратегия | **reliable** (Самый надёжный) |
 | Context Handoff | `on_model_switch` |
@@ -110,8 +110,8 @@
 2. `docker compose up -d --force-recreate`
 3. Проверить `X-Routed-Via` тестовым запросом.
 
-**Что нового в v0.16.7:**
-- **SerpSearch** — больше не посылает key-check запрос вообще (v0.16.7 остановил polling, но всё ещё делал пустой поиск при добавлении ключа).
+**Что нового в v0.16.10:**
+- **SerpSearch** — больше не посылает key-check запрос вообще (v0.16.10 остановил polling, но всё ещё делал пустой поиск при добавлении ключа).
 - **onomeo** — новый бесплатный OpenAI-compatible провайдер (30 calls/5h).
 - **Per-key monthly caps** — теперь enforce-ятся для rerank и moderation, и router checks их учитывает.
 - **`GET /v1/usage`** — spend per key + monthly cap.
