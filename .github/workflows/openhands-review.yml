@@ -3,11 +3,6 @@ name: PR Review by OpenHands
 on:
   pull_request_target:
     types: [opened, ready_for_review, labeled, review_requested]
-  workflow_dispatch:
-    inputs:
-      pr_number:
-        description: 'Номер Pull Request'
-        required: true
 
 permissions:
   contents: read
@@ -15,7 +10,7 @@ permissions:
   issues: write
 
 concurrency:
-  group: pr-review-${{ github.event.pull_request.number || github.event.inputs.pr_number || github.ref }}
+  group: pr-review-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:
@@ -26,7 +21,6 @@ jobs:
       issues: write
 
     if: |
-      github.event_name == 'workflow_dispatch' ||
       (github.event.action == 'opened' && github.event.pull_request.draft == false) ||
       github.event.action == 'ready_for_review' ||
       github.event.label.name == 'review-this' ||
@@ -43,4 +37,3 @@ jobs:
           llm-api-key: ${{ secrets.NVIDIA_API_KEY }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           openhands-sdk-package: openhands-sdk>=1.22.0
-          pr-number: ${{ github.event.pull_request.number || github.event.inputs.pr_number }}
