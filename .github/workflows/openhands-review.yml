@@ -26,21 +26,15 @@ jobs:
       - name: Create Prompt File
         run: |
           echo "Пожалуйста, проверь этот Pull Request на наличие багов и предложи улучшения." > prompt.txt
-          cat prompt.txt
 
-      - name: Run OpenHands Docker
-        uses: docker://ghcr.io/all-hands-ai/openhands:latest
-        env:
-          LLM_MODEL: "openai/nemotron-3-super-120b-a12b"
-          LLM_BASE_URL: "https://khadas.taila31870.ts.net/v1"
-          LLM_API_KEY: ${{ secrets.FREELLMAPI_API_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          args: >
-            python -m openhands.resolver.resolve_issue
-            --selected-repo ${{ github.repository }}
-            --issue-number ${{ github.event.pull_request.number || github.event.inputs.pr_number }}
-            --issue-type pr
-            --username artemfire1980
-            --token ${{ secrets.GITHUB_TOKEN }}
-            --prompt-file /github/workspace/prompt.txt
+      - name: Run OpenHands with git installed
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}:/github/workspace" \
+            -w /github/workspace \
+            -e LLM_MODEL="openai/nemotron-3-super-120b-a12b" \
+            -e LLM_BASE_URL="https://khadas.taila31870.ts.net/v1" \
+            -e LLM_API_KEY="${{ secrets.FREELLMAPI_API_KEY }}" \
+            -e GITHUB_TOKEN="${{ secrets.GITHUB_TOKEN }}" \
+            ghcr.io/all-hands-ai/openhands:latest \
+            bash -c "apt-get update && apt-get install -y git && python -m openhands.resolver.resolve_issue --selected-repo ${{ github.repository }} --issue-number ${{ github.event.pull_request.number || github.event.inputs.pr_number }} --issue-type pr --username artemfire1980 --token ${{ secrets.GITHUB_TOKEN }} --prompt-file /github/workspace/prompt.txt"
