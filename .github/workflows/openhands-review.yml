@@ -27,9 +27,10 @@ jobs:
         run: |
           echo "Пожалуйста, проверь этот Pull Request на наличие багов и предложи улучшения." > prompt.txt
 
-      - name: Run OpenHands with git installed
+      - name: Run OpenHands with Docker socket
         run: |
           docker run --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
             -v "${{ github.workspace }}:/github/workspace" \
             -w /github/workspace \
             -e LLM_MODEL="openai/nemotron-3-super-120b-a12b" \
