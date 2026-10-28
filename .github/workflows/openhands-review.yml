@@ -1,0 +1,22 @@
+name: OpenHands Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run OpenHands
+        uses: All-Hands-AI/openhands-github-action@v1
+        with:
+          openhands-api-key: ${{ secrets.OPENHANDS_API_KEY }}
+          prompt: "Пожалуйста, проверь этот Pull Request на наличие багов, проблем с безопасностью и предложи улучшения кода."
+          llm-model: "nemotron-3-super-120b-a12b"
+          llm-base-url: "https://khadas.taila31870.ts.net/v1"
+          llm-api-key: ${{ secrets.FREELLMAPI_API_KEY }}
