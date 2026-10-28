@@ -38,6 +38,8 @@ jobs:
             -e LLM_BASE_URL="https://integrate.api.nvidia.com/v1" \
             -e LLM_API_KEY="${{ secrets.NVIDIA_API_KEY }}" \
             -e GITHUB_TOKEN="${{ secrets.GITHUB_TOKEN }}" \
-            -e SANDBOX_VOLUMES="/github/workspace:/workspace:rw" \
+            -e DISABLE_SECURITY_RISK=true \
+            -e OPENHANDS_SECURITY_RISK=low \
+            -e SANDBOX_VOLUMES="${{ github.workspace }}:/workspace:rw" \
             ghcr.io/all-hands-ai/openhands:latest \
             bash -c "apt-get update && apt-get install -y git && python -m openhands.resolver.resolve_issue --selected-repo ${{ github.repository }} --issue-number ${{ github.event.pull_request.number || github.event.inputs.pr_number }} --issue-type pr --username artemfire1980 --token ${{ secrets.GITHUB_TOKEN }} --prompt-file /github/workspace/prompt.txt"
