@@ -1,4 +1,4 @@
-name: OpenHands Code Review (Local)
+name: OpenHands Code Review
 
 on:
   pull_request:
@@ -6,33 +6,30 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
 
 jobs:
   review:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          python-version: '3.12'
+          fetch-depth: 0
 
-      - name: Install OpenHands Resolver
-        run: pip install openhands-resolver
-
-      - name: Run OpenHands Review
+      - name: Run OpenHands Docker
+        uses: docker://ghcr.io/all-hands-ai/openhands:latest
         env:
           LLM_MODEL: "openai/nemotron-3-super-120b-a12b"
           LLM_BASE_URL: "https://khadas.taila31870.ts.net/v1"
           LLM_API_KEY: ${{ secrets.FREELLMAPI_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PAT_USERNAME: "artemfire1980"
-          PAT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          openhands-resolver resolve-issue \
-            --repo "${{ github.repository }}" \
-            --issue-number "${{ github.event.pull_request.number }}" \
+          OPENHANDS_REPO: ${{ github.repository }}
+          OPENHANDS_PR_NUMBER: ${{ github.event.pull_request.number }}
+        with:
+          args: >
+            python -m openhands.resolver.resolve_issue
+            --repo ${{ github.repository }}
+            --issue-number ${{ github.event.pull_request.number }}
             --comment "Пожалуйста, проверь этот Pull Request на наличие багов и предложи улучшения."
