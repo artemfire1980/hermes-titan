@@ -27,16 +27,17 @@ jobs:
         run: |
           echo "Пожалуйста, проверь этот Pull Request на наличие багов и предложи улучшения." > prompt.txt
 
-      - name: Run OpenHands with NVIDIA NIM
+      - name: Run OpenHands
         run: |
           docker run --rm \
             --network host \
             -v /var/run/docker.sock:/var/run/docker.sock \
-            -v "${{ github.workspace }}:/github/workspace" \
+            -v "${{ github.workspace }}:/github/workspace:rw" \
             -w /github/workspace \
             -e LLM_MODEL="openai/nvidia/nemotron-3-ultra-550b-a55b" \
             -e LLM_BASE_URL="https://integrate.api.nvidia.com/v1" \
             -e LLM_API_KEY="${{ secrets.NVIDIA_API_KEY }}" \
             -e GITHUB_TOKEN="${{ secrets.GITHUB_TOKEN }}" \
+            -e SANDBOX_VOLUMES="/github/workspace:/workspace:rw" \
             ghcr.io/all-hands-ai/openhands:latest \
             bash -c "apt-get update && apt-get install -y git && python -m openhands.resolver.resolve_issue --selected-repo ${{ github.repository }} --issue-number ${{ github.event.pull_request.number || github.event.inputs.pr_number }} --issue-type pr --username artemfire1980 --token ${{ secrets.GITHUB_TOKEN }} --prompt-file /github/workspace/prompt.txt"
