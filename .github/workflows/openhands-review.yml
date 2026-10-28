@@ -4,6 +4,11 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
   workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'Номер Pull Request (для ручного запуска)'
+        required: false
+        default: '1'
 
 permissions:
   contents: write
@@ -25,11 +30,10 @@ jobs:
           LLM_BASE_URL: "https://khadas.taila31870.ts.net/v1"
           LLM_API_KEY: ${{ secrets.FREELLMAPI_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          OPENHANDS_REPO: ${{ github.repository }}
-          OPENHANDS_PR_NUMBER: ${{ github.event.pull_request.number }}
         with:
           args: >
             python -m openhands.resolver.resolve_issue
-            --repo ${{ github.repository }}
-            --issue-number ${{ github.event.pull_request.number }}
+            --selected-repo ${{ github.repository }}
+            --issue-number ${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+            --issue-type pr
             --comment "Пожалуйста, проверь этот Pull Request на наличие багов и предложи улучшения."
