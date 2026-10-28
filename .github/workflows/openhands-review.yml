@@ -25,8 +25,7 @@ jobs:
 
       - name: Create Prompt File
         run: |
-          echo "Пожалуйста, проверь этот Pull Request на наличие багов и предложи улучшения." > /tmp/prompt.txt
-          cat /tmp/prompt.txt
+          echo "Пожалуйста, проверь этот Pull Request на наличие багов и предложи улучшения." > /github/workspace/prompt.txt
 
       - name: Run OpenHands Docker
         uses: docker://ghcr.io/all-hands-ai/openhands:latest
@@ -41,4 +40,6 @@ jobs:
             --selected-repo ${{ github.repository }}
             --issue-number ${{ github.event.pull_request.number || github.event.inputs.pr_number }}
             --issue-type pr
-            --prompt-file /tmp/prompt.txt
+            --username artemfire1980
+            --token ${{ secrets.GITHUB_TOKEN }}
+            --prompt-file /github/workspace/prompt.txt
