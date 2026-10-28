@@ -1,45 +1,82 @@
-name: OpenHands Code Review
+name: AI PR Review (Nemotron via NVIDIA API)
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
-  workflow_dispatch:
-    inputs:
-      pr_number:
-        description: 'Номер Pull Request (для ручного запуска)'
-        required: false
-        default: '1'
+    types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
-  contents: write
+  contents: read
   pull-requests: write
+
+concurrency:
+  group: ai-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 jobs:
   review:
+    if: github.event.pull_request.head.repo.full_name == github.repository && !github.event.pull_request.draft
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Create Prompt File
+      - name: Получить diff PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "Пожалуйста, проверь этот Pull Request на наличие багов и предложи улучшения." > prompt.txt
+          curl -sS -f \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github.v3.diff" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}" \
+            -o pr.diff
+          wc -c pr.diff
 
-      - name: Run OpenHands
+      - name: Ревью моделью и публикация комментария
+        env:
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LLM_BASE_URL: https://integrate.api.nvidia.com/v1
+          LLM_MODEL: nvidia/nemotron-3-ultra-550b-a55b
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
-          docker run --rm \
-            --network host \
-            -v /var/run/docker.sock:/var/run/docker.sock \
-            -v "${{ github.workspace }}:/github/workspace:rw" \
-            -w /github/workspace \
-            -e LLM_MODEL="openai/nvidia/nemotron-3-ultra-550b-a55b" \
-            -e LLM_BASE_URL="https://integrate.api.nvidia.com/v1" \
-            -e LLM_API_KEY="${{ secrets.NVIDIA_API_KEY }}" \
-            -e GITHUB_TOKEN="${{ secrets.GITHUB_TOKEN }}" \
-            -e DISABLE_SECURITY_RISK=true \
-            -e SANDBOX_VOLUMES="/github/workspace:/workspace:rw" \
-            -e WORKSPACE_DIR="/github/workspace" \
-            ghcr.io/all-hands-ai/openhands:latest \
-            bash -c "apt-get update && apt-get install -y git && python -m openhands.resolver.resolve_issue --selected-repo ${{ github.repository }} --issue-number ${{ github.event.pull_request.number || github.event.inputs.pr_number }} --issue-type pr --username artemfire1980 --token ${{ secrets.GITHUB_TOKEN }} --prompt-file /github/workspace/prompt.txt"
+          python3 - <<'PY'
+          import json, os, urllib.request
+
+          MAX_CHARS = 120_000
+          diff = open("pr.diff", encoding="utf-8", errors="replace").read()
+          truncated = len(diff) > MAX_CHARS
+          diff = diff[:MAX_CHARS]
+
+          system = (
+              "Ты строгий, но доброжелательный senior-ревьюер. Проверяй баги, "
+              "безопасность, обработку ошибок, граничные случаи и читаемость. "
+              "Отвечай по-русски, списком конкретных замечаний с указанием "
+              "файла и строки. Если замечаний нет, так и скажи. Не выдумывай."
+          )
+          user = f"PR: {os.environ['PR_TITLE']}\n\n```diff\n{diff}\n```"
+          if truncated:
+              user += "\n\n(diff обрезан по лимиту)"
+
+          def call(url, payload, headers):
+              req = urllib.request.Request(
+                  url, data=json.dumps(payload).encode(), headers=headers)
+              with urllib.request.urlopen(req, timeout=600) as r:
+                  return json.load(r)
+
+          resp = call(
+              os.environ["LLM_BASE_URL"] + "/chat/completions",
+              {"model": os.environ["LLM_MODEL"],
+               "messages": [{"role": "system", "content": system},
+                            {"role": "user", "content": user}],
+               "temperature": 0.2, "max_tokens": 4096},
+              {"Authorization": "Bearer " + os.environ["NVIDIA_API_KEY"],
+               "Content-Type": "application/json"})
+          review = resp["choices"][0]["message"]["content"]
+
+          call(
+              f"https://api.github.com/repos/{os.environ['REPO']}/issues/{os.environ['PR']}/comments",
+              {"body": "## 🤖 AI-ревью\n\n" + review},
+              {"Authorization": "Bearer " + os.environ["GH_TOKEN"],
+               "Accept": "application/vnd.github+json",
+               "Content-Type": "application/json"})
+          PY
