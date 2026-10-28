@@ -1,45 +1,34 @@
-name: OpenHands Code Review
+name: PR Review by OpenHands
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
+  pull_request_target:
+    types: [opened, ready_for_review, labeled, review_requested]
   workflow_dispatch:
-    inputs:
-      pr_number:
-        description: 'Номер Pull Request (для ручного запуска)'
-        required: false
-        default: '1'
 
 permissions:
-  contents: write
+  contents: read
   pull-requests: write
+  issues: write
+
+concurrency:
+  group: pr-review-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  review:
+  pr-review:
+    if: |
+      (github.event.action == 'opened' && github.event.pull_request.draft == false) ||
+      github.event.action == 'ready_for_review' ||
+      github.event.label.name == 'review-this' ||
+      github.event.requested_reviewer.login == 'openhands-agent'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Run OpenHands PR Review
+        uses: OpenHands/extensions/plugins/pr-review@main
         with:
-          fetch-depth: 0
-
-      - name: Create Prompt File
-        run: |
-          echo "Пожалуйста, проверь этот Pull Request на наличие багов и предложи улучшения." > prompt.txt
-
-      - name: Run OpenHands
-        run: |
-          docker run --rm \
-            --network host \
-            -v /var/run/docker.sock:/var/run/docker.sock \
-            -v "${{ github.workspace }}:/github/workspace:rw" \
-            -w /github/workspace \
-            -e LLM_MODEL="openai/nvidia/nemotron-3-ultra-550b-a55b" \
-            -e LLM_BASE_URL="https://integrate.api.nvidia.com/v1" \
-            -e LLM_API_KEY="${{ secrets.NVIDIA_API_KEY }}" \
-            -e GITHUB_TOKEN="${{ secrets.GITHUB_TOKEN }}" \
-            -e DISABLE_SECURITY_RISK=true \
-            -e SANDBOX_VOLUMES="/github/workspace:/workspace:rw" \
-            -e WORKSPACE_DIR="/github/workspace" \
-            ghcr.io/all-hands-ai/openhands:latest \
-            bash -c "apt-get update && apt-get install -y git && python -m openhands.resolver.resolve_issue --selected-repo ${{ github.repository }} --issue-number ${{ github.event.pull_request.number || github.event.inputs.pr_number }} --issue-type pr --username artemfire1980 --token ${{ secrets.GITHUB_TOKEN }} --prompt-file /github/workspace/prompt.txt"
+          llm-model: openai/nvidia/nemotron-3-ultra-550b-a55b
+          llm-base-url: https://integrate.api.nvidia.com/v1
+          llm-api-key: ${{ secrets.NVIDIA_API_KEY }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          openhands-sdk-package: openhands-sdk>=1.22.0
