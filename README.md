@@ -1,23 +1,23 @@
-# Hermes-Titan v7.2
+# Hermes-Titan v7.5
 
 Автономная инженерная платформа на Khadas VIM4 (ARM64, 8 GB) поверх Hermes Agent.
 
 ## Состояние
 
 - **Контрольная точка:** DEC-060
-- **Версия:** v0.22.0
+- **Версия:** v0.22.5
 - **Хранилище:** `/mnt/ai-ssd/ai-system` (симлинк `~/ai-system`)
 - **GitHub:** `artemfire1980/hermes-titan`
 
 ## Архитектура
 
-- **Ядро:** Hermes Agent `v0.22.0+1.g494038c` (`/mnt/ai-ssd/hermes/`)
+- **Ядро:** Hermes Agent `v0.22.5+1.g494038c` (`/mnt/ai-ssd/hermes/`)
 - **Модель:** FreeLLMAPI `v0.16.10` (Docker `127.0.0.1:3001`, `auto`, 1M контекст)
-- **Aider:** `nvidia_nim/nvidia/nemotron-3-ultra-550b-a55b`
+- **Aider:** `FreeLLMAPI (openai/nvidia/nemotron-3-ultra-550b-a55b)`
 - **Поиск:** SearXNG (Docker, 10 движков) + Exa (`extract_backend`, semantic extract)
 - **Telegram:** whitelist + home channel + уведомления
 - **Kanban:** board `hermes-titan` + native tools + dispatcher
-- **Память:** Holographic community 0.17.7 + built-in + memory tool
+- **Память:** Holographic community 0.19.2 + built-in + memory tool
 - **Двигатель данных:** `scripts/research_runner.py` (shim) + `scripts/research/` (CP-036)
 - **Executive Summary:** `scripts/summary_generator.py` (Pydantic + citations)
 - **Исполнитель кода:** `scripts/aider_runner.py` (изоляция через `/mnt/ai-ssd/ai-system/projects/`)
@@ -98,3 +98,9 @@
 10. Checkpoint-after-proof
 11. Official-binary-first
 12. Minimal-surface
+
+
+## AI-ревьюер для GitHub
+- **Workflow:** `.github/workflows/openhands-review.yml`
+- **Модель:** Nemotron Ultra через NVIDIA API
+- **Запускается:** на `push` в `main` и на `pull_request`.
