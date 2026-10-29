@@ -36,7 +36,6 @@ jobs:
               "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUM" \
               -o pr.diff
           else
-            # Для push в main берем diff последнего коммита
             curl -sS -f \
               -H "Authorization: Bearer $GH_TOKEN" \
               -H "Accept: application/vnd.github.v3.diff" \
@@ -49,8 +48,6 @@ jobs:
         env:
           NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           LLM_BASE_URL: https://integrate.api.nvidia.com/v1
           LLM_MODEL: nvidia/nemotron-3-ultra-550b-a55b
           REPO: ${{ github.repository }}
@@ -92,7 +89,6 @@ jobs:
                "Content-Type": "application/json"})
           review = resp["choices"][0]["message"]["content"]
 
-          # Публикуем комментарий в GitHub (если это PR)
           if os.environ.get("PR") and os.environ["PR"].isdigit():
               call(
                   f"https://api.github.com/repos/{os.environ['REPO']}/issues/{os.environ['PR']}/comments",
@@ -100,23 +96,4 @@ jobs:
                   {"Authorization": "Bearer " + os.environ["GH_TOKEN"],
                    "Accept": "application/vnd.github+json",
                    "Content-Type": "application/json"})
-
-          # Отправляем в Telegram
-          if os.environ.get("TELEGRAM_BOT_TOKEN") and os.environ.get("TELEGRAM_CHAT_ID"):
-              tg_text = f"🤖 AI-ревью для {os.environ['PR_TITLE']}\n"
-              tg_text += f"🔗 {os.environ['PR_URL']}\n\n"
-              tg_text += review[:3500]
-              if len(review) > 3500:
-                  tg_text += "\n\n... (обрезано, полный текст в PR)"
-
-              try:
-                  call(
-                      f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_TOKEN']}/sendMessage",
-                      {"chat_id": os.environ["TELEGRAM_CHAT_ID"],
-                       "text": tg_text,
-                       "parse_mode": "HTML",
-                       "disable_web_page_preview": True},
-                      {"Content-Type": "application/json"})
-              except Exception as e:
-                  print(f"Ошибка отправки в Telegram: {e}")
           PY
