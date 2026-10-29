@@ -430,3 +430,13 @@ wc -l ~/ai-system/README.md ~/ai-system/IMPLEMENTATION_STATUS.md ~/ai-system/DEC
 **Известные проблемы:**
 - Дубль Holographic в `hermes plugins list` (git + catalog) — косметический баг, игнорируем.
 - `pm install` может падать на баге `uv 0.12.x` (Invalid Wheel-Version) — обходим через `pip`.
+
+## Часть 13. AI-ревью для GitHub (2026-10-28)
+
+Настроен автоматический AI-ревьюер для Pull Request'ов.
+- **Workflow:** `.github/workflows/openhands-review.yml` (в репозитории `hermes-titan`).
+- **Модель:** `nvidia/nemotron-3-ultra-550b-a55b` через прямой NVIDIA API.
+- **Механизм:** GitHub Actions берет diff PR, отправляет в NVIDIA, публикует комментарий в PR.
+- **Триггер:** `pull_request` (opened, synchronize).
+- **Секреты:** `NVIDIA_API_KEY` и `GITHUB_TOKEN` (в GitHub Secrets).
+- **Важно:** НЕ использует OpenHands-агент (обходит баги `prompt_cache_key` и `security_risk`). Для работы требует прав `pull-requests: write` и настройки «Read and write permissions» в Settings → Actions.
