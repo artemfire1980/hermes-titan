@@ -440,3 +440,4 @@ wc -l ~/ai-system/README.md ~/ai-system/IMPLEMENTATION_STATUS.md ~/ai-system/DEC
 - **Триггер:** `pull_request` (opened, synchronize).
 - **Секреты:** `NVIDIA_API_KEY` и `GITHUB_TOKEN` (в GitHub Secrets).
 - **Важно:** НЕ использует OpenHands-агент (обходит баги `prompt_cache_key` и `security_risk`). Для работы требует прав `pull-requests: write` и настройки «Read and write permissions» в Settings → Actions.
+test push after telegram removal
