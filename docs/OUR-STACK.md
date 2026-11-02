@@ -63,7 +63,7 @@
 
 | Компонент | Версия | Может быть заменено |
 |---|---|---|
-| Holographic memory | community 0.22.1 | — |
+| Holographic memory | git 0.26.0 | — |
 | MEMORY.md | universal | — |
 
 ## 8. Как обновлять этот файл
@@ -96,8 +96,8 @@
 
 | Параметр | Значение |
 |---|---|
-| Версия | v0.16.12 (фиксированный тег, авто-обновление) |
-| Образ | `ghcr.io/tashfeenahmed/freellmapi:v0.16.12` |
+| Версия | v0.16.16 (фиксированный тег, авто-обновление) |
+| Образ | `ghcr.io/tashfeenahmed/freellmapi:v0.16.16` |
 | Порт | `127.0.0.1:3001` |
 | Стратегия | **reliable** (Самый надёжный) |
 | Context Handoff | `on_model_switch` |
@@ -110,12 +110,10 @@
 2. `docker compose up -d --force-recreate`
 3. Проверить `X-Routed-Via` тестовым запросом.
 
-**Что нового в v0.16.12:**
-- **SerpSearch** — больше не посылает key-check запрос вообще (v0.16.10 остановил polling, но всё ещё делал пустой поиск при добавлении ключа).
-- **onomeo** — новый бесплатный OpenAI-compatible провайдер (30 calls/5h).
-- **Per-key monthly caps** — теперь enforce-ятся для rerank и moderation, и router checks их учитывает.
-- **`GET /v1/usage`** — spend per key + monthly cap.
-- **`GET /v1/models/:id`** — OpenAI `models.retrieve` из каталога.
-- Model discovery не маркирует платные модели как free.
-- Proxy fail-closed (opt-in, `PROXY_REQUIRED_PLATFORMS`).
-- Model probes (opt-in, `MODEL_PROBE_ENABLED=1`).
+**Что нового в v0.16.16:**
+- **Поддержка audio/video каталога** — адаптеры ноябрьского обновления: 13 протестированных media-добавлений (net +10 включённых).
+- **NovAI** — ежедневный бесплатный CogVideoX Flash (видео), async polling, отмена, безопасная загрузка media.
+- **Free.ai** — MeloTTS, Chatterbox, Qwen3 TTS, VibeVoice; Whisper-транскрипция загруженных файлов.
+- **OVH** — keyless speech (EN/DE/ES/IT) + Whisper-транскрипция.
+- **Mistral** — Voxtral Mini TTS 3.0; **Google** — Gemini 3.5 Transcribe; **ElectronHub** — GPT-4o Mini TTS.
+- **Фиксы** — Cloudflare Aura speech payloads, MeloTTS WAV labeling, Nova 3 transcription parsing.
