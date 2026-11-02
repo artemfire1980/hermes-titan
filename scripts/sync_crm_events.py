@@ -72,7 +72,7 @@ def get_emails():
     data = json.loads(secrets_path.read_text(encoding="utf-8"))
     password = data.get("password:mailru") or data.get("mailru")
 
-    imap = imaplib.IMAP4_SSL("imap.mail.ru")
+    imap = imaplib.IMAP4_SSL("imap.mail.ru", timeout=120)
     imap.login("artem_s@chocoladovo.by", password)
     imap.select("INBOX")
 
@@ -83,7 +83,7 @@ def get_emails():
     email_ids = data[0].split()
 
     emails = []
-    for eid in email_ids[-50:]:  # Берем последние 50 писем (для теста)
+    for eid in email_ids[-10:]:  # Берем последние 50 писем (для теста)
         _, msg_data = imap.fetch(eid, "(RFC822)")
         msg = email.message_from_bytes(msg_data[0][1])
 
