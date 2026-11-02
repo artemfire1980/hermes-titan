@@ -28,7 +28,12 @@ def get_freellmapi_tag():
 
 
 def get_holographic_version():
-    # TITAN: хардкод (hermes plugins list триггерит uv sync → баг uv 0.12.x)
+    # TITAN: читаем из plugin.yaml (hermes plugins list триггерит uv sync → баг uv 0.12.x)
+    p = Path("/mnt/ai-ssd/hermes/plugins/holographic/plugin.yaml")
+    if p.exists():
+        m = re.search(r"^version:\s*([\d.]+)", p.read_text(encoding="utf-8"), re.MULTILINE)
+        if m:
+            return m.group(1)
     return "0.17.7"
 
 
@@ -101,16 +106,18 @@ def main():
         print("ℹ️ Нечего обновлять")
         return 0
 
-    # Коммит + пуш
-    run(["git", "-C", str(REPO), "add"] + [str(f.relative_to(REPO)) for f in files])
+    # Коммит + пуш. ВАЖНО: --only + pathspec — иначе затронет чужие staged-файлы в индексе
     commit = run(
         [
             "git",
             "-C",
             str(REPO),
             "commit",
+            "--only",
             "-m",
             f"docs: авто-актуализация (update-stack) — {', '.join(changed)}",
+            "--",
+            *[str(f.relative_to(REPO)) for f in files],
         ]
     )
     print("Commit:", commit.stdout.strip() or commit.stderr.strip())
