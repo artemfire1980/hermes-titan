@@ -2,6 +2,39 @@ import email
 import imaplib
 import json
 import os
+
+# Ключевые слова для фильтрации (только сырьё и глазури)
+KEYWORDS = [
+    "какао",
+    "глазурь",
+    "масло",
+    "стружка",
+    "начинка",
+    "сироп",
+    "орех",
+    "изюм",
+    "цукат",
+    "пюре",
+    "концентрат",
+    "ароматизатор",
+    "краситель",
+    "эмульгатор",
+    "стабилизатор",
+    "заменитель",
+    "какао-масло",
+    "какао-порошок",
+    "кокос",
+    "миндаль",
+    "фундук",
+]
+
+
+def has_keywords(text):
+    """Проверяет, есть ли в тексте ключевые слова."""
+    text_lower = text.lower()
+    return any(kw in text_lower for kw in KEYWORDS)
+
+
 import time
 from email.header import decode_header
 from pathlib import Path
