@@ -78,12 +78,12 @@ def get_emails():
 
     # Письма за последние 7 дней
     _, data = imap.search(
-        None, "SINCE", time.strftime("%d-%b-%Y", time.localtime(time.time() - 7 * 86400))
+        None, "SINCE", time.strftime("%d-%b-%Y", time.localtime(time.time() - 2 * 86400))
     )
     email_ids = data[0].split()
 
     emails = []
-    for eid in email_ids[-10:]:  # Берем последние 50 писем (для теста)
+    for eid in email_ids[-50:]:  # Берем последние 50 писем (для теста)
         _, msg_data = imap.fetch(eid, "(RFC822)")
         msg = email.message_from_bytes(msg_data[0][1])
 
