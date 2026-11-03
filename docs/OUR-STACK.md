@@ -117,3 +117,14 @@
 - **OVH** — keyless speech (EN/DE/ES/IT) + Whisper-транскрипция.
 - **Mistral** — Voxtral Mini TTS 3.0; **Google** — Gemini 3.5 Transcribe; **ElectronHub** — GPT-4o Mini TTS.
 - **Фиксы** — Cloudflare Aura speech payloads, MeloTTS WAV labeling, Nova 3 transcription parsing.
+
+### Скрипты синхронизации
+
+- **`sync_crm_events.py`** — синхронизация событий из почты в МойСклад:
+  - Берет клиентов Самсонова с тегом «глазури» (не архивных).
+  - Читает почту (IMAP) за последние 2 дня.
+  - Сопоставляет письма с клиентами по email.
+  - Сжимает текст через FreeLLMAPI (`qwen3-coder-plus`).
+  - Создает заметки в МойСкладе.
+  - **Cron:** `sync-crm-events-daily` (каждый день в 10:00).
+- **`test_one_client.py`** — тестовый скрипт для одного клиента (Элигита Азия).
