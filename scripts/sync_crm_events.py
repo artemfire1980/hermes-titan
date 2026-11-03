@@ -219,7 +219,7 @@ def main():
                 import time
 
                 time.sleep(7)  # Пауза между запросами (7 секунд, чтобы не превысить лимит)
-                summary = summarize(email["body"])
+                summary = summarize(msg["body"])
                 if create_event(client["id"], f"Ответ: {summary}"):
                     created += 1
                     print(f"  ✅ Событие создано: {summary[:50]}...")
