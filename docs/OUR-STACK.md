@@ -63,7 +63,7 @@
 
 | Компонент | Версия | Может быть заменено |
 |---|---|---|
-| Holographic memory | git 0.26.0 | — |
+| Holographic memory | git 0.26.4 | — |
 | MEMORY.md | universal | — |
 
 ## 8. Как обновлять этот файл
@@ -96,8 +96,8 @@
 
 | Параметр | Значение |
 |---|---|
-| Версия | v0.16.16 (фиксированный тег, авто-обновление) |
-| Образ | `ghcr.io/tashfeenahmed/freellmapi:v0.16.16` |
+| Версия | v0.16.19 (фиксированный тег, авто-обновление) |
+| Образ | `ghcr.io/tashfeenahmed/freellmapi:v0.16.19` |
 | Порт | `127.0.0.1:3001` |
 | Стратегия | **reliable** (Самый надёжный) |
 | Context Handoff | `on_model_switch` |
@@ -110,13 +110,11 @@
 2. `docker compose up -d --force-recreate`
 3. Проверить `X-Routed-Via` тестовым запросом.
 
-**Что нового в v0.16.16:**
-- **Поддержка audio/video каталога** — адаптеры ноябрьского обновления: 13 протестированных media-добавлений (net +10 включённых).
-- **NovAI** — ежедневный бесплатный CogVideoX Flash (видео), async polling, отмена, безопасная загрузка media.
-- **Free.ai** — MeloTTS, Chatterbox, Qwen3 TTS, VibeVoice; Whisper-транскрипция загруженных файлов.
-- **OVH** — keyless speech (EN/DE/ES/IT) + Whisper-транскрипция.
-- **Mistral** — Voxtral Mini TTS 3.0; **Google** — Gemini 3.5 Transcribe; **ElectronHub** — GPT-4o Mini TTS.
-- **Фиксы** — Cloudflare Aura speech payloads, MeloTTS WAV labeling, Nova 3 transcription parsing.
+**Что нового в v0.16.17–v0.16.19:**
+- **v0.16.19 FreeInference** — новый провайдер: Qwen3.6 35B (chat, streaming) + BGE-M3 embeddings (1024 dim).
+- **v0.16.18 NovAI image** — бесплатная генерация изображений cogview-3-flash (1024×1024, PNG base64).
+- **v0.16.17 NovAI chat** — GLM 4.6V Flash и GLM 4.1V Thinking Flash (chat + streaming); выключены 3 устаревших onomeo-маршрута.
+- Каталог обновлён подписью: новые media/entry без удаления существующих моделей.
 
 ### Скрипты синхронизации
 
