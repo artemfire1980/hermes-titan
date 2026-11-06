@@ -14,8 +14,9 @@ def run(cmd, **kw):
 
 
 def get_hermes_version():
-    # TITAN: хардкод (hermes --version триггерит uv sync → баг uv 0.12.x)
-    return "v0.22.4+1.gc8d0f0e"
+    # TITAN: hermes --version триггерит uv sync → баг uv 0.12.x. Читаем git describe (read-only, без uv).
+    v = run(["git", "-C", "/mnt/ai-ssd/hermes/hermes-agent", "describe", "--tags"]).stdout.strip()
+    return v if v.startswith("v") else "v0.22.4+1.gc8d0f0e"
 
 
 def get_freellmapi_tag():
@@ -66,17 +67,22 @@ def main():
 
     # Замены (старое -> новое). Только если старое реально есть.
     replacements = {
-        # Hermes
+        # Hermes (длинные строки раньше коротких — иначе суффикс +1.gXXXX осиротеет;
+        # голый v0.22.0 НЕ в списке — это исторические записи DEC-060)
+        "v0.22.5+1.g494038c": facts["hermes"],
+        "v0.22.0+1.g494038c": facts["hermes"],
         "v0.21.5+4925.gb4c9def": facts["hermes"],
+        "v0.22.7": facts["hermes"],
+        "v0.22.5": facts["hermes"],
         "v0.21.5+4925": facts["hermes"],
         "v0.21.5": facts["hermes"].split("+")[0],
         # FreeLLMAPI
-        "v0.13.2": facts["freellmapi"],
-        "v0.15.0": facts["freellmapi"],
         "v0.16.4": facts["freellmapi"],
         "v0.16.5": facts["freellmapi"],
         "v0.16.6": facts["freellmapi"],
         "v0.16.7": facts["freellmapi"],
+        "v0.16.19": facts["freellmapi"],
+        "v0.16.20": facts["freellmapi"],
         # Holographic
         "0.13.0": facts["holographic"],
         "0.17.4": facts["holographic"],
