@@ -7,11 +7,11 @@
 | Компонент | Статус | Точка |
 |-----------|--------|-------|
 | Фундамент + защита | ✅ | CP-000 |
-| Ядро Hermes (v0.22.0+1.g494038c) | ✅ | CP-001 |
+| Ядро Hermes (v0.23.0) | ✅ | CP-001 |
 | Модель через FreeLLMAPI (auto, 1M ctx) | ✅ | CP-001.4 |
 | Telegram-бот | ✅ | CP-002 |
 | Аудит возможностей ядра | ✅ | CP-003 |
-| FreeLLMAPI (Docker, v0.16.19) | ✅ | CP-004 |
+| FreeLLMAPI (Docker, v0.16.20) | ✅ | CP-004 |
 | SearXNG (Docker, JSON API) | ✅ | CP-004 |
 | Tailscale Serve для Dashboard | ✅ | CP-004 |
 | Аудит старой системы (CP-005) | ✅ | CP-005 |

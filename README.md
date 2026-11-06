@@ -5,14 +5,14 @@
 ## Состояние
 
 - **Контрольная точка:** DEC-060
-- **Версия:** v0.22.5
+- **Версия:** v0.23.0
 - **Хранилище:** `/mnt/ai-ssd/ai-system` (симлинк `~/ai-system`)
 - **GitHub:** `artemfire1980/hermes-titan`
 
 ## Архитектура
 
-- **Ядро:** Hermes Agent `v0.22.5+1.g494038c` (`/mnt/ai-ssd/hermes/`)
-- **Модель:** FreeLLMAPI `v0.16.19` (Docker `127.0.0.1:3001`, `auto`, 1M контекст)
+- **Ядро:** Hermes Agent `v0.23.0` (`/mnt/ai-ssd/hermes/`)
+- **Модель:** FreeLLMAPI `v0.16.20` (Docker `127.0.0.1:3001`, `auto`, 1M контекст)
 - **Aider:** `FreeLLMAPI (openai/nvidia/nemotron-3-ultra-550b-a55b)`
 - **Поиск:** SearXNG (Docker, 10 движков) + Exa (`extract_backend`, semantic extract)
 - **Telegram:** whitelist + home channel + уведомления

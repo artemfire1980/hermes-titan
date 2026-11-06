@@ -8,8 +8,8 @@
 
 ## Ядро и стек (2026-10-19)
 
-- **Hermes Agent** — v0.22.0+1.g494038c (stable).
-- **FreeLLMAPI** — v0.16.19 (фиксированный тег, `127.0.0.1:3001`, `auto`, 1M ctx).
+- **Hermes Agent** — v0.23.0 (stable).
+- **FreeLLMAPI** — v0.16.20 (фиксированный тег, `127.0.0.1:3001`, `auto`, 1M ctx).
 - **SearXNG** — Docker, `127.0.0.1:8888` + Exa (semantic extract).
 - **Aider** — `nvidia_nim/nvidia/nemotron-3-ultra-550b-a55b`.
 - **Kanban** — board `hermes-titan`, dispatcher в gateway (60s).
